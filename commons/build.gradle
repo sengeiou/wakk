@@ -25,6 +25,8 @@ dependencies {
     def deps = rootProject.ext.deps
     implementation deps.appcompat
 
+    implementation deps.ulog
+
     testImplementation deps.junit
     androidTestImplementation deps.espressoCore
     androidTestImplementation deps.runner

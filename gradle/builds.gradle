@@ -35,8 +35,8 @@ allprojects {
 
 ext {
     versions = [
-            sampleVersionCode    : 1,
-            sampleVersionName    : '0.0.1'
+            sampleVersionCode: 1,
+            sampleVersionName: '0.0.1'
     ]
 
     sdk = [
@@ -46,12 +46,14 @@ ext {
     ]
 
     deps = [
-            appcompat          : 'com.android.support:appcompat-v7:27.0.2',
-            constraintLayout   : 'com.android.support.constraint:constraint-layout:1.0.2',
-            recyclerView       : 'com.android.support:recyclerview-v7:27.0.2',
+            appcompat       : 'com.android.support:appcompat-v7:27.0.2',
+            constraintLayout: 'com.android.support.constraint:constraint-layout:1.0.2',
+            recyclerView    : 'com.android.support:recyclerview-v7:27.0.2',
 
-            junit              : 'junit:junit:4.12',
-            espressoCore       : 'com.android.support.test.espresso:espresso-core:3.0.1',
-            runner             : 'com.android.support.test:runner:1.0.1',
+            junit           : 'junit:junit:4.12',
+            espressoCore    : 'com.android.support.test.espresso:espresso-core:3.0.1',
+            runner          : 'com.android.support.test:runner:1.0.1',
+
+            ulog            : 'com.ubtrobot.ulog:ulog:0.0.2'
     ]
 }

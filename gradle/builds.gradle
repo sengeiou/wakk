@@ -54,6 +54,9 @@ ext {
             espressoCore    : 'com.android.support.test.espresso:espresso-core:3.0.1',
             runner          : 'com.android.support.test:runner:1.0.1',
 
-            ulog            : 'com.ubtrobot.ulog:ulog:0.0.2'
+            // Master ProtoBuf Param，会传递依赖：
+            //   - Master 对应版本（与 Param 版本号一致）
+            //   - ulog v0.0.2
+            masterProtobufParam: 'com.ubtrobot.master:protobuf-param:0.4.0-SNAPSHOT',
     ]
 }

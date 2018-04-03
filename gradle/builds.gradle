@@ -1,0 +1,57 @@
+allprojects {
+    repositories {
+        maven {
+            url "${artifactory_url}/${artifactory_rose_release}"
+            credentials {
+                username = artifactory_username
+                password = artifactory_password
+            }
+        }
+
+        maven {
+            url "${artifactory_url}/${artifactory_rose_snapshot}"
+            credentials {
+                username = artifactory_username
+                password = artifactory_password
+            }
+        }
+
+        maven {
+            url "${artifactory_url}/${artifactory_virtual_release}"
+            credentials {
+                username = artifactory_username
+                password = artifactory_password
+            }
+        }
+
+        google()
+        jcenter()
+    }
+
+    configurations.all {
+        resolutionStrategy.cacheChangingModulesFor 60, 'seconds'
+    }
+}
+
+ext {
+    versions = [
+            sampleVersionCode    : 1,
+            sampleVersionName    : '0.0.1'
+    ]
+
+    sdk = [
+            compileSdkVersion: 26,
+            minSdkVersion    : 15,
+            targetSdkVersion : 26,
+    ]
+
+    deps = [
+            appcompat          : 'com.android.support:appcompat-v7:27.0.2',
+            constraintLayout   : 'com.android.support.constraint:constraint-layout:1.0.2',
+            recyclerView       : 'com.android.support:recyclerview-v7:27.0.2',
+
+            junit              : 'junit:junit:4.12',
+            espressoCore       : 'com.android.support.test.espresso:espresso-core:3.0.1',
+            runner             : 'com.android.support.test:runner:1.0.1',
+    ]
+}

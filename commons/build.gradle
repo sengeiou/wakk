@@ -25,7 +25,7 @@ dependencies {
     def deps = rootProject.ext.deps
     implementation deps.appcompat
 
-    implementation deps.masterProtobufParam
+    api deps.masterProtobufParam
 
     testImplementation deps.junit
     androidTestImplementation deps.espressoCore

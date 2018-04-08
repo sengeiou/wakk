@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.google.protobuf'
 
 android {
     def sdk = rootProject.ext.sdk
@@ -7,7 +8,6 @@ android {
     defaultConfig {
         minSdkVersion sdk.minSdkVersion
         targetSdkVersion sdk.targetSdkVersion
-
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
@@ -19,8 +19,30 @@ android {
     }
 }
 
+protobuf {
+    protoc {
+        artifact = rootProject.ext.protoc
+    }
+
+    plugins {
+        java {
+            artifact = rootProject.ext.protoc
+        }
+    }
+
+    generateProtoTasks {
+        all().each { task ->
+            task.plugins {
+                java {}
+            }
+        }
+    }
+}
+
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    api project(':commons')
+
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     def deps = rootProject.ext.deps
     implementation deps.appcompat

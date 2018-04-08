@@ -22,7 +22,7 @@ public abstract class ProtoEventReceiver<M extends Message> implements EventRece
     }
 
     @Override
-    public void onReceive(MasterContext masterContext, Event event) {
+    public final void onReceive(MasterContext masterContext, Event event) {
         if (event.getParam().isEmpty()) {
             onReceive(masterContext, event.getAction(), null);
             return;

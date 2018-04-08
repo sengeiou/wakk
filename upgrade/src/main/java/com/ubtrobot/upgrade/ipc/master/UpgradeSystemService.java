@@ -19,6 +19,8 @@ import com.ubtrobot.upgrade.DetectException;
 import com.ubtrobot.upgrade.DownloadException;
 import com.ubtrobot.upgrade.FirmwareDownloader;
 import com.ubtrobot.upgrade.FirmwarePackageGroup;
+import com.ubtrobot.upgrade.UpgradeException;
+import com.ubtrobot.upgrade.UpgradeProgress;
 import com.ubtrobot.upgrade.ipc.UpgradeConstants;
 import com.ubtrobot.upgrade.ipc.UpgradeConverters;
 import com.ubtrobot.upgrade.ipc.UpgradeProto;
@@ -184,6 +186,43 @@ public class UpgradeSystemService extends MasterSystemService {
                     }
                 },
                 new DownloadConverter()
+        );
+    }
+
+    @Call(path = UpgradeConstants.CALL_PATH_UPGRADE_FIRMWARE)
+    public void onuUgradeFirmware(Request request, Responder responder) {
+        final UpgradeProto.FirmwarePackageGroup packageGroup = ProtoParamParser.parseParam(request,
+                UpgradeProto.FirmwarePackageGroup.class, responder);
+        if (packageGroup == null) {
+            return;
+        }
+
+        mCallProcessor.onCall(
+                responder,
+                new CallProcessAdapter.Callable<Void, UpgradeException, UpgradeProgress>() {
+                    @Override
+                    public Promise<Void, UpgradeException, UpgradeProgress>
+                    call() throws CallException {
+                        return mUpgradeService.upgrade(UpgradeConverters.
+                                toFirmwarePackageGroupPojo(packageGroup));
+                    }
+                },
+                new ProtoCallProcessAdapter.DFPConverter<Void, UpgradeException, UpgradeProgress>() {
+                    @Override
+                    public Message convertDone(Void done) {
+                        return null;
+                    }
+
+                    @Override
+                    public CallException convertFail(UpgradeException ue) {
+                        return new CallException(ue.getCode(), ue.getMessage());
+                    }
+
+                    @Override
+                    public Message convertProgress(UpgradeProgress progress) {
+                        return UpgradeConverters.toUpgradeProgressProto(progress);
+                    }
+                }
         );
     }
 

@@ -63,3 +63,13 @@ message DownloadProgress {
     int64 downloaded_bytes = 2;
     int32 speed = 3;
 }
+
+message UpgradeProgress {
+
+    int32 state = 1;
+    int32 upgrading_single_progress = 2;
+    int32 upgrading_all_progress = 3;
+    string upgrading_firmware = 4;
+    int32 upgrading_firmware_order = 5;
+    int32 remaining_seconds = 6;
+}

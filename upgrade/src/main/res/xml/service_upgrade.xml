@@ -11,4 +11,5 @@
     <call path="/firmware/package/group/download/start" />
     <call path="/firmware/package/group/download/pause" />
     <call path="/firmware/package/group/download/clear" />
+    <call path="/firmware/list/upgrade" />
 </service>

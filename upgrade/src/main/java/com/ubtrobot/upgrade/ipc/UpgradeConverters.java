@@ -5,6 +5,7 @@ import com.ubtrobot.upgrade.DownloadException;
 import com.ubtrobot.upgrade.Firmware;
 import com.ubtrobot.upgrade.FirmwarePackage;
 import com.ubtrobot.upgrade.FirmwarePackageGroup;
+import com.ubtrobot.upgrade.UpgradeProgress;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -168,5 +169,26 @@ public class UpgradeConverters {
     toDownloadProgressProto(long totalBytes, long downloadedBytes, int speed) {
         return UpgradeProto.DownloadProgress.newBuilder().setTotalBytes(totalBytes).
                 setDownloadedBytes(downloadedBytes).setSpeed(speed).build();
+    }
+
+    public static UpgradeProto.UpgradeProgress toUpgradeProgressProto(UpgradeProgress progress) {
+        return UpgradeProto.UpgradeProgress.newBuilder().
+                setState(progress.getState()).
+                setUpgradingSingleProgress(progress.getUpgradingSingleProgress()).
+                setUpgradingAllProgress(progress.getUpgradingAllProgress()).
+                setUpgradingFirmware(progress.getUpgradingFirmware()).
+                setUpgradingFirmwareOrder(progress.getUpgradingFirmwareOrder()).
+                setRemainingSeconds(progress.getRemainingSeconds()).
+                build();
+    }
+
+    public static UpgradeProgress toUpgradeProgressPojo(UpgradeProto.UpgradeProgress progress) {
+        return new UpgradeProgress.Builder(progress.getState()).
+                setUpgradingSingleProgress(progress.getUpgradingSingleProgress()).
+                setUpgradingAllProgress(progress.getUpgradingAllProgress()).
+                setUpgradingFirmware(progress.getUpgradingFirmware()).
+                setUpgradingFirmwareOrder(progress.getUpgradingFirmwareOrder()).
+                setRemainingSeconds(progress.getRemainingSeconds()).
+                build();
     }
 }

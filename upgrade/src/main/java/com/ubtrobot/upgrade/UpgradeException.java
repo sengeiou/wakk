@@ -3,7 +3,6 @@ package com.ubtrobot.upgrade;
 import android.os.Bundle;
 
 import com.ubtrobot.exception.AccessServiceException;
-import com.ubtrobot.exception.RichException;
 
 public class UpgradeException extends AccessServiceException {
 
@@ -11,12 +10,12 @@ public class UpgradeException extends AccessServiceException {
         super(code, message, detail, cause);
     }
 
-    public static class Factory extends AccessServiceException.Factory {
+    public static class Factory extends AccessServiceException.Factory<UpgradeException> {
 
         @Override
-        protected RichException
+        protected UpgradeException
         createException(int code, String message, Bundle detail, Throwable cause) {
-            return null;
+            return new UpgradeException(code, message, detail, cause);
         }
     }
 }

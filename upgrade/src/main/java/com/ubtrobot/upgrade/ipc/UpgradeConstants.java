@@ -23,6 +23,7 @@ public class UpgradeConstants {
             "/firmware/package/group/download/pause";
     public static final String CALL_PATH_CLEAR_FIRMWARE_PACKAGE_DOWNLOAD =
             "/firmware/package/group/download/clear";
+    public static final String CALL_PATH_UPGRADE_FIRMWARE = "/firmware/list/upgrade";
 
     public static final String ACTION_FIRMWARE_DOWNLOAD_STATE_CHANGE =
             "event.action.FIRMWARE_DOWNLOAD_STATE_CHANGE";

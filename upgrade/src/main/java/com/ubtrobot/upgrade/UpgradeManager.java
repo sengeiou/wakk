@@ -19,6 +19,7 @@ public class UpgradeManager {
     private final FirmwareList mFirmwareList;
     private final UpgradeDetector mDetector;
     private final FirmwareDownloaderProxy mFirmwareDownloader;
+    private final Upgrader mUpgrader;
 
     public UpgradeManager(MasterContext masterContext) {
         ServiceProxy proxy = masterContext.createSystemServiceProxy(
@@ -29,6 +30,7 @@ public class UpgradeManager {
         mFirmwareList = new FirmwareList(upgradeService);
         mDetector = new UpgradeDetector(upgradeService);
         mFirmwareDownloader = new FirmwareDownloaderProxy(masterContext, upgradeService, handler);
+        mUpgrader = new Upgrader(upgradeService);
     }
 
     /**
@@ -86,6 +88,6 @@ public class UpgradeManager {
      */
     public Promise<Void, UpgradeException, UpgradeProgress>
     upgrade(FirmwarePackageGroup packageGroup) {
-        return null;
+        return mUpgrader.upgrade(packageGroup);
     }
 }

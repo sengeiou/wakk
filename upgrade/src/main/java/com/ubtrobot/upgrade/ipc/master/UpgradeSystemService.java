@@ -190,7 +190,7 @@ public class UpgradeSystemService extends MasterSystemService {
     }
 
     @Call(path = UpgradeConstants.CALL_PATH_UPGRADE_FIRMWARE)
-    public void onuUgradeFirmware(Request request, Responder responder) {
+    public void onUgradeFirmware(Request request, Responder responder) {
         final UpgradeProto.FirmwarePackageGroup packageGroup = ProtoParamParser.parseParam(request,
                 UpgradeProto.FirmwarePackageGroup.class, responder);
         if (packageGroup == null) {

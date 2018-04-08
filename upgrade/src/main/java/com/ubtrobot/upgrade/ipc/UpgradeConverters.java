@@ -179,6 +179,7 @@ public class UpgradeConverters {
                 setUpgradingFirmware(progress.getUpgradingFirmware()).
                 setUpgradingFirmwareOrder(progress.getUpgradingFirmwareOrder()).
                 setRemainingSeconds(progress.getRemainingSeconds()).
+                setWillReboot(progress.willRoboot()).
                 build();
     }
 
@@ -189,6 +190,7 @@ public class UpgradeConverters {
                 setUpgradingFirmware(progress.getUpgradingFirmware()).
                 setUpgradingFirmwareOrder(progress.getUpgradingFirmwareOrder()).
                 setRemainingSeconds(progress.getRemainingSeconds()).
+                setWillRoboot(progress.getWillReboot()).
                 build();
     }
 }

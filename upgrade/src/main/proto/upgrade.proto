@@ -72,4 +72,5 @@ message UpgradeProgress {
     string upgrading_firmware = 4;
     int32 upgrading_firmware_order = 5;
     int32 remaining_seconds = 6;
+    bool will_reboot = 7;
 }

@@ -16,6 +16,7 @@ public class UpgradeProgress {
     private String upgradingFirmware;
     private int upgradingFirmwareOrder;
     private int remainingSeconds;
+    private boolean willRoboot;
 
     public UpgradeProgress(int state) {
         this.state = state;
@@ -73,6 +74,10 @@ public class UpgradeProgress {
         return remainingSeconds;
     }
 
+    public boolean willRoboot() {
+        return willRoboot;
+    }
+
     @Override
     public String toString() {
         return "UpgradeProgress{" +
@@ -82,6 +87,7 @@ public class UpgradeProgress {
                 ", upgradingFirmware='" + upgradingFirmware + '\'' +
                 ", upgradingFirmwareOrder=" + upgradingFirmwareOrder +
                 ", remainingSeconds=" + remainingSeconds +
+                ", willRoboot=" + willRoboot +
                 '}';
     }
 
@@ -93,6 +99,7 @@ public class UpgradeProgress {
         private String upgradingFirmware;
         private int upgradingFirmwareOrder;
         private int remainingSeconds;
+        private boolean willRoboot;
 
         public Builder(int state) {
             this.state = state;
@@ -123,6 +130,11 @@ public class UpgradeProgress {
             return this;
         }
 
+        public Builder setWillRoboot(boolean willRoboot) {
+            this.willRoboot = willRoboot;
+            return this;
+        }
+
         public UpgradeProgress build() {
             UpgradeProgress progress = new UpgradeProgress(state);
             progress.upgradingSingleProgress = upgradingSingleProgress;
@@ -130,6 +142,7 @@ public class UpgradeProgress {
             progress.upgradingFirmware = upgradingFirmware;
             progress.upgradingFirmwareOrder = upgradingFirmwareOrder;
             progress.remainingSeconds = remainingSeconds;
+            progress.willRoboot = willRoboot;
             return progress;
         }
     }

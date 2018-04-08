@@ -3,6 +3,7 @@ package com.ubtrobot.upgrade;
 import android.os.Handler;
 
 import com.ubtrobot.async.Promise;
+import com.ubtrobot.master.adapter.CallAdapter;
 import com.ubtrobot.master.adapter.ProtoCallAdapter;
 import com.ubtrobot.master.adapter.ProtoEventReceiver;
 import com.ubtrobot.master.context.MasterContext;
@@ -169,7 +170,11 @@ public class FirmwareDownloaderProxy extends AbstractFirmwareDownloader {
 
     @Override
     public Promise<Void, DownloadException, Void> ready(FirmwarePackageGroup packageGroup) {
-        return null;
+        return mUpgradeService.call(
+                UpgradeConstants.CALL_PATH_READY_FIRMWARE_PACKAGE_DOWNLOAD,
+                UpgradeConverters.toFirmwarePackageGroupProto(packageGroup),
+                new DownloadConverter()
+        );
     }
 
     @Override
@@ -187,17 +192,26 @@ public class FirmwareDownloaderProxy extends AbstractFirmwareDownloader {
 
     @Override
     public Promise<Void, DownloadException, Void> start() {
-        return null;
+        return mUpgradeService.call(
+                UpgradeConstants.CALL_PATH_START_FIRMWARE_PACKAGE_DOWNLOAD,
+                new DownloadConverter()
+        );
     }
 
     @Override
     public Promise<Void, DownloadException, Void> pause() {
-        return null;
+        return mUpgradeService.call(
+                UpgradeConstants.CALL_PATH_PAUSE_FIRMWARE_PACKAGE_DOWNLOAD,
+                new DownloadConverter()
+        );
     }
 
     @Override
     public Promise<Void, DownloadException, Void> clear() {
-        return null;
+        return mUpgradeService.call(
+                UpgradeConstants.CALL_PATH_CLEAR_FIRMWARE_PACKAGE_DOWNLOAD,
+                new DownloadConverter()
+        );
     }
 
     private class StateReceiver extends ProtoEventReceiver<UpgradeProto.DownloadState> {
@@ -245,6 +259,14 @@ public class FirmwareDownloaderProxy extends AbstractFirmwareDownloader {
 
                 notifyProgressChange(downloadedBytes(), speed());
             }
+        }
+    }
+
+    private static class DownloadConverter extends CallAdapter.FConverter<DownloadException> {
+
+        @Override
+        public DownloadException convertFail(CallException e) {
+            return new DownloadException.Factory().from(e);
         }
     }
 }

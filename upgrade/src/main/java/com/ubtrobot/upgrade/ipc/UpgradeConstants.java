@@ -15,6 +15,14 @@ public class UpgradeConstants {
             "/firmware/upgrade/group/download/state";
     public static final String CALL_PATH_GET_FIRMWARE_PACKAGE_DOWNLOAD_PROGRESS =
             "/firmware/upgrade/group/download/progress";
+    public static final String CALL_PATH_READY_FIRMWARE_PACKAGE_DOWNLOAD =
+            "/firmware/package/group/download/ready";
+    public static final String CALL_PATH_START_FIRMWARE_PACKAGE_DOWNLOAD =
+            "/firmware/package/group/download/start";
+    public static final String CALL_PATH_PAUSE_FIRMWARE_PACKAGE_DOWNLOAD =
+            "/firmware/package/group/download/pause";
+    public static final String CALL_PATH_CLEAR_FIRMWARE_PACKAGE_DOWNLOAD =
+            "/firmware/package/group/download/clear";
 
     public static final String ACTION_FIRMWARE_DOWNLOAD_STATE_CHANGE =
             "event.action.FIRMWARE_DOWNLOAD_STATE_CHANGE";

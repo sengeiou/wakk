@@ -2,15 +2,15 @@ package com.ubtrobot.upgrade;
 
 import android.os.Bundle;
 
-import com.ubtrobot.exception.RichException;
+import com.ubtrobot.exception.AccessServiceException;
 
-public class DownloadException extends RichException {
+public class DownloadException extends AccessServiceException {
 
     protected DownloadException(int code, String message, Bundle detail, Throwable cause) {
         super(code, message, detail, cause);
     }
 
-    public static class Factory extends RichException.Factory<DownloadException> {
+    public static class Factory extends AccessServiceException.Factory<DownloadException> {
 
         @Override
         protected DownloadException

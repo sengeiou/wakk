@@ -22,6 +22,7 @@ import com.ubtrobot.upgrade.FirmwarePackageGroup;
 import com.ubtrobot.upgrade.ipc.UpgradeConstants;
 import com.ubtrobot.upgrade.ipc.UpgradeConverters;
 import com.ubtrobot.upgrade.ipc.UpgradeProto;
+import com.ubtrobot.upgrade.sal.AbstractFirmwareDownloadService;
 import com.ubtrobot.upgrade.sal.AbstractUpgradeService;
 import com.ubtrobot.upgrade.sal.FirmwareDownloadService;
 import com.ubtrobot.upgrade.sal.UpgradeFactory;
@@ -123,6 +124,69 @@ public class UpgradeSystemService extends MasterSystemService {
                 mDownloadService.packageGroup())));
     }
 
+    @Call(path = UpgradeConstants.CALL_PATH_READY_FIRMWARE_PACKAGE_DOWNLOAD)
+    public void onReadyFirmwarePackageDownload(Request request, Responder responder) {
+        final UpgradeProto.FirmwarePackageGroup packageGroup = ProtoParamParser.parseParam(request,
+                UpgradeProto.FirmwarePackageGroup.class, responder);
+        if (packageGroup == null) {
+            return;
+        }
+
+        mCallProcessor.onCall(
+                responder,
+                new CallProcessAdapter.Callable<Void, DownloadException, Void>() {
+                    @Override
+                    public Promise<Void, DownloadException, Void> call() throws CallException {
+                        return mDownloadService.ready(UpgradeConverters.
+                                toFirmwarePackageGroupPojo(packageGroup));
+                    }
+                },
+                new DownloadConverter()
+        );
+    }
+
+    @Call(path = UpgradeConstants.CALL_PATH_START_FIRMWARE_PACKAGE_DOWNLOAD)
+    public void onStartFirmwarePackageDownload(Request request, Responder responder) {
+        mCallProcessor.onCall(
+                responder,
+                new CallProcessAdapter.Callable<Void, DownloadException, Void>() {
+                    @Override
+                    public Promise<Void, DownloadException, Void> call() throws CallException {
+                        return mDownloadService.start();
+                    }
+                },
+                new DownloadConverter()
+        );
+    }
+
+    @Call(path = UpgradeConstants.CALL_PATH_PAUSE_FIRMWARE_PACKAGE_DOWNLOAD)
+    public void onPauseFirmwarePackageDownload(Request request, Responder responder) {
+        mCallProcessor.onCall(
+                responder,
+                new CallProcessAdapter.Callable<Void, DownloadException, Void>() {
+                    @Override
+                    public Promise<Void, DownloadException, Void> call() throws CallException {
+                        return mDownloadService.pause();
+                    }
+                },
+                new DownloadConverter()
+        );
+    }
+
+    @Call(path = UpgradeConstants.CALL_PATH_CLEAR_FIRMWARE_PACKAGE_DOWNLOAD)
+    public void onClearFirmwarePackageDownload(Request request, Responder responder) {
+        mCallProcessor.onCall(
+                responder,
+                new CallProcessAdapter.Callable<Void, DownloadException, Void>() {
+                    @Override
+                    public Promise<Void, DownloadException, Void> call() throws CallException {
+                        return mDownloadService.clear();
+                    }
+                },
+                new DownloadConverter()
+        );
+    }
+
     @Override
     protected void onServiceDestroy() {
         mDownloadService.unregisterStateListener(mStateListener);
@@ -153,6 +217,15 @@ public class UpgradeSystemService extends MasterSystemService {
                             speed
                     ))
             );
+        }
+    }
+
+    private static class DownloadConverter
+            extends ProtoCallProcessAdapter.FConverter<DownloadException> {
+
+        @Override
+        public CallException convertFail(DownloadException e) {
+            return new CallException(e.getCode(), e.getMessage());
         }
     }
 }

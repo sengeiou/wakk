@@ -1,1 +1,3 @@
-include ':sample', ':commons', ':upgrade'
+include ':commons'
+include ':upgrade'
+include ':sample', ':service-mocks'

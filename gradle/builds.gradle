@@ -35,8 +35,11 @@ allprojects {
 
 ext {
     versions = [
-            sampleVersionCode: 1,
-            sampleVersionName: '0.0.1'
+            sampleVersionCode      : 1,
+            sampleVersionName      : '0.0.1',
+
+            serviceMocksVersionCode: 1,
+            serviceMocksVersionName: '0.0.1'
     ]
 
     sdk = [

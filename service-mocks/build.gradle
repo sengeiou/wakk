@@ -1,0 +1,37 @@
+apply plugin: 'com.android.application'
+
+android {
+    def sdk = rootProject.ext.sdk
+    compileSdkVersion sdk.compileSdkVersion
+
+    defaultConfig {
+        applicationId "com.ubtrobot.service.mock"
+
+        minSdkVersion sdk.minSdkVersion
+        targetSdkVersion sdk.targetSdkVersion
+
+        def versions = rootProject.ext.versions
+        versionCode versions.serviceMocksVersionCode
+        versionName versions.serviceMocksVersionName
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    def deps = rootProject.ext.deps
+    implementation deps.appcompat
+
+    testImplementation deps.junit
+    androidTestImplementation deps.espressoCore
+    androidTestImplementation deps.runner
+}

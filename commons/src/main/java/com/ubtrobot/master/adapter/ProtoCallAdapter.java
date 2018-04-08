@@ -76,6 +76,47 @@ public class ProtoCallAdapter {
         );
     }
 
+    public <D, DM extends Message, F extends Exception, P, PM extends Message> Promise<D, F, P>
+    callStickily(String path, Message protoParam, final DFPProtoConverter<D, DM, F, P, PM> converter) {
+        return mCallAdapter.callStickily(
+                path,
+                protoParam == null ? null : ProtoParam.create(protoParam),
+                new CallAdapter.DFPConverter<D, F, P>() {
+                    @Override
+                    public P convertProgress(Param param) throws F {
+                        try {
+                            return converter.convertProgress(ProtoParam.from(
+                                    param, converter.progressProtoClass()).getProtoMessage());
+                        } catch (ProtoParam.InvalidProtoParamException e) {
+                            throw convertFail(new CallException(CallGlobalCode.INTERNAL_ERROR,
+                                    "Response illegal protobuf message.", e));
+                        }
+                    }
+
+                    @Override
+                    public D convertDone(Param param) throws F {
+                        try {
+                            return converter.convertDone(ProtoParam.from(
+                                    param, converter.doneProtoClass()).getProtoMessage());
+                        } catch (ProtoParam.InvalidProtoParamException e) {
+                            throw convertFail(new CallException(CallGlobalCode.INTERNAL_ERROR,
+                                    "Response illegal protobuf message.", e));
+                        }
+                    }
+
+                    @Override
+                    public F convertFail(CallException e) {
+                        return converter.convertFail(e);
+                    }
+                }
+        );
+    }
+
+    public <D, DM extends Message, F extends Exception, P, PM extends Message> Promise<D, F, P>
+    callStickily(String path, DFPProtoConverter<D, DM, F, P, PM> converter) {
+        return callStickily(path, null, converter);
+    }
+
     public <F extends Exception> Promise<Void, F, Void>
     call(String path, Message protoParam, CallAdapter.FConverter<F> converter) {
         return mCallAdapter.call(path, protoParam == null ? null : ProtoParam.create(protoParam),
@@ -94,5 +135,18 @@ public class ProtoCallAdapter {
         D convertDone(DM protoParam);
 
         F convertFail(CallException e);
+    }
+
+    public interface DFPProtoConverter<D, DM extends Message, F extends Exception, P, PM extends Message> {
+
+        Class<DM> doneProtoClass();
+
+        D convertDone(DM protoParam);
+
+        F convertFail(CallException e);
+
+        Class<PM> progressProtoClass();
+
+        P convertProgress(PM protoParam);
     }
 }

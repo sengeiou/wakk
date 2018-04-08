@@ -59,6 +59,10 @@ public class ProtoCallAdapter {
                 new CallAdapter.DFConverter<D, F>() {
                     @Override
                     public D convertDone(Param param) throws F {
+                        if (param.isEmpty()) {
+                            return null;
+                        }
+
                         try {
                             return converter.convertDone(ProtoParam.from(
                                     param, converter.doneProtoClass()).getProtoMessage());
@@ -74,6 +78,17 @@ public class ProtoCallAdapter {
                     }
                 }
         );
+    }
+
+    public <F extends Exception> Promise<Void, F, Void>
+    call(String path, Message protoParam, CallAdapter.FConverter<F> converter) {
+        return mCallAdapter.call(path, protoParam == null ? null : ProtoParam.create(protoParam),
+                converter);
+    }
+
+    public <F extends Exception> Promise<Void, F, Void>
+    call(String path, CallAdapter.FConverter<F> converter) {
+        return mCallAdapter.call(path, null, converter);
     }
 
     public <D, DM extends Message, F extends Exception, P, PM extends Message> Promise<D, F, P>
@@ -95,6 +110,10 @@ public class ProtoCallAdapter {
 
                     @Override
                     public D convertDone(Param param) throws F {
+                        if (param.isEmpty()) {
+                            return null;
+                        }
+
                         try {
                             return converter.convertDone(ProtoParam.from(
                                     param, converter.doneProtoClass()).getProtoMessage());
@@ -117,15 +136,14 @@ public class ProtoCallAdapter {
         return callStickily(path, null, converter);
     }
 
-    public <F extends Exception> Promise<Void, F, Void>
-    call(String path, Message protoParam, CallAdapter.FConverter<F> converter) {
-        return mCallAdapter.call(path, protoParam == null ? null : ProtoParam.create(protoParam),
-                converter);
+    public <F extends Exception, P, PM extends Message> Promise<Void, F, P>
+    callStickily(String path, Message protoParam, FPProtoConverter<F, P, PM> converter) {
+        return callStickily(path, protoParam, (DFPProtoConverter<Void, Message, F, P, PM>) converter);
     }
 
-    public <F extends Exception> Promise<Void, F, Void>
-    call(String path, CallAdapter.FConverter<F> converter) {
-        return mCallAdapter.call(path, null, converter);
+    public <F extends Exception, P, PM extends Message> Promise<Void, F, P>
+    callStickily(String path, FPProtoConverter<F, P, PM> converter) {
+        return callStickily(path, null, (DFPProtoConverter<Void, Message, F, P, PM>) converter);
     }
 
     public interface DFProtoConverter<D, DM extends Message, F extends Exception> {
@@ -148,5 +166,19 @@ public class ProtoCallAdapter {
         Class<PM> progressProtoClass();
 
         P convertProgress(PM protoParam);
+    }
+
+    public abstract static class FPProtoConverter<F extends Exception, P, PM extends Message>
+            implements DFPProtoConverter<Void, Message, F, P, PM> {
+
+        @Override
+        public final Class<Message> doneProtoClass() {
+            return null;
+        }
+
+        @Override
+        public final Void convertDone(Message protoParam) {
+            return null;
+        }
     }
 }

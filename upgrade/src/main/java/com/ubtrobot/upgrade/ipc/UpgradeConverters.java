@@ -1,6 +1,7 @@
 package com.ubtrobot.upgrade.ipc;
 
 import com.ubtrobot.upgrade.DetectOption;
+import com.ubtrobot.upgrade.DownloadException;
 import com.ubtrobot.upgrade.Firmware;
 import com.ubtrobot.upgrade.FirmwarePackage;
 import com.ubtrobot.upgrade.FirmwarePackageGroup;
@@ -146,5 +147,26 @@ public class UpgradeConverters {
         }
 
         return builder.build();
+    }
+
+    public static UpgradeProto.DownloadState toDownloadStateProto(int state, DownloadException e) {
+        UpgradeProto.DownloadState.Builder builder = UpgradeProto.DownloadState.newBuilder().
+                setState(state);
+
+        if (e == null) {
+            return builder.build();
+        } else {
+            return builder.setErrorCode(e.getCode()).setErrorMessage(e.getMessage()).build();
+        }
+    }
+
+    public static UpgradeProto.DownloadState toDownloadStateProto(int state) {
+        return UpgradeProto.DownloadState.newBuilder().setState(state).build();
+    }
+
+    public static UpgradeProto.DownloadProgress
+    toDownloadProgressProto(long totalBytes, long downloadedBytes, int speed) {
+        return UpgradeProto.DownloadProgress.newBuilder().setTotalBytes(totalBytes).
+                setDownloadedBytes(downloadedBytes).setSpeed(speed).build();
     }
 }

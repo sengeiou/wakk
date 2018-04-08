@@ -49,3 +49,17 @@ message DetectOption {
     string local_source_path = 2;
     int64 timeout = 3;
 }
+
+message DownloadState {
+
+    int32 state = 1;
+    int32 error_code = 2;
+    string error_message = 3;
+}
+
+message DownloadProgress {
+
+    int64 total_bytes = 1;
+    int64 downloaded_bytes = 2;
+    int32 speed = 3;
+}

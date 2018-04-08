@@ -4,4 +4,7 @@
     level="system">
     <call path="/upgrade/firmware/list" />
     <call path="/firmware/upgrade/detect" />
+    <call path="/firmware/upgrade/group/downloading" />
+    <call path="/firmware/upgrade/group/download/state" />
+    <call path="/firmware/upgrade/group/download/progress" />
 </service>

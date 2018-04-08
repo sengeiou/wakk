@@ -96,8 +96,18 @@ public abstract class AbstractFirmwareDownloader implements FirmwareDownloader {
     }
 
     @Override
+    public boolean downloadFor(FirmwarePackageGroup packageGroup) {
+        // TODO
+        return false;
+    }
+
+    @Override
     public void registerStateListener(StateListener listener) {
         mStateListeners.register(listener);
+    }
+
+    protected boolean isAnyStateListenerRegistered() {
+        return !mStateListeners.isEmpty();
     }
 
     @Override
@@ -117,6 +127,10 @@ public abstract class AbstractFirmwareDownloader implements FirmwareDownloader {
     @Override
     public void registerProgressListener(ProgressListener listener) {
         mProgressListeners.register(listener);
+    }
+
+    protected boolean isAnyProgressListenerRegistered() {
+        return !mProgressListeners.isEmpty();
     }
 
     @Override

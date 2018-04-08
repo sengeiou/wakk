@@ -34,5 +34,17 @@ public abstract class RichException extends Exception {
         protected abstract E createException(
                 int code, String message,
                 Bundle detail, Throwable cause);
+
+        public E from(int code, String message, Bundle detail, Throwable cause) {
+            return createException(code, message, detail, cause);
+        }
+
+        public E from(int code, String message, Bundle detail) {
+            return createException(code, message, detail, null);
+        }
+
+        public E from(int code, String message) {
+            return createException(code, message, null, null);
+        }
     }
 }

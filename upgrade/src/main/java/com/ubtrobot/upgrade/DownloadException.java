@@ -15,7 +15,7 @@ public class DownloadException extends RichException {
         @Override
         protected DownloadException
         createException(int code, String message, Bundle detail, Throwable cause) {
-            return null;
+            return new DownloadException(code, message, detail, cause);
         }
     }
 }

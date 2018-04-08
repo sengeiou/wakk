@@ -18,6 +18,7 @@ public class UpgradeManager {
 
     private final FirmwareList mFirmwareList;
     private final UpgradeDetector mDetector;
+    private final FirmwareDownloaderProxy mFirmwareDownloader;
 
     public UpgradeManager(MasterContext masterContext) {
         ServiceProxy proxy = masterContext.createSystemServiceProxy(
@@ -27,6 +28,7 @@ public class UpgradeManager {
 
         mFirmwareList = new FirmwareList(upgradeService);
         mDetector = new UpgradeDetector(upgradeService);
+        mFirmwareDownloader = new FirmwareDownloaderProxy(masterContext, upgradeService, handler);
     }
 
     /**
@@ -73,8 +75,7 @@ public class UpgradeManager {
      * @return 固件下载器
      */
     public FirmwareDownloader firmwareDownloader() {
-        // TODO
-        return null;
+        return mFirmwareDownloader;
     }
 
     /**

@@ -1,7 +1,13 @@
 package com.ubtrobot.upgrade;
 
+import android.os.Handler;
+import android.os.Looper;
+
 import com.ubtrobot.async.Promise;
+import com.ubtrobot.master.adapter.ProtoCallAdapter;
 import com.ubtrobot.master.context.MasterContext;
+import com.ubtrobot.master.service.ServiceProxy;
+import com.ubtrobot.upgrade.ipc.UpgradeConstants;
 
 import java.util.List;
 
@@ -10,7 +16,15 @@ import java.util.List;
  */
 public class UpgradeManager {
 
+    private final FirmwareList mFirmwareList;
+
     public UpgradeManager(MasterContext masterContext) {
+        ServiceProxy proxy = masterContext.createSystemServiceProxy(
+                UpgradeConstants.SERVICE_NAME);
+        Handler handler = new Handler(Looper.getMainLooper());
+        ProtoCallAdapter upgradeService = new ProtoCallAdapter(proxy, handler);
+
+        mFirmwareList = new FirmwareList(upgradeService);
     }
 
     /**
@@ -19,8 +33,7 @@ public class UpgradeManager {
      * @return 固件列表
      */
     public List<Firmware> getFirmwareList() {
-        // TODO
-        return null;
+        return mFirmwareList.all();
     }
 
     /**
@@ -30,8 +43,7 @@ public class UpgradeManager {
      * @return 固件
      */
     public Firmware getFirmware(String name) {
-        // TODO
-        return null;
+        return mFirmwareList.get(name);
     }
 
     /**

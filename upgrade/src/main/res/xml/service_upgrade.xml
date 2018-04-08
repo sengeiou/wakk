@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<service
+    name="upgrade"
+    level="system">
+    <call path="/upgrade/firmware/list" />
+</service>

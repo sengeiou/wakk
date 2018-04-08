@@ -48,14 +48,16 @@ ext {
             targetSdkVersion : 26,
     ]
 
-    deps = [
-            appcompat       : 'com.android.support:appcompat-v7:27.0.2',
-            constraintLayout: 'com.android.support.constraint:constraint-layout:1.0.2',
-            recyclerView    : 'com.android.support:recyclerview-v7:27.0.2',
+    protoc = 'com.google.protobuf:protoc:3.0.0'
 
-            junit           : 'junit:junit:4.12',
-            espressoCore    : 'com.android.support.test.espresso:espresso-core:3.0.1',
-            runner          : 'com.android.support.test:runner:1.0.1',
+    deps = [
+            appcompat          : 'com.android.support:appcompat-v7:27.0.2',
+            constraintLayout   : 'com.android.support.constraint:constraint-layout:1.0.2',
+            recyclerView       : 'com.android.support:recyclerview-v7:27.0.2',
+
+            junit              : 'junit:junit:4.12',
+            espressoCore       : 'com.android.support.test.espresso:espresso-core:3.0.1',
+            runner             : 'com.android.support.test:runner:1.0.1',
 
             // Master ProtoBuf Param，会传递依赖：
             //   - Master 对应版本（与 Param 版本号一致）

@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package upgrade;
+
+option java_package = "com.ubtrobot.upgrade.ipc";
+option java_outer_classname = "UpgradeProto";
+
+message FirmwareList {
+
+    repeated Firmware firmware = 1;
+}
+
+message Firmware {
+
+    string name = 1;
+    string version = 2;
+    int64 upgrade_time = 3;
+    FirmwarePackage current_package = 4;
+}
+
+message FirmwarePackage {
+
+    string group = 1;
+    string name = 2;
+    string version = 3;
+    bool forced = 4;
+    bool incremental = 5;
+    string package_url = 6;
+    string package_md5 = 7;
+    string increment_url = 8;
+    string increment_md5 = 9;
+    int64 release_time = 10;
+    string release_note = 11;
+    string local_file = 12;
+}
+
+message FirmwarePackageGroup {
+
+    string name = 1;
+    bool forced = 2;
+    int64 release_time = 3;
+    string release_note = 4;
+    repeated FirmwarePackage firmware_package = 5;
+}

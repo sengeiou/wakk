@@ -17,6 +17,7 @@ import java.util.List;
 public class UpgradeManager {
 
     private final FirmwareList mFirmwareList;
+    private final UpgradeDetector mDetector;
 
     public UpgradeManager(MasterContext masterContext) {
         ServiceProxy proxy = masterContext.createSystemServiceProxy(
@@ -25,6 +26,7 @@ public class UpgradeManager {
         ProtoCallAdapter upgradeService = new ProtoCallAdapter(proxy, handler);
 
         mFirmwareList = new FirmwareList(upgradeService);
+        mDetector = new UpgradeDetector(upgradeService);
     }
 
     /**
@@ -52,8 +54,7 @@ public class UpgradeManager {
      * @return 升级回调
      */
     public Promise<FirmwarePackageGroup, DetectException, Void> detectUpgrade() {
-        // TODO
-        return null;
+        return mDetector.detect();
     }
 
     /**
@@ -63,8 +64,7 @@ public class UpgradeManager {
      * @return 升级回调
      */
     public Promise<FirmwarePackageGroup, DetectException, Void> detectUpgrade(DetectOption option) {
-        // TODO
-        return null;
+        return mDetector.detect(option);
     }
 
     /**

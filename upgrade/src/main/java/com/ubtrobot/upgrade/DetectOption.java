@@ -7,6 +7,7 @@ public class DetectOption {
 
     private final boolean remoteOrLocalSource;
     private String localSourcePath;
+    private long timeout;
 
     private DetectOption(boolean remoteOrLocalSource) {
         this.remoteOrLocalSource = remoteOrLocalSource;
@@ -30,11 +31,21 @@ public class DetectOption {
         return localSourcePath;
     }
 
+    /**
+     * 获取检测超时时间
+     *
+     * @return 超时时间（毫秒数）
+     */
+    public long getTimeout() {
+        return timeout;
+    }
+
     @Override
     public String toString() {
         return "DetectOption{" +
                 "remoteOrLocalSource=" + remoteOrLocalSource +
                 ", localSourcePath='" + localSourcePath + '\'' +
+                ", timeout=" + timeout +
                 '}';
     }
 
@@ -42,6 +53,7 @@ public class DetectOption {
 
         private boolean remoteOrLocalSource;
         private String localSourcePath;
+        private long timeout;
 
         public Builder(boolean remoteOrLocalSource) {
             this.remoteOrLocalSource = remoteOrLocalSource;
@@ -52,9 +64,15 @@ public class DetectOption {
             return this;
         }
 
+        public Builder setTimeout(long timeout) {
+            this.timeout = timeout;
+            return this;
+        }
+
         public DetectOption build() {
             DetectOption option = new DetectOption(remoteOrLocalSource);
             option.localSourcePath = localSourcePath;
+            option.timeout = timeout;
             return option;
         }
     }

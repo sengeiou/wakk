@@ -3,4 +3,5 @@
     name="upgrade"
     level="system">
     <call path="/upgrade/firmware/list" />
+    <call path="/firmware/upgrade/detect" />
 </service>

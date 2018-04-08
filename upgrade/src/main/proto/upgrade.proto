@@ -42,3 +42,10 @@ message FirmwarePackageGroup {
     string release_note = 4;
     repeated FirmwarePackage firmware_package = 5;
 }
+
+message DetectOption {
+
+    bool remote_or_local_source = 1;
+    string local_source_path = 2;
+    int64 timeout = 3;
+}

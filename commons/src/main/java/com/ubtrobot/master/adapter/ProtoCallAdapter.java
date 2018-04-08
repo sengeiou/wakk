@@ -61,7 +61,7 @@ public class ProtoCallAdapter {
                     public D convertDone(Param param) throws F {
                         try {
                             return converter.convertDone(ProtoParam.from(
-                                    param, converter.protoClass()).getProtoMessage());
+                                    param, converter.doneProtoClass()).getProtoMessage());
                         } catch (ProtoParam.InvalidProtoParamException e) {
                             throw convertFail(new CallException(CallGlobalCode.INTERNAL_ERROR,
                                     "Response illegal protobuf message.", e));
@@ -87,11 +87,11 @@ public class ProtoCallAdapter {
         return mCallAdapter.call(path, null, converter);
     }
 
-    public interface DFProtoConverter<D, M extends Message, F extends Exception> {
+    public interface DFProtoConverter<D, DM extends Message, F extends Exception> {
 
-        Class<M> protoClass();
+        Class<DM> doneProtoClass();
 
-        D convertDone(M protoParam);
+        D convertDone(DM protoParam);
 
         F convertFail(CallException e);
     }

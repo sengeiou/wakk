@@ -38,7 +38,7 @@ public class UpgradeDetector {
                     }
 
                     @Override
-                    public Class<UpgradeProto.FirmwarePackageGroup> protoClass() {
+                    public Class<UpgradeProto.FirmwarePackageGroup> doneProtoClass() {
                         return UpgradeProto.FirmwarePackageGroup.class;
                     }
 

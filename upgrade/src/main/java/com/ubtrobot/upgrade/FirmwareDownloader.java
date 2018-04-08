@@ -43,21 +43,6 @@ public interface FirmwareDownloader {
     int state();
 
     /**
-     * 准备待下载的固件包组
-     *
-     * @param packageGroup 固件包组
-     * @return 异步结果
-     */
-    Promise<Void, DownloadException, Void> ready(FirmwarePackageGroup packageGroup);
-
-    /**
-     * 获取在下载的固件包组
-     *
-     * @return 固件包组
-     */
-    FirmwarePackageGroup packageGroup();
-
-    /**
      * 查询是否闲置
      *
      * @return 是否闲置
@@ -106,6 +91,21 @@ public interface FirmwareDownloader {
      * @return 是否在为某个固件包组下载
      */
     boolean downloadFor(FirmwarePackageGroup packageGroup);
+
+    /**
+     * 准备待下载的固件包组
+     *
+     * @param packageGroup 固件包组
+     * @return 异步结果
+     */
+    Promise<Void, DownloadException, Void> ready(FirmwarePackageGroup packageGroup);
+
+    /**
+     * 获取在下载的固件包组
+     *
+     * @return 固件包组
+     */
+    FirmwarePackageGroup packageGroup();
 
     /**
      * 启动或恢复下载

@@ -26,6 +26,14 @@ dependencies {
 
     def deps = rootProject.ext.deps
     implementation deps.appcompat
+    implementation(deps.retrofit, {
+        exclude group: 'com.squareup.okhttp3', module: 'okhttp'
+    })
+    implementation deps.okHttp
+    implementation deps.gsonConverter
+    implementation deps.uRestAdapter
+    implementation deps.signInterceptor
+    implementation deps.authInterceptor
 
     testImplementation deps.junit
     androidTestImplementation deps.espressoCore

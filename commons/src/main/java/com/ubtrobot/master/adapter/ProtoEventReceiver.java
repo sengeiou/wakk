@@ -8,9 +8,18 @@ import com.ubtrobot.transport.message.Event;
 import com.ubtrobot.ulog.FwLoggerFactory;
 import com.ubtrobot.ulog.Logger;
 
+import java.lang.reflect.ParameterizedType;
+
 public abstract class ProtoEventReceiver<M extends Message> implements EventReceiver {
 
     private static final Logger LOGGER = FwLoggerFactory.getLogger("ProtoEventReceiver");
+
+    private final Class<M> mGenericClass;
+
+    public ProtoEventReceiver() {
+        mGenericClass = (Class) ((ParameterizedType) (getClass().getGenericSuperclass()))
+                .getActualTypeArguments()[0];
+    }
 
     @Override
     public void onReceive(MasterContext masterContext, Event event) {
@@ -21,13 +30,11 @@ public abstract class ProtoEventReceiver<M extends Message> implements EventRece
 
         try {
             onReceive(masterContext, event.getAction(),
-                    ProtoParam.from(event.getParam(), protoClass()).getProtoMessage());
+                    ProtoParam.from(event.getParam(), mGenericClass).getProtoMessage());
         } catch (ProtoParam.InvalidProtoParamException e) {
             LOGGER.e(e, "Framework error when parse event param. event=%s", event);
         }
     }
-
-    protected abstract Class<M> protoClass();
 
     public abstract void onReceive(MasterContext masterContext, String action, M param);
 }

@@ -5,6 +5,8 @@ import android.os.Handler;
 import com.ubtrobot.async.Consumer;
 import com.ubtrobot.async.ListenerList;
 
+import java.util.HashMap;
+
 public abstract class AbstractFirmwareDownloader implements FirmwareDownloader {
 
     private final Handler mHandler;
@@ -97,8 +99,66 @@ public abstract class AbstractFirmwareDownloader implements FirmwareDownloader {
 
     @Override
     public boolean downloadFor(FirmwarePackageGroup packageGroup) {
-        // TODO
-        return false;
+        if (packageGroup == null) {
+            throw new IllegalArgumentException("Argument packageGroup is null.");
+        }
+
+        if (isIdle()) {
+            return false;
+        }
+
+        FirmwarePackageGroup downloading = packageGroup();
+        if (!downloading.getName().equals(packageGroup.getName())) {
+            return false;
+        }
+        if (downloading.isForced() != packageGroup.isForced()) {
+            return false;
+        }
+        if (downloading.getPackageCount() != packageGroup.getPackageCount()) {
+            return false;
+        }
+
+        HashMap<String, FirmwarePackage> packageMap = new HashMap<>();
+        for (FirmwarePackage firmwarePackage : downloading) {
+            if (packageMap.put(firmwarePackage.getName(), firmwarePackage) != null) {
+                throw new IllegalStateException("Repeated firmware package name. name=" +
+                        firmwarePackage.getName());
+            }
+        }
+
+        for (FirmwarePackage firmwarePackage : packageGroup) {
+            FirmwarePackage downloadingPackage = packageMap.get(firmwarePackage.getName());
+            if (downloadingPackage == null) {
+                return false;
+            }
+
+            if (!downloadingPackage.getGroup().equals(firmwarePackage.getGroup())) {
+                return false;
+            }
+            if (!downloadingPackage.getVersion().equals(firmwarePackage.getVersion())) {
+                return false;
+            }
+            if (downloadingPackage.isForced() != firmwarePackage.isForced()) {
+                return false;
+            }
+            if (downloadingPackage.isIncremental() != firmwarePackage.isIncremental()) {
+                return false;
+            }
+            if (!downloadingPackage.getPackageUrl().equals(firmwarePackage.getPackageUrl())) {
+                return false;
+            }
+            if (!downloadingPackage.getPackageMd5().equals(firmwarePackage.getPackageMd5())) {
+                return false;
+            }
+            if (!downloadingPackage.getIncrementUrl().equals(firmwarePackage.getIncrementUrl())) {
+                return false;
+            }
+            if (!downloadingPackage.getIncrementMd5().equals(firmwarePackage.getIncrementMd5())) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     @Override

@@ -1,4 +1,4 @@
 include ':commons'
-include ':upgrade', 'wakeup', 'analytics','speech', ':emotion'
+include ':upgrade', 'wakeup', 'analytics','speech', ':emotion', ':navigation'
 include ':service-impl:upgrade', ':service-impl:analytics'
 include ':sample', ':service-mocks'

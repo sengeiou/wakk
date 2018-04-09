@@ -7,20 +7,24 @@ import android.text.TextUtils;
  */
 public class FirmwarePackage {
 
-    private String group;
+    private String group = "";
     private String name;
     private String version;
     private boolean forced;
     private boolean incremental;
-    private String packageUrl;
-    private String packageMd5;
-    private String incrementUrl;
-    private String incrementMd5;
+    private String packageUrl = "";
+    private String packageMd5 = "";
+    private String incrementUrl = "";
+    private String incrementMd5 = "";
     private long releaseTime;
-    private String releaseNote;
-    private String localFile;
+    private String releaseNote = "";
+    private String localFile = "";
 
     private FirmwarePackage(String name, String version) {
+        if (name == null || version == null) {
+            throw new IllegalArgumentException("Argument name or version is null.");
+        }
+
         this.name = name;
         this.version = version;
     }
@@ -178,36 +182,64 @@ public class FirmwarePackage {
         }
 
         public Builder setPackageUrl(String packageUrl) {
+            if (TextUtils.isEmpty(packageUrl)) {
+                throw new IllegalArgumentException("Argument packageUrl is an empty string.");
+            }
+
             this.packageUrl = packageUrl;
             return this;
         }
 
         public Builder setPackageMd5(String packageMd5) {
+            if (TextUtils.isEmpty(packageMd5)) {
+                throw new IllegalArgumentException("Argument packageMd5 is an empty string.");
+            }
+
             this.packageMd5 = packageMd5;
             return this;
         }
 
         public Builder setIncrementUrl(String incrementUrl) {
+            if (TextUtils.isEmpty(incrementUrl)) {
+                throw new IllegalArgumentException("Argument incrementUrl is an empty string.");
+            }
+
             this.incrementUrl = incrementUrl;
             return this;
         }
 
         public Builder setIncrementMd5(String incrementMd5) {
+            if (TextUtils.isEmpty(incrementMd5)) {
+                throw new IllegalArgumentException("Argument incrementMd5 is an empty string.");
+            }
+
             this.incrementMd5 = incrementMd5;
             return this;
         }
 
         public Builder setReleaseTime(long releaseTime) {
+            if (releaseTime < 0) {
+                throw new IllegalArgumentException("Argument releaseTime < 0");
+            }
+
             this.releaseTime = releaseTime;
             return this;
         }
 
         public Builder setReleaseNote(String releaseNote) {
+            if (TextUtils.isEmpty(releaseNote)) {
+                throw new IllegalArgumentException("Argument releaseNote is an empty string.");
+            }
+
             this.releaseNote = releaseNote;
             return this;
         }
 
         public Builder setLocalFile(String localFile) {
+            if (TextUtils.isEmpty(releaseNote)) {
+                throw new IllegalArgumentException("Argument releaseNote is an empty string.");
+            }
+
             this.localFile = localFile;
             return this;
         }

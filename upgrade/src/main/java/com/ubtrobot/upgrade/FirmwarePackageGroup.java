@@ -1,6 +1,7 @@
 package com.ubtrobot.upgrade;
 
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -13,10 +14,14 @@ public class FirmwarePackageGroup implements Iterable<FirmwarePackage> {
     private String name;
     private boolean forced;
     private long releaseTime;
-    private String releaseNote;
+    private String releaseNote = "";
     private LinkedList<FirmwarePackage> packageList = new LinkedList<>();
 
-    public FirmwarePackageGroup(String name) {
+    private FirmwarePackageGroup(String name) {
+        if (name == null) {
+            throw new IllegalArgumentException("Argument name is null.");
+        }
+
         this.name = name;
     }
 
@@ -100,6 +105,10 @@ public class FirmwarePackageGroup implements Iterable<FirmwarePackage> {
         private LinkedList<FirmwarePackage> packages = new LinkedList<>();
 
         public Builder(String groupName) {
+            if (TextUtils.isEmpty(groupName)) {
+                throw new IllegalArgumentException("Argument groupName is an empty string.");
+            }
+
             this.groupName = groupName;
         }
 
@@ -114,11 +123,19 @@ public class FirmwarePackageGroup implements Iterable<FirmwarePackage> {
         }
 
         public Builder setReleaseNote(String releaseNote) {
+            if (TextUtils.isEmpty(releaseNote)) {
+                throw new IllegalArgumentException("Argument releaseNote is an empty string.");
+            }
+
             this.releaseNote = releaseNote;
             return this;
         }
 
         public Builder addPackage(FirmwarePackage firmwarePackage) {
+            if (firmwarePackage == null) {
+                throw new IllegalArgumentException("Argument firmwarePackage is null.");
+            }
+
             if (!groupName.equals(firmwarePackage.getGroup())) {
                 throw new IllegalArgumentException("Illegal argument firmwarePackage. " +
                         "firmwarePackage.group NOT equal " + groupName);

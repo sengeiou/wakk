@@ -30,7 +30,7 @@ public class ProtoCallAdapter {
 
     public <T extends Message> T
     syncCall(String path, Class<T> resParamClass) throws CallException {
-        return syncCall(path, resParamClass);
+        return syncCall(path, null, resParamClass);
     }
 
     public <T extends Message> T

@@ -5,6 +5,8 @@ package com.ubtrobot.upgrade;
  */
 public class Firmware {
 
+    private static final Firmware DEFAULT = new Firmware.Builder("", "").build();
+
     private String name;
     private String version;
     private long upgradeTime;
@@ -33,7 +35,7 @@ public class Firmware {
      * @return 固件包
      */
     public FirmwarePackage getCurrentPackage() {
-        return currentPackage;
+        return currentPackage == null ? FirmwarePackage.DEFAULT : currentPackage;
     }
 
     @Override
@@ -54,6 +56,10 @@ public class Firmware {
         private FirmwarePackage currentPackage;
 
         public Builder(String name, String version) {
+            if (name == null || version == null) {
+                throw new IllegalArgumentException("Argument name or version is null.");
+            }
+
             this.name = name;
             this.version = version;
         }
@@ -64,6 +70,10 @@ public class Firmware {
         }
 
         public Builder setCurrentPackage(FirmwarePackage currentPackage) {
+            if (currentPackage == null) {
+                throw new IllegalArgumentException("Argument currentPackage is null.");
+            }
+
             this.currentPackage = currentPackage;
             return this;
         }

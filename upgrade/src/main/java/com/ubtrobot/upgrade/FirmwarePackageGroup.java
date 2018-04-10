@@ -1,7 +1,6 @@
 package com.ubtrobot.upgrade;
 
 import android.support.annotation.NonNull;
-import android.text.TextUtils;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -11,17 +10,15 @@ import java.util.LinkedList;
  */
 public class FirmwarePackageGroup implements Iterable<FirmwarePackage> {
 
+    public static final FirmwarePackageGroup DEFAULT = new FirmwarePackageGroup.Builder("").build();
+
     private String name;
     private boolean forced;
     private long releaseTime;
-    private String releaseNote = "";
+    private String releaseNote;
     private LinkedList<FirmwarePackage> packageList = new LinkedList<>();
 
     private FirmwarePackageGroup(String name) {
-        if (name == null) {
-            throw new IllegalArgumentException("Argument name is null.");
-        }
-
         this.name = name;
     }
 
@@ -101,12 +98,12 @@ public class FirmwarePackageGroup implements Iterable<FirmwarePackage> {
         private final String groupName;
         private boolean forced;
         private long releaseTime;
-        private String releaseNote;
+        private String releaseNote = "";
         private LinkedList<FirmwarePackage> packages = new LinkedList<>();
 
         public Builder(String groupName) {
-            if (TextUtils.isEmpty(groupName)) {
-                throw new IllegalArgumentException("Argument groupName is an empty string.");
+            if (groupName == null) {
+                throw new IllegalArgumentException("Argument groupName is null.");
             }
 
             this.groupName = groupName;
@@ -123,8 +120,8 @@ public class FirmwarePackageGroup implements Iterable<FirmwarePackage> {
         }
 
         public Builder setReleaseNote(String releaseNote) {
-            if (TextUtils.isEmpty(releaseNote)) {
-                throw new IllegalArgumentException("Argument releaseNote is an empty string.");
+            if (releaseNote == null) {
+                throw new IllegalArgumentException("Argument releaseNote is null.");
             }
 
             this.releaseNote = releaseNote;

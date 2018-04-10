@@ -5,6 +5,8 @@ package com.ubtrobot.upgrade;
  */
 public class DetectOption {
 
+    public static final DetectOption DEFAULT = new DetectOption.Builder(true).build();
+
     private final boolean remoteOrLocalSource;
     private String localSourcePath;
     private long timeout;
@@ -52,7 +54,7 @@ public class DetectOption {
     public static class Builder {
 
         private boolean remoteOrLocalSource;
-        private String localSourcePath;
+        private String localSourcePath = "";
         private long timeout;
 
         public Builder(boolean remoteOrLocalSource) {
@@ -60,6 +62,10 @@ public class DetectOption {
         }
 
         public Builder setLocalSourcePath(String localSourcePath) {
+            if (localSourcePath == null) {
+                throw new IllegalArgumentException("Argument localSourcePath is null.");
+            }
+
             this.localSourcePath = localSourcePath;
             return this;
         }

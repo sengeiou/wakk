@@ -7,24 +7,22 @@ import android.text.TextUtils;
  */
 public class FirmwarePackage {
 
-    private String group = "";
+    public static final FirmwarePackage DEFAULT = new FirmwarePackage.Builder("", "").build();
+
+    private String group;
     private String name;
     private String version;
     private boolean forced;
     private boolean incremental;
-    private String packageUrl = "";
-    private String packageMd5 = "";
-    private String incrementUrl = "";
-    private String incrementMd5 = "";
+    private String packageUrl;
+    private String packageMd5;
+    private String incrementUrl;
+    private String incrementMd5;
     private long releaseTime;
-    private String releaseNote = "";
-    private String localFile = "";
+    private String releaseNote;
+    private String localFile;
 
     private FirmwarePackage(String name, String version) {
-        if (name == null || version == null) {
-            throw new IllegalArgumentException("Argument name or version is null.");
-        }
-
         this.name = name;
         this.version = version;
     }
@@ -140,22 +138,22 @@ public class FirmwarePackage {
 
     public static class Builder {
 
-        private String group;
+        private String group = "";
         private final String name;
         private final String version;
         private boolean forced;
         private boolean incremental;
-        private String packageUrl;
-        private String packageMd5;
-        private String incrementUrl;
-        private String incrementMd5;
+        private String packageUrl = "";
+        private String packageMd5 = "";
+        private String incrementUrl = "";
+        private String incrementMd5 = "";
         private long releaseTime;
-        private String releaseNote;
-        private String localFile;
+        private String releaseNote = "";
+        private String localFile = "";
 
         public Builder(String name, String version) {
-            if (TextUtils.isEmpty(name) || TextUtils.isEmpty(version)) {
-                throw new IllegalArgumentException("name or version argument is a empty string.");
+            if (name == null || version == null) {
+                throw new IllegalArgumentException("Argument name or version is null.");
             }
 
             this.name = name;

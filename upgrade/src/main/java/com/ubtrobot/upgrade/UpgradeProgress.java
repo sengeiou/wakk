@@ -2,6 +2,8 @@ package com.ubtrobot.upgrade;
 
 public class UpgradeProgress {
 
+    public static final UpgradeProgress DEFAULT = new UpgradeProgress.Builder(0).build();
+
     public static final int STATE_CHECKING_BEGAN = 1;
     public static final int STATE_CHECKING_ENDED = 2;
     public static final int STATE_UPGRADING_ALL_BEGAN = 3;
@@ -96,7 +98,7 @@ public class UpgradeProgress {
         private final int state;
         private int upgradingSingleProgress;
         private int upgradingAllProgress;
-        private String upgradingFirmware;
+        private String upgradingFirmware = "";
         private int upgradingFirmwareOrder;
         private int remainingSeconds;
         private boolean willRoboot;
@@ -116,6 +118,10 @@ public class UpgradeProgress {
         }
 
         public Builder setUpgradingFirmware(String upgradingFirmware) {
+            if (upgradingFirmware == null) {
+                throw new IllegalArgumentException("Argument upgradingFirmware is null.");
+            }
+
             this.upgradingFirmware = upgradingFirmware;
             return this;
         }

@@ -27,5 +27,9 @@ public class UpgradeException extends AccessServiceException {
         public UpgradeException verifyPackageError(String message) {
             return createException(CODE_VERIFY_PACKAGE_ERROR, message);
         }
+
+        public UpgradeException verifyPackageError(String message, Throwable cause) {
+            return createException(CODE_VERIFY_PACKAGE_ERROR, message, cause);
+        }
     }
 }

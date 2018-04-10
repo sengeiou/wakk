@@ -1,2 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.ubtrobot.analytics.sal" />
+    package="com.ubtrobot.analytics.sal">
+
+    <application>
+        <provider
+            android:name="com.ubtrobot.analytics.ipc.provider.AnalyticsProvider"
+            android:authorities="com.ubtrobot.analytics.ipc.provider.AnalyticsProvider"
+            android:exported="true"
+            android:permission="ubtrobot.permissions.AnalyticsProvider" />
+
+    </application>
+</manifest>

@@ -227,8 +227,6 @@ public class FirmwareDownloaderProxy extends AbstractFirmwareDownloader {
                 String action,
                 UpgradeProto.DownloadState state) {
             synchronized (FirmwareDownloaderProxy.this) {
-                setState(state.getState());
-
                 DownloadException e = null;
                 if (state.getState() == STATE_ERROR) {
                     e = new DownloadException.Factory().from(

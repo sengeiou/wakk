@@ -4,10 +4,14 @@ import android.os.Handler;
 
 import com.ubtrobot.async.Consumer;
 import com.ubtrobot.async.ListenerList;
+import com.ubtrobot.ulog.FwLoggerFactory;
+import com.ubtrobot.ulog.Logger;
 
 import java.util.HashMap;
 
 public abstract class AbstractFirmwareDownloader implements FirmwareDownloader {
+
+    private static final Logger LOGGER = FwLoggerFactory.getLogger("AbstractFirmwareDownloader");
 
     private final Handler mHandler;
 
@@ -176,12 +180,28 @@ public abstract class AbstractFirmwareDownloader implements FirmwareDownloader {
     }
 
     protected void notifyStateChange(final int state, final DownloadException e) {
-        mStateListeners.forEach(new Consumer<StateListener>() {
-            @Override
-            public void accept(StateListener listener) {
-                listener.onStateChange(AbstractFirmwareDownloader.this, state, e);
+        if (state < STATE_IDLE || state > STATE_ERROR) {
+            throw new IllegalArgumentException("Illegal state value. state=" + state);
+        }
+
+        if (state == STATE_ERROR && e == null) {
+            throw new IllegalArgumentException("Argument e is null when state is " + state);
+        }
+
+        synchronized (this) {
+            if (mState == state) {
+                LOGGER.w("Notify state change, but the state not changed. state=%s", state);
+                return;
             }
-        });
+
+            mState = state;
+            mStateListeners.forEach(new Consumer<StateListener>() {
+                @Override
+                public void accept(StateListener listener) {
+                    listener.onStateChange(AbstractFirmwareDownloader.this, state, e);
+                }
+            });
+        }
     }
 
     @Override

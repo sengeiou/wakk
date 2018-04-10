@@ -217,11 +217,6 @@ public class FirmwareDownloaderProxy extends AbstractFirmwareDownloader {
     private class StateReceiver extends ProtoEventReceiver<UpgradeProto.DownloadState> {
 
         @Override
-        protected Class<UpgradeProto.DownloadState> protoClass() {
-            return UpgradeProto.DownloadState.class;
-        }
-
-        @Override
         public void onReceive(
                 MasterContext masterContext,
                 String action,
@@ -239,11 +234,6 @@ public class FirmwareDownloaderProxy extends AbstractFirmwareDownloader {
     }
 
     private class ProgressReceiver extends ProtoEventReceiver<UpgradeProto.DownloadProgress> {
-
-        @Override
-        protected Class<UpgradeProto.DownloadProgress> protoClass() {
-            return UpgradeProto.DownloadProgress.class;
-        }
 
         @Override
         public void onReceive(

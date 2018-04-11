@@ -25,12 +25,12 @@ public class AnalyticsDelegate implements Analytics {
 
     @Override
     public void setStrategy(Strategy strategy) {
-
+        mAnalyticsService.setStrategy(strategy);
     }
 
     @Override
     public Strategy getStrategy() {
-        return null;
+        return mAnalyticsService.getStrategy();
     }
 
     @Override

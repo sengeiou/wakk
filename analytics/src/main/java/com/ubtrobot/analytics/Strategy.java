@@ -1,6 +1,9 @@
 package com.ubtrobot.analytics;
 
-public class Strategy {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class Strategy implements Parcelable {
 
     private static final int DEFAULT_REPORT_INTERVAL_SECONDS = 300;
     private static final int DEFAULT_REPORT_COUNT = 500;
@@ -10,8 +13,30 @@ public class Strategy {
     private boolean reportAtStartup;
     private int reportCount;
 
+    public static final Parcelable.Creator<Strategy> CREATOR = new Parcelable.Creator<Strategy>() {
+        @Override
+        public Strategy createFromParcel(Parcel in) {
+            return new Strategy(in);
+        }
+
+        @Override
+        public Strategy[] newArray(int size) {
+            return new Strategy[size];
+        }
+    };
+
     private Strategy() {
     }
+
+
+    private Strategy(Parcel in) {
+
+        enable = in.readByte() != 0;
+        reportIntervalSeconds = in.readLong();
+        reportAtStartup = in.readByte() != 0;
+        reportCount = in.readInt();
+    }
+
 
     public boolean isEnable() {
         return enable;
@@ -37,6 +62,19 @@ public class Strategy {
                 ", reportAtStartup=" + reportAtStartup +
                 ", reportCount=" + reportCount +
                 '}';
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeByte((byte) (enable ? 1 : 0));
+        dest.writeLong(reportIntervalSeconds);
+        dest.writeByte((byte) (reportAtStartup ? 1 : 0));
+        dest.writeInt(reportCount);
     }
 
     public static class Builder {

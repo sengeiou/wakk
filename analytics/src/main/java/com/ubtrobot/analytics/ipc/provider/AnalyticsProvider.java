@@ -9,12 +9,16 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.ubtrobot.analytics.Analytics;
+import com.ubtrobot.analytics.Strategy;
 import com.ubtrobot.analytics.ipc.AnalyticsConstants;
 import com.ubtrobot.analytics.sal.AnalyticsFactory;
 
 public class AnalyticsProvider extends ContentProvider {
+
+    private static final String TAG = "AnalyticsProvider";
 
     private Analytics mAnalytics;
 
@@ -50,10 +54,41 @@ public class AnalyticsProvider extends ContentProvider {
 
         switch (method) {
             case AnalyticsConstants.CALL_METHOD_PING:
-                ping();
+                bundle = ping();
+                break;
+
+            case AnalyticsConstants.CALL_METHOD_SET_STRATEGY:
+                setStrategy(extras);
+                break;
+
+            case AnalyticsConstants.CALL_METHOD_GET_STRATEGY:
+                bundle = getStrategy();
                 break;
         }
 
+        return bundle;
+    }
+
+    private void setStrategy(Bundle extras) {
+
+        if (extras == null) {
+            Log.w(TAG, "Argument(extras) is null.");
+            return;
+        }
+
+        Strategy strategy = extras.getParcelable(AnalyticsConstants.KEY_STRATEGY);
+        if (strategy == null) {
+            Log.w(TAG, "Get strategy is null.");
+            return;
+        }
+
+        mAnalytics.setStrategy(strategy);
+    }
+
+    private Bundle getStrategy() {
+        Strategy strategy = mAnalytics.getStrategy();
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(AnalyticsConstants.KEY_STRATEGY, strategy);
         return bundle;
     }
 

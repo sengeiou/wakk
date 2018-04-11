@@ -70,11 +70,13 @@ public class AnalyticsKit {
     }
 
     public static void setStrategy(Strategy strategy) {
-
+        checkAnalytics();
+        sAnalytics.setStrategy(strategy);
     }
 
     public static Strategy getStrategy() {
-        return null;
+        checkAnalytics();
+        return sAnalytics.getStrategy();
     }
 
     public static void recordEvent(String eventId) {

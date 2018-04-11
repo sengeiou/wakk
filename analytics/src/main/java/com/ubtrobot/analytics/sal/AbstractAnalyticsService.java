@@ -20,12 +20,18 @@ public abstract class AbstractAnalyticsService implements AnalyticsService {
     @Override
     public void setStrategy(Strategy strategy) {
         mStrategy = strategy;
+        doSetStrategy(strategy);
     }
+
+    protected abstract void doSetStrategy(Strategy strategy);
 
     @Override
     public Strategy getStrategy() {
-        return null;
+        mStrategy = mStrategy != null ? mStrategy : doGetStrategy();
+        return mStrategy;
     }
+
+    protected abstract Strategy doGetStrategy();
 
     @Override
     public void recordEvent(Event event) {

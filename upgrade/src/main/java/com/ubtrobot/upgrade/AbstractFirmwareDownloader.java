@@ -87,11 +87,6 @@ public abstract class AbstractFirmwareDownloader implements FirmwareDownloader {
     }
 
     @Override
-    public boolean isPausing() {
-        return mState == STATE_PAUSING;
-    }
-
-    @Override
     public boolean isComplete() {
         return mState == STATE_COMPLETE;
     }

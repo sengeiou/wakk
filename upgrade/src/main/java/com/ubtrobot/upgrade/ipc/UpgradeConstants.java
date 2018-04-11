@@ -19,8 +19,8 @@ public class UpgradeConstants {
             "/firmware/package/group/download/ready";
     public static final String CALL_PATH_START_FIRMWARE_PACKAGE_DOWNLOAD =
             "/firmware/package/group/download/start";
-    public static final String CALL_PATH_PAUSE_FIRMWARE_PACKAGE_DOWNLOAD =
-            "/firmware/package/group/download/pause";
+    public static final String CALL_PATH_STOP_FIRMWARE_PACKAGE_DOWNLOAD =
+            "/firmware/package/group/download/stop";
     public static final String CALL_PATH_CLEAR_FIRMWARE_PACKAGE_DOWNLOAD =
             "/firmware/package/group/download/clear";
     public static final String CALL_PATH_UPGRADE_FIRMWARE = "/firmware/list/upgrade";

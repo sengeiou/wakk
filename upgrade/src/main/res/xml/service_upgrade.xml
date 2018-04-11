@@ -9,7 +9,7 @@
     <call path="/firmware/upgrade/group/download/progress" />
     <call path="/firmware/package/group/download/ready" />
     <call path="/firmware/package/group/download/start" />
-    <call path="/firmware/package/group/download/pause" />
+    <call path="/firmware/package/group/download/stop" />
     <call path="/firmware/package/group/download/clear" />
     <call path="/firmware/list/upgrade" />
 </service>

@@ -161,14 +161,14 @@ public class UpgradeSystemService extends MasterSystemService {
         );
     }
 
-    @Call(path = UpgradeConstants.CALL_PATH_PAUSE_FIRMWARE_PACKAGE_DOWNLOAD)
-    public void onPauseFirmwarePackageDownload(Request request, Responder responder) {
+    @Call(path = UpgradeConstants.CALL_PATH_STOP_FIRMWARE_PACKAGE_DOWNLOAD)
+    public void onStopFirmwarePackageDownload(Request request, Responder responder) {
         mCallProcessor.onCall(
                 responder,
                 new CallProcessAdapter.Callable<Void, DownloadException, Void>() {
                     @Override
                     public Promise<Void, DownloadException, Void> call() throws CallException {
-                        return mDownloadService.pause();
+                        return mDownloadService.stop();
                     }
                 },
                 new DownloadConverter()

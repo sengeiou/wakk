@@ -199,9 +199,9 @@ public class FirmwareDownloaderProxy extends AbstractFirmwareDownloader {
     }
 
     @Override
-    public Promise<Void, DownloadException, Void> pause() {
+    public Promise<Void, DownloadException, Void> stop() {
         return mUpgradeService.call(
-                UpgradeConstants.CALL_PATH_PAUSE_FIRMWARE_PACKAGE_DOWNLOAD,
+                UpgradeConstants.CALL_PATH_STOP_FIRMWARE_PACKAGE_DOWNLOAD,
                 new DownloadConverter()
         );
     }

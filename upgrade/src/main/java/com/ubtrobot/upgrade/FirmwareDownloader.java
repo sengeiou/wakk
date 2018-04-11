@@ -10,9 +10,8 @@ public interface FirmwareDownloader {
     int STATE_IDLE = 0;
     int STATE_READY = 1;
     int STATE_DOWNLOADING = 2;
-    int STATE_PAUSING = 3;
-    int STATE_COMPLETE = 4;
-    int STATE_ERROR = 5;
+    int STATE_COMPLETE = 3;
+    int STATE_ERROR = 4;
 
     /**
      * 获取（多个）固件包总大小
@@ -63,12 +62,6 @@ public interface FirmwareDownloader {
      */
     boolean isDownloading();
 
-    /**
-     * 查询是否暂停中
-     *
-     * @return 是否暂停中
-     */
-    boolean isPausing();
 
     /**
      * 查询是否完成
@@ -115,11 +108,11 @@ public interface FirmwareDownloader {
     Promise<Void, DownloadException, Void> start();
 
     /**
-     * 暂停下载
+     * 停止下载
      *
      * @return 异步结果
      */
-    Promise<Void, DownloadException, Void> pause();
+    Promise<Void, DownloadException, Void> stop();
 
     /**
      * 清除下载

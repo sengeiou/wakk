@@ -22,18 +22,12 @@ public abstract class AbstractFirmwareDownloadService extends AbstractFirmwareDo
             public FirmwarePackageGroup get() {
                 FirmwarePackageGroup packageGroup = doGetPackageGroup();
                 if (packageGroup == null) {
-                    packageGroup = new FirmwarePackageGroup.Builder("").build();
+                    packageGroup = FirmwarePackageGroup.DEFAULT;
                 }
 
                 return packageGroup;
             }
         });
-
-        if (mPackageGroup.get().getPackageCount() == 0) {
-            setState(STATE_IDLE);
-        } else {
-            setState(STATE_READY);
-        }
     }
 
     @Override
@@ -80,7 +74,7 @@ public abstract class AbstractFirmwareDownloadService extends AbstractFirmwareDo
         synchronized (this) {
             if (isDownloading()) {
                 deferred.resolve(null);
-            } else if (isReady() || isPausing() || isError()) {
+            } else if (isReady() || isError()) {
                 doStart();
 
                 deferred.resolve(null);
@@ -96,17 +90,17 @@ public abstract class AbstractFirmwareDownloadService extends AbstractFirmwareDo
     protected abstract void doStart();
 
     @Override
-    public Promise<Void, DownloadException, Void> pause() {
+    public Promise<Void, DownloadException, Void> stop() {
         Deferred<Void, DownloadException, Void> deferred = new Deferred<>(getHandler());
 
         synchronized (this) {
-            if (isPausing()) {
+            if (isReady()) {
                 deferred.resolve(null);
             } else if (isDownloading()) {
-                doPause();
+                doStop();
 
                 deferred.resolve(null);
-                notifyStateChange(STATE_PAUSING, null);
+                notifyStateChange(STATE_READY, null);
             } else {
                 operationInIllegalState(deferred);
             }
@@ -115,7 +109,7 @@ public abstract class AbstractFirmwareDownloadService extends AbstractFirmwareDo
         return deferred.promise();
     }
 
-    protected abstract void doPause();
+    protected abstract void doStop();
 
     @Override
     public Promise<Void, DownloadException, Void> clear() {
@@ -128,7 +122,7 @@ public abstract class AbstractFirmwareDownloadService extends AbstractFirmwareDo
             }
 
             if (isDownloading()) {
-                doPause();
+                doStop();
             }
             doClear();
             mPackageGroup.clear();
@@ -148,5 +142,9 @@ public abstract class AbstractFirmwareDownloadService extends AbstractFirmwareDo
         }
 
         notifyStateChange(STATE_ERROR, e);
+    }
+
+    protected void notifyComplete() {
+        notifyStateChange(STATE_COMPLETE, null);
     }
 }

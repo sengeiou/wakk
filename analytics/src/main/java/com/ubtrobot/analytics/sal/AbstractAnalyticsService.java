@@ -7,6 +7,7 @@ import java.util.Map;
 
 public abstract class AbstractAnalyticsService implements AnalyticsService {
 
+    private boolean mEnable = true;
     private Strategy mStrategy;
 
     public AbstractAnalyticsService(Strategy strategy) {
@@ -15,6 +16,7 @@ public abstract class AbstractAnalyticsService implements AnalyticsService {
 
     @Override
     public void enable(boolean enable) {
+        mEnable = enable;
     }
 
     @Override

@@ -20,7 +20,7 @@ public class AnalyticsDelegate implements Analytics {
 
     @Override
     public void enable(boolean enable) {
-
+        mAnalyticsService.enable(enable);
     }
 
     @Override

@@ -8,7 +8,6 @@ public class Strategy implements Parcelable {
     private static final int DEFAULT_REPORT_INTERVAL_SECONDS = 300;
     private static final int DEFAULT_REPORT_COUNT = 500;
 
-    private boolean enable;
     private long reportIntervalSeconds;
     private boolean reportAtStartup;
     private int reportCount;
@@ -30,16 +29,9 @@ public class Strategy implements Parcelable {
 
 
     private Strategy(Parcel in) {
-
-        enable = in.readByte() != 0;
         reportIntervalSeconds = in.readLong();
         reportAtStartup = in.readByte() != 0;
         reportCount = in.readInt();
-    }
-
-
-    public boolean isEnable() {
-        return enable;
     }
 
     public long getReportIntervalSeconds() {
@@ -57,7 +49,6 @@ public class Strategy implements Parcelable {
     @Override
     public String toString() {
         return "Strategy{" +
-                "enable=" + enable +
                 ", reportIntervalSeconds=" + reportIntervalSeconds +
                 ", reportAtStartup=" + reportAtStartup +
                 ", reportCount=" + reportCount +
@@ -71,7 +62,6 @@ public class Strategy implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeByte((byte) (enable ? 1 : 0));
         dest.writeLong(reportIntervalSeconds);
         dest.writeByte((byte) (reportAtStartup ? 1 : 0));
         dest.writeInt(reportCount);
@@ -92,7 +82,6 @@ public class Strategy implements Parcelable {
         }
 
         public Builder(Strategy strategy) {
-            enable = strategy.isEnable();
             reportIntervalSeconds = strategy.getReportIntervalSeconds();
             reportAtStartup = strategy.isReportAtStartup();
             reportCount = strategy.getReportCount();
@@ -120,7 +109,6 @@ public class Strategy implements Parcelable {
 
         public Strategy build() {
             Strategy strategy = new Strategy();
-            strategy.enable = enable;
             strategy.reportIntervalSeconds = reportIntervalSeconds;
             strategy.reportAtStartup = reportAtStartup;
             strategy.reportCount = reportCount;
@@ -130,7 +118,6 @@ public class Strategy implements Parcelable {
         @Override
         public String toString() {
             return "Builder{" +
-                    "enable=" + enable +
                     ", reportIntervalSeconds=" + reportIntervalSeconds +
                     ", reportAtStartup=" + reportAtStartup +
                     ", reportCount=" + reportCount +

@@ -56,17 +56,28 @@ public class AnalyticsProvider extends ContentProvider {
             case AnalyticsConstants.CALL_METHOD_PING:
                 bundle = ping();
                 break;
-
             case AnalyticsConstants.CALL_METHOD_SET_STRATEGY:
                 setStrategy(extras);
                 break;
-
             case AnalyticsConstants.CALL_METHOD_GET_STRATEGY:
                 bundle = getStrategy();
+                break;
+            case AnalyticsConstants.CALL_METHOD_ENABLE:
+                enable(extras);
                 break;
         }
 
         return bundle;
+    }
+
+    private void enable(Bundle extras) {
+        if (extras == null){
+            Log.w(TAG, "Argument(extras) is null.");
+            return;
+        }
+
+        boolean enable = extras.getBoolean(AnalyticsConstants.KEY_ENABLE, true);
+        mAnalytics.enable(enable);
     }
 
     private void setStrategy(Bundle extras) {

@@ -22,6 +22,9 @@ public class ProviderAnalyticsProxy implements Analytics {
 
     @Override
     public void enable(boolean enable) {
+        Bundle bundle = new Bundle();
+        bundle.putBoolean(AnalyticsConstants.KEY_ENABLE, enable);
+        mContentResolver.call(mUri, AnalyticsConstants.CALL_METHOD_ENABLE, null, bundle);
     }
 
     @Override

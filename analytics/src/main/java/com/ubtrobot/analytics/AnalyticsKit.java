@@ -79,6 +79,11 @@ public class AnalyticsKit {
         return sAnalytics.getStrategy();
     }
 
+    public void enable(boolean enable) {
+        checkAnalytics();
+        sAnalytics.enable(enable);
+    }
+
     public static void recordEvent(String eventId) {
     }
 

@@ -7,9 +7,11 @@ public class AnalyticsConstants {
 
     public static final String KEY_PROVIDER_PONG = "pong";
     public static final String KEY_STRATEGY = "strategy";
+    public static final String KEY_ENABLE = "enable";
 
     public static final String CALL_METHOD_PING = "ping";
     public static final String CALL_METHOD_SET_STRATEGY = "setStrategy";
     public static final String CALL_METHOD_GET_STRATEGY = "getStrategy";
+    public static final String CALL_METHOD_ENABLE = "enable";
 
 }

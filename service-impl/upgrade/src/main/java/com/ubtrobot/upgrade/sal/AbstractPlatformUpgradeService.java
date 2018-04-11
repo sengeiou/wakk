@@ -135,7 +135,7 @@ public abstract class AbstractPlatformUpgradeService extends AbstractUpgradeServ
                                 releaseTime = dtPackage.releaseTime;
                             }
 
-                            builder.addPackage(new FirmwarePackage.Builder(
+                            FirmwarePackage.Builder packageBuilder = new FirmwarePackage.Builder(
                                     dtPackage.moduleName, dtPackage.versionName).
                                     setGroup(mFirmwarePackageGroupName).
                                     setForced(dtPackage.isForced).
@@ -145,8 +145,18 @@ public abstract class AbstractPlatformUpgradeService extends AbstractUpgradeServ
                                     setIncrementUrl(dtPackage.incrementUrl).
                                     setIncrementMd5(dtPackage.incrementMd5).
                                     setReleaseTime(dtPackage.releaseTime).
-                                    setReleaseNote(dtPackage.releaseNote).
-                                    build());
+                                    setReleaseNote(dtPackage.releaseNote);
+                            if (dtPackage.isIncremental) {
+                                packageBuilder.setIncrementUrl(dtPackage.incrementUrl).
+                                        setIncrementSize(dtPackage.incrementSize).
+                                        setIncrementMd5(dtPackage.incrementMd5);
+                            } else {
+                                packageBuilder.setPackageUrl(dtPackage.packageUrl).
+                                        setPackageSize(dtPackage.packageSize).
+                                        setPackageMd5(dtPackage.packageMd5);
+                            }
+
+                            builder.addPackage(packageBuilder.build());
                         }
 
                         builder.setReleaseTime(releaseTime);

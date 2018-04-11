@@ -15,8 +15,10 @@ public class DTPackage {
     public boolean isForced;
     public boolean isIncremental;
     public String packageUrl;
+    public long packageSize;
     public String packageMd5;
     public String incrementUrl;
+    public long incrementSize;
     public String incrementMd5;
     public long releaseTime;
     public String releaseNote;
@@ -36,20 +38,6 @@ public class DTPackage {
             );
         }
 
-        if (!isLegalUrl(packageUrl)) {
-            throw new URestException(
-                    UCodes.ERR_INTERNAL_SERVER_ERROR,
-                    "Illegal package url. packageUrl=" + packageUrl
-            );
-        }
-
-        if (!isLegalMd5(packageMd5)) {
-            throw new URestException(
-                    UCodes.ERR_INTERNAL_SERVER_ERROR,
-                    "Illegal package md5. packageMd5=" + packageMd5
-            );
-        }
-
         if (isIncremental) {
             if (!isLegalUrl(incrementUrl)) {
                 throw new URestException(
@@ -58,10 +46,38 @@ public class DTPackage {
                 );
             }
 
+            if (incrementSize <= 0) {
+                throw new URestException(
+                        UCodes.ERR_INTERNAL_SERVER_ERROR,
+                        "Illegal increment size. incrementSize=" + incrementSize
+                );
+            }
+
             if (!isLegalMd5(incrementMd5)) {
                 throw new URestException(
                         UCodes.ERR_INTERNAL_SERVER_ERROR,
                         "Illegal increment md5. incrementMd5=" + incrementMd5
+                );
+            }
+        } else {
+            if (!isLegalUrl(packageUrl)) {
+                throw new URestException(
+                        UCodes.ERR_INTERNAL_SERVER_ERROR,
+                        "Illegal package url. packageUrl=" + packageUrl
+                );
+            }
+
+            if (packageSize <= 0) {
+                throw new URestException(
+                        UCodes.ERR_INTERNAL_SERVER_ERROR,
+                        "Illegal package size. packageSize=" + packageSize
+                );
+            }
+
+            if (!isLegalMd5(packageMd5)) {
+                throw new URestException(
+                        UCodes.ERR_INTERNAL_SERVER_ERROR,
+                        "Illegal package md5. packageMd5=" + packageMd5
                 );
             }
         }

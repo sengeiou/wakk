@@ -15,8 +15,10 @@ public class FirmwarePackage {
     private boolean forced;
     private boolean incremental;
     private String packageUrl;
+    private long packageSize;
     private String packageMd5;
     private String incrementUrl;
+    private long incrementSize;
     private String incrementMd5;
     private long releaseTime;
     private String releaseNote;
@@ -51,12 +53,20 @@ public class FirmwarePackage {
         return packageUrl;
     }
 
+    public long getPackageSize() {
+        return packageSize;
+    }
+
     public String getPackageMd5() {
         return packageMd5;
     }
 
     public String getIncrementUrl() {
         return incrementUrl;
+    }
+
+    public long getIncrementSize() {
+        return incrementSize;
     }
 
     public String getIncrementMd5() {
@@ -144,8 +154,10 @@ public class FirmwarePackage {
         private boolean forced;
         private boolean incremental;
         private String packageUrl = "";
+        private long packageSize;
         private String packageMd5 = "";
         private String incrementUrl = "";
+        private long incrementSize;
         private String incrementMd5 = "";
         private long releaseTime;
         private String releaseNote = "";
@@ -188,6 +200,11 @@ public class FirmwarePackage {
             return this;
         }
 
+        public Builder setPackageSize(long packageSize) {
+            this.packageSize = packageSize;
+            return this;
+        }
+
         public Builder setPackageMd5(String packageMd5) {
             if (TextUtils.isEmpty(packageMd5)) {
                 throw new IllegalArgumentException("Argument packageMd5 is an empty string.");
@@ -203,6 +220,11 @@ public class FirmwarePackage {
             }
 
             this.incrementUrl = incrementUrl;
+            return this;
+        }
+
+        public Builder setIncrementSize(long incrementSize) {
+            this.incrementSize = incrementSize;
             return this;
         }
 
@@ -248,8 +270,10 @@ public class FirmwarePackage {
             firmwarePackage.forced = forced;
             firmwarePackage.incremental = incremental;
             firmwarePackage.packageUrl = packageUrl;
+            firmwarePackage.packageSize = packageSize;
             firmwarePackage.packageMd5 = packageMd5;
             firmwarePackage.incrementUrl = incrementUrl;
+            firmwarePackage.incrementSize = incrementSize;
             firmwarePackage.incrementMd5 = incrementMd5;
             firmwarePackage.releaseTime = releaseTime;
             firmwarePackage.releaseNote = releaseNote;

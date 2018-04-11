@@ -36,7 +36,7 @@ public class UpgradeConverters {
                 setName(firmware.getName()).
                 setVersion(firmware.getVersion()).
                 setUpgradeTime(firmware.getUpgradeTime()).
-                setCurrentPackage(totoFirmwarePackageProto(firmware.getCurrentPackage())).
+                setCurrentPackage(toFirmwarePackageProto(firmware.getCurrentPackage())).
                 build();
     }
 
@@ -49,8 +49,10 @@ public class UpgradeConverters {
                 setForced(firmwarePackageProto.getForced()).
                 setIncremental(firmwarePackageProto.getIncremental()).
                 setPackageUrl(firmwarePackageProto.getPackageUrl()).
+                setPackageSize(firmwarePackageProto.getPackageSize()).
                 setPackageMd5(firmwarePackageProto.getPackageMd5()).
                 setIncrementUrl(firmwarePackageProto.getIncrementUrl()).
+                setIncrementSize(firmwarePackageProto.getIncrementSize()).
                 setIncrementMd5(firmwarePackageProto.getIncrementMd5()).
                 setReleaseTime(firmwarePackageProto.getReleaseTime()).
                 setReleaseNote(firmwarePackageProto.getReleaseNote()).
@@ -67,26 +69,10 @@ public class UpgradeConverters {
                 setForced(firmwarePackage.isForced()).
                 setIncremental(firmwarePackage.isIncremental()).
                 setPackageUrl(firmwarePackage.getPackageUrl()).
+                setPackageSize(firmwarePackage.getPackageSize()).
                 setPackageMd5(firmwarePackage.getPackageMd5()).
                 setIncrementUrl(firmwarePackage.getIncrementUrl()).
-                setIncrementMd5(firmwarePackage.getIncrementMd5()).
-                setReleaseTime(firmwarePackage.getReleaseTime()).
-                setReleaseNote(firmwarePackage.getReleaseNote()).
-                setLocalFile(firmwarePackage.getLocalFile()).
-                build();
-    }
-
-    public static UpgradeProto.FirmwarePackage
-    totoFirmwarePackageProto(FirmwarePackage firmwarePackage) {
-        return UpgradeProto.FirmwarePackage.newBuilder().
-                setName(firmwarePackage.getName()).
-                setVersion(firmwarePackage.getVersion()).
-                setGroup(firmwarePackage.getGroup()).
-                setForced(firmwarePackage.isForced()).
-                setIncremental(firmwarePackage.isIncremental()).
-                setPackageUrl(firmwarePackage.getPackageUrl()).
-                setPackageMd5(firmwarePackage.getPackageMd5()).
-                setIncrementUrl(firmwarePackage.getIncrementUrl()).
+                setIncrementSize(firmwarePackage.getIncrementSize()).
                 setIncrementMd5(firmwarePackage.getIncrementMd5()).
                 setReleaseTime(firmwarePackage.getReleaseTime()).
                 setReleaseNote(firmwarePackage.getReleaseNote()).

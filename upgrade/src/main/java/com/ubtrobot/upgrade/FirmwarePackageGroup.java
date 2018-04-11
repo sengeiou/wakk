@@ -2,6 +2,7 @@ package com.ubtrobot.upgrade;
 
 import android.support.annotation.NonNull;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -14,6 +15,7 @@ public class FirmwarePackageGroup implements Iterable<FirmwarePackage> {
 
     private String name;
     private boolean forced;
+    private long totalSize;
     private long releaseTime;
     private String releaseNote;
     private LinkedList<FirmwarePackage> packageList = new LinkedList<>();
@@ -28,6 +30,10 @@ public class FirmwarePackageGroup implements Iterable<FirmwarePackage> {
 
     public boolean isForced() {
         return forced;
+    }
+
+    public long getTotalSize() {
+        return totalSize;
     }
 
     public long getReleaseTime() {
@@ -93,13 +99,28 @@ public class FirmwarePackageGroup implements Iterable<FirmwarePackage> {
         return result;
     }
 
+    @Override
+    public String toString() {
+        return "FirmwarePackageGroup{" +
+                "name='" + name + '\'' +
+                ", forced=" + forced +
+                ", totalSize=" + totalSize +
+                ", releaseTime=" + releaseTime +
+                ", releaseNote='" + releaseNote + '\'' +
+                ", packageList=" + packageList +
+                '}';
+    }
+
     public static class Builder {
 
         private final String groupName;
         private boolean forced;
+        private long totalSize;
         private long releaseTime;
         private String releaseNote = "";
         private LinkedList<FirmwarePackage> packages = new LinkedList<>();
+
+        private final HashSet<String> packageNameSet = new HashSet<>();
 
         public Builder(String groupName) {
             if (groupName == null) {
@@ -112,6 +133,10 @@ public class FirmwarePackageGroup implements Iterable<FirmwarePackage> {
         public Builder setForced(boolean forced) {
             this.forced = forced;
             return this;
+        }
+
+        public long getTotalSize() {
+            return totalSize;
         }
 
         public Builder setReleaseTime(long releaseTime) {
@@ -138,13 +163,27 @@ public class FirmwarePackageGroup implements Iterable<FirmwarePackage> {
                         "firmwarePackage.group NOT equal " + groupName);
             }
 
+            if (packageNameSet.contains(firmwarePackage.getName())) {
+                throw new IllegalArgumentException("Illegal argument firmwarePackage. The package " +
+                        "is already in the group. packageName=" + firmwarePackage.getName());
+            }
+
             packages.add(firmwarePackage);
+            packageNameSet.add(firmwarePackage.getName());
+
+            if (firmwarePackage.isIncremental()) {
+                totalSize += firmwarePackage.getIncrementSize();
+            } else {
+                totalSize += firmwarePackage.getPackageSize();
+            }
+
             return this;
         }
 
         public FirmwarePackageGroup build() {
             FirmwarePackageGroup group = new FirmwarePackageGroup(groupName);
             group.forced = forced;
+            group.totalSize = totalSize;
             group.releaseTime = releaseTime;
             group.releaseNote = releaseNote;
             group.packageList.addAll(packages);

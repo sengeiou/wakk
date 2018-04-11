@@ -26,12 +26,14 @@ message FirmwarePackage {
     bool forced = 4;
     bool incremental = 5;
     string package_url = 6;
-    string package_md5 = 7;
-    string increment_url = 8;
-    string increment_md5 = 9;
-    int64 release_time = 10;
-    string release_note = 11;
-    string local_file = 12;
+    int64 package_size = 7;
+    string package_md5 = 8;
+    string increment_url = 9;
+    int64 increment_size = 10;
+    string increment_md5 = 11;
+    int64 release_time = 12;
+    string release_note = 13;
+    string local_file = 14;
 }
 
 message FirmwarePackageGroup {

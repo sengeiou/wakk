@@ -52,6 +52,8 @@ public class ProviderAnalyticsProxy implements Analytics {
 
     @Override
     public void recordEvent(Event event) {
-
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(AnalyticsConstants.KEY_RECORD_EVENT, event);
+        mContentResolver.call(mUri, AnalyticsConstants.CALL_METHOD_RECORD_EVENT, null, bundle);
     }
 }

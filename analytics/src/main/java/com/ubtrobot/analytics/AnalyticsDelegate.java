@@ -35,6 +35,6 @@ public class AnalyticsDelegate implements Analytics {
 
     @Override
     public void recordEvent(Event event) {
-
+        mAnalyticsService.recordEvent(event);
     }
 }

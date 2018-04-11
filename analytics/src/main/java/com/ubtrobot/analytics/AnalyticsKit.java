@@ -8,9 +8,22 @@ import android.os.Bundle;
 
 import com.ubtrobot.analytics.ipc.AnalyticsConstants;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class AnalyticsKit {
+
+    private static final int ID_MAX_LENGTH = 64;
+
+    private static final String CUSTOM_EVENT = "custom_event";
+
+    private static final String EVENT_TYPE_ACTIVITY = "activity";                // 页面的类型：activity
+    private static final String EVENT_TYPE_FRAGMENT = "fragment";                // 页面类型：fragment
+
+    private static final String EVENT_ID_DEF_ACTIVITY_START = "activityStart";   // activity启动时，默认的eventId
+    private static final String EVENT_ID_DEF_ACTIVITY_STOP = "activityStop";     // activity退出时，默认的eventId
+    private static final String EVENT_ID_DEF_FRAGMENT_START = "fragmentStart";   // fragment展示时，默认的eventId
+    private static final String EVENT_ID_DEF_FRAGMENT_STOP = "fragmentStop";     // fragment退出前台时，默认的eventId
 
     private static volatile Analytics sAnalytics;
 
@@ -85,24 +98,71 @@ public class AnalyticsKit {
     }
 
     public static void recordEvent(String eventId) {
+        recordEvent(eventId, null);
     }
 
-    public static void recordEvent(String eventId, Map<String, String> customSegmentation) {
+    public static void recordEvent(String eventId, Map<String, String> segmentation) {
+        checkAnalytics();
+
+        if (eventId == null || eventId.length() <= 0 || eventId.length() > ID_MAX_LENGTH) {
+            throw new IllegalArgumentException("Illegal id argument. 0 < id.length <= 64.");
+        }
+
+        Event event = new Event.Builder(eventId, CUSTOM_EVENT).setCustomSegmentation(segmentation).build();
+
+        sAnalytics.recordEvent(event);
     }
 
-    public static void recordPageStart(Activity activity) {
+    public static void recordActivityStart(Activity activity) {
+        recordEvent(EVENT_ID_DEF_ACTIVITY_START, createSegmentation(activity, EVENT_TYPE_ACTIVITY));
     }
 
-    public static void recordPageStart(Activity activity, String eventId) {
+    public static void recordActivityStart(String activityName) {
+        checkString("activityName", activityName);
+
+        recordEvent(EVENT_ID_DEF_ACTIVITY_START, createSegmentation(activityName, EVENT_TYPE_ACTIVITY));
     }
 
-    public static void recordPageStart(String fragmentName) {
+    private static void checkString(String stringName, String stringValue) {
+        if (stringValue == null || stringValue.length() <= 0) {
+            throw new IllegalArgumentException(
+                    "Argument:" + stringName + " is null.");
+        }
     }
 
-    public static void recordPageStart(String fragmentName, String eventId) {
+    public static void recordFragmentStart(String fragmentName) {
+        checkString("fragmentName", fragmentName);
+
+        recordEvent(EVENT_ID_DEF_FRAGMENT_START, createSegmentation(fragmentName, EVENT_TYPE_FRAGMENT));
     }
 
-    public static void recordPageStop(Activity activity) {
+    public static void recordActivityStop(Activity activity) {
+        recordEvent(EVENT_ID_DEF_ACTIVITY_STOP, createSegmentation(activity, EVENT_TYPE_ACTIVITY));
+    }
+
+    public static void recordActivityStop(String activityName) {
+        checkString("activityName", activityName);
+
+        recordEvent(EVENT_ID_DEF_ACTIVITY_STOP, createSegmentation(activityName, EVENT_TYPE_ACTIVITY));
+    }
+
+    public static void recordFragmentStop(String fragmentName) {
+        checkString("fragmentName", fragmentName);
+
+        recordEvent(EVENT_ID_DEF_FRAGMENT_STOP, createSegmentation(fragmentName, EVENT_TYPE_FRAGMENT));
+    }
+
+    private static Map<String, String> createSegmentation(Object page, String pageType) {
+        Map<String, String> segmentation = new HashMap<>();
+        segmentation.put("_pageType", pageType);
+
+        if (page instanceof String) {
+            segmentation.put("_pageName", String.valueOf(page));
+        } else {
+            segmentation.put("_pageName", page.getClass().getName());
+        }
+
+        return segmentation;
     }
 
 }

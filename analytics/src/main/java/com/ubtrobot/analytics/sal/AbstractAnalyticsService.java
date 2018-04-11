@@ -3,7 +3,6 @@ package com.ubtrobot.analytics.sal;
 import com.ubtrobot.analytics.Event;
 import com.ubtrobot.analytics.Strategy;
 
-import java.util.Map;
 
 public abstract class AbstractAnalyticsService implements AnalyticsService {
 
@@ -37,6 +36,12 @@ public abstract class AbstractAnalyticsService implements AnalyticsService {
 
     @Override
     public void recordEvent(Event event) {
+        if (!mEnable || event == null) {
+            return;
+        }
 
+        doRecordEvent(event);
     }
+
+    protected abstract void doRecordEvent(Event event);
 }

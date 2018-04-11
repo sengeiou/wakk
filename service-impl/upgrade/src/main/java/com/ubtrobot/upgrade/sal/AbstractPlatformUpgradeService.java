@@ -145,12 +145,9 @@ public abstract class AbstractPlatformUpgradeService extends AbstractUpgradeServ
                                     setGroup(mFirmwarePackageGroupName).
                                     setForced(dtPackage.isForced).
                                     setIncremental(dtPackage.isIncremental).
-                                    setPackageUrl(dtPackage.packageUrl).
-                                    setPackageMd5(dtPackage.packageMd5).
-                                    setIncrementUrl(dtPackage.incrementUrl).
-                                    setIncrementMd5(dtPackage.incrementMd5).
                                     setReleaseTime(dtPackage.releaseTime).
-                                    setReleaseNote(dtPackage.releaseNote);
+                                    setReleaseNote(dtPackage.releaseNote == null ?
+                                            "" : dtPackage.releaseNote);
                             if (dtPackage.isIncremental) {
                                 packageBuilder.setIncrementUrl(dtPackage.incrementUrl).
                                         setIncrementSize(dtPackage.incrementSize).

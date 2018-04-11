@@ -1,7 +1,5 @@
 package com.ubtrobot.upgrade;
 
-import android.text.TextUtils;
-
 /**
  * 固件包
  */
@@ -192,8 +190,8 @@ public class FirmwarePackage {
         }
 
         public Builder setPackageUrl(String packageUrl) {
-            if (TextUtils.isEmpty(packageUrl)) {
-                throw new IllegalArgumentException("Argument packageUrl is an empty string.");
+            if (packageUrl == null) {
+                throw new IllegalArgumentException("Argument packageUrl is null.");
             }
 
             this.packageUrl = packageUrl;
@@ -206,8 +204,8 @@ public class FirmwarePackage {
         }
 
         public Builder setPackageMd5(String packageMd5) {
-            if (TextUtils.isEmpty(packageMd5)) {
-                throw new IllegalArgumentException("Argument packageMd5 is an empty string.");
+            if (packageMd5 == null) {
+                throw new IllegalArgumentException("Argument packageMd5 is null.");
             }
 
             this.packageMd5 = packageMd5;
@@ -215,8 +213,8 @@ public class FirmwarePackage {
         }
 
         public Builder setIncrementUrl(String incrementUrl) {
-            if (TextUtils.isEmpty(incrementUrl)) {
-                throw new IllegalArgumentException("Argument incrementUrl is an empty string.");
+            if (incrementUrl == null) {
+                throw new IllegalArgumentException("Argument incrementUrl is null.");
             }
 
             this.incrementUrl = incrementUrl;
@@ -229,8 +227,8 @@ public class FirmwarePackage {
         }
 
         public Builder setIncrementMd5(String incrementMd5) {
-            if (TextUtils.isEmpty(incrementMd5)) {
-                throw new IllegalArgumentException("Argument incrementMd5 is an empty string.");
+            if (incrementMd5 == null) {
+                throw new IllegalArgumentException("Argument incrementMd5 is null.");
             }
 
             this.incrementMd5 = incrementMd5;
@@ -247,8 +245,8 @@ public class FirmwarePackage {
         }
 
         public Builder setReleaseNote(String releaseNote) {
-            if (TextUtils.isEmpty(releaseNote)) {
-                throw new IllegalArgumentException("Argument releaseNote is an empty string.");
+            if (releaseNote == null) {
+                throw new IllegalArgumentException("Argument releaseNote is null.");
             }
 
             this.releaseNote = releaseNote;
@@ -256,8 +254,8 @@ public class FirmwarePackage {
         }
 
         public Builder setLocalFile(String localFile) {
-            if (TextUtils.isEmpty(releaseNote)) {
-                throw new IllegalArgumentException("Argument releaseNote is an empty string.");
+            if (localFile == null) {
+                throw new IllegalArgumentException("Argument localFile is null.");
             }
 
             this.localFile = localFile;

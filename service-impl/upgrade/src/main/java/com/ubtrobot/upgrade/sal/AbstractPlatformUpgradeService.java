@@ -3,12 +3,15 @@ package com.ubtrobot.upgrade.sal;
 import android.text.TextUtils;
 
 import com.ubtrobot.async.CancelableAsyncTask;
+import com.ubtrobot.http.rest.UCodes;
 import com.ubtrobot.http.rest.URestException;
 import com.ubtrobot.okhttp.interceptor.sign.AuthorizationInterceptor;
 import com.ubtrobot.okhttp.interceptor.sign.HttpSignInterceptor;
 import com.ubtrobot.retrofit.adapter.urest.URestCall;
 import com.ubtrobot.retrofit.adapter.urest.URestCallAdapterFactory;
 import com.ubtrobot.retrofit.adapter.urest.URestCallback;
+import com.ubtrobot.ulog.FwLoggerFactory;
+import com.ubtrobot.ulog.Logger;
 import com.ubtrobot.upgrade.DetectException;
 import com.ubtrobot.upgrade.Firmware;
 import com.ubtrobot.upgrade.FirmwarePackage;
@@ -24,6 +27,8 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public abstract class AbstractPlatformUpgradeService extends AbstractUpgradeService {
+
+    private static final Logger LOGGER = FwLoggerFactory.getLogger("AbstractPlatformUpgradeService");
 
     private UpgradeHttpService mUpgradeService;
 
@@ -123,7 +128,7 @@ public abstract class AbstractPlatformUpgradeService extends AbstractUpgradeServ
                             try {
                                 dtPackage.validate();
                             } catch (URestException e) {
-                                reject(new DetectException.Factory().internalError("")); // TODO
+                                reject(translateURestException(e));
                                 return;
                             }
 
@@ -165,11 +170,30 @@ public abstract class AbstractPlatformUpgradeService extends AbstractUpgradeServ
 
                     @Override
                     public void onFailure(URestCall<List<DTPackage>> uRestCall, URestException e) {
-                        reject(new DetectException.Factory().internalError("")); // TODO
+                        reject(translateURestException(e));
                     }
                 });
             }
         };
+    }
+
+    private DetectException translateURestException(URestException e) {
+        DetectException.Factory factory = new DetectException.Factory();
+        if (UCodes.ERR_NETWORK_PERMISSION_DENIED == e.getCode()) {
+            return factory.internalError("Internal error. No network permission.cause: " +
+                    e.getMessage(), e);
+        } else if (UCodes.ERR_FAILED_TO_ESTABLISH_CONNECTION == e.getCode()) {
+            return factory.failedToEstablishConnection("Failed to establish connection. Network " +
+                    "error or server down. cause: " + e.getMessage(), e);
+        } else if (UCodes.ERR_SOCKET_TIMEOUT == e.getCode()) {
+            return factory.timeout("Request server timeout. cause: " + e.getMessage(), e);
+        } else if (UCodes.ERR_INTERNAL_HTTP_CLIENT_ERROR == e.getCode()) {
+            DetectException de = factory.internalError("Internal error. cause: " + e.getMessage(), e);
+            LOGGER.e(de);
+            return de;
+        } else {
+            return factory.serverError("Server error. cause: " + e.getMessage(), e);
+        }
     }
 
     @Override

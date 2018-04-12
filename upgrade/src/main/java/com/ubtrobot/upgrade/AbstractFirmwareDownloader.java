@@ -189,7 +189,9 @@ public abstract class AbstractFirmwareDownloader implements FirmwareDownloader {
                 return;
             }
 
+            LOGGER.i("Download state changed. previous=%s, current=%s", mState, state);
             mState = state;
+
             mStateListeners.forEach(new Consumer<StateListener>() {
                 @Override
                 public void accept(StateListener listener) {
@@ -214,6 +216,9 @@ public abstract class AbstractFirmwareDownloader implements FirmwareDownloader {
     }
 
     protected void notifyProgressChange(final long downloadedBytes, final int speed) {
+        setDownloadedBytes(downloadedBytes);
+        setSpeed(speed);
+
         mProgressListeners.forEach(new Consumer<ProgressListener>() {
             @Override
             public void accept(ProgressListener listener) {

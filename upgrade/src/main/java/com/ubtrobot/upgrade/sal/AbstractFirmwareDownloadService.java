@@ -5,7 +5,6 @@ import android.os.Looper;
 
 import com.ubtrobot.async.Deferred;
 import com.ubtrobot.async.Promise;
-import com.ubtrobot.cache.CachedField;
 import com.ubtrobot.upgrade.AbstractFirmwareDownloader;
 import com.ubtrobot.upgrade.DownloadException;
 import com.ubtrobot.upgrade.FirmwarePackageGroup;
@@ -13,21 +12,8 @@ import com.ubtrobot.upgrade.FirmwarePackageGroup;
 public abstract class AbstractFirmwareDownloadService extends AbstractFirmwareDownloader
         implements FirmwareDownloadService {
 
-    private final CachedField<FirmwarePackageGroup> mPackageGroup;
-
     protected AbstractFirmwareDownloadService() {
         super(new Handler(Looper.getMainLooper()));
-        mPackageGroup = new CachedField<>(new CachedField.FieldGetter<FirmwarePackageGroup>() {
-            @Override
-            public FirmwarePackageGroup get() {
-                FirmwarePackageGroup packageGroup = doGetPackageGroup();
-                if (packageGroup == null) {
-                    packageGroup = FirmwarePackageGroup.DEFAULT;
-                }
-
-                return packageGroup;
-            }
-        });
     }
 
     @Override
@@ -40,20 +26,16 @@ public abstract class AbstractFirmwareDownloadService extends AbstractFirmwareDo
         synchronized (this) {
             if (isIdle()) {
                 doReady(packageGroup);
-                mPackageGroup.clear();
 
                 deferred.resolve(null);
                 notifyStateChange(STATE_READY, null);
             } else {
-                operationInIllegalState(deferred);
+                deferred.reject(new DownloadException.Factory().illegalOperation(
+                        "Should not ready when not idle."));
             }
         }
 
         return deferred.promise();
-    }
-
-    private void operationInIllegalState(Deferred<Void, DownloadException, Void> deferred) {
-        deferred.reject(new DownloadException.Factory().internalError("")); // TODO
     }
 
     protected abstract void doReady(FirmwarePackageGroup packageGroup);
@@ -61,7 +43,8 @@ public abstract class AbstractFirmwareDownloadService extends AbstractFirmwareDo
     @Override
     public FirmwarePackageGroup packageGroup() {
         synchronized (this) {
-            return mPackageGroup.get();
+            FirmwarePackageGroup group = doGetPackageGroup();
+            return group == null ? FirmwarePackageGroup.DEFAULT : group;
         }
     }
 
@@ -80,7 +63,8 @@ public abstract class AbstractFirmwareDownloadService extends AbstractFirmwareDo
                 deferred.resolve(null);
                 notifyStateChange(STATE_DOWNLOADING, null);
             } else {
-                operationInIllegalState(deferred);
+                deferred.reject(new DownloadException.Factory().illegalOperation(
+                        "Should not start when idle or complete."));
             }
         }
 
@@ -102,7 +86,8 @@ public abstract class AbstractFirmwareDownloadService extends AbstractFirmwareDo
                 deferred.resolve(null);
                 notifyStateChange(STATE_READY, null);
             } else {
-                operationInIllegalState(deferred);
+                deferred.reject(new DownloadException.Factory().illegalOperation(
+                        "Should not stop when idle, complete or error."));
             }
         }
 
@@ -125,7 +110,6 @@ public abstract class AbstractFirmwareDownloadService extends AbstractFirmwareDo
                 doStop();
             }
             doClear();
-            mPackageGroup.clear();
 
             deferred.resolve(null);
             notifyStateChange(STATE_IDLE, null);

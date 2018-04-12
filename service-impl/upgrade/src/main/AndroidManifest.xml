@@ -1,2 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.ubtrobot.upgrade.sal.impl" />
+    package="com.ubtrobot.upgrade.sal.impl">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+</manifest>

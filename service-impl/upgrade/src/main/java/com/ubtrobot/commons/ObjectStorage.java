@@ -4,6 +4,7 @@ import android.content.SharedPreferences;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 
 public class ObjectStorage {
 
@@ -30,6 +31,15 @@ public class ObjectStorage {
         } catch (JsonSyntaxException e) {
             return null;
         }
+    }
+
+    public <T> T get(String key, TypeToken<T> typeToken) {
+        String json = mSharedPreferences.getString(key, null);
+        if (json == null) {
+            return null;
+        }
+
+        return mGson.fromJson(json, typeToken.getType());
     }
 
     public void remove(String key) {

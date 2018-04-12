@@ -20,7 +20,7 @@ android {
 }
 
 dependencies {
-    implementation project(':upgrade')
+    api project(':upgrade')
 
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
@@ -34,8 +34,10 @@ dependencies {
     implementation deps.uRestAdapter
     implementation deps.signInterceptor
     implementation deps.authInterceptor
+    implementation deps.okDownload
+    implementation deps.okDownloadSqlite
+    implementation deps.okDownloadOkHttp
 
     testImplementation deps.junit
     androidTestImplementation deps.espressoCore
     androidTestImplementation deps.runner
-}

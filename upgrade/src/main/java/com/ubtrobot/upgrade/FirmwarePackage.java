@@ -83,6 +83,14 @@ public class FirmwarePackage {
         return localFile;
     }
 
+    public Builder newBuilder() {
+        return new Builder(name, version).setGroup(group).setForced(forced).
+                setIncremental(incremental).setPackageUrl(packageUrl).setPackageSize(packageSize).
+                setPackageMd5(packageMd5).setIncrementUrl(incrementUrl).
+                setIncrementSize(incrementSize).setIncrementMd5(incrementMd5).
+                setReleaseTime(releaseTime).setReleaseNote(releaseNote).setLocalFile(localFile);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -9,9 +9,9 @@ import retrofit2.http.Query;
 
 public interface UpgradeHttpService {
 
-    String SERVICE_URL = "http://10.10.20.71:8032/";
+    String SERVICE_URL = "http://10.10.20.71:8032/v1/";
 
-    @GET("upgrade-rest/upgrade/version/upgradable")
+    @GET("upgrade-rest/version/upgradable")
     URestCall<List<DTPackage>> detectUpgrade(
             @Query("productName") String packageGroup,
             @Query("moduleNames") String packageNames,

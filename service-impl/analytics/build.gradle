@@ -20,10 +20,17 @@ android {
 }
 
 dependencies {
+    api project(':analytics')
+
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     def deps = rootProject.ext.deps
     implementation deps.appcompat
+    implementation deps.okHttp
+    implementation deps.gsonConverter
+    implementation deps.uRestAdapter
+    implementation deps.signInterceptor
+    implementation deps.authInterceptor
 
     testImplementation deps.junit
     androidTestImplementation deps.espressoCore

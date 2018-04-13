@@ -32,7 +32,6 @@ public class ProviderAnalyticsProxy implements Analytics {
         if (strategy == null) {
             return;
         }
-
         Bundle bundle = new Bundle();
         bundle.putParcelable(AnalyticsConstants.KEY_STRATEGY, strategy);
         mContentResolver.call(mUri, AnalyticsConstants.CALL_METHOD_SET_STRATEGY, null, bundle);
@@ -44,10 +43,11 @@ public class ProviderAnalyticsProxy implements Analytics {
         Bundle bundle = mContentResolver.call(mUri, AnalyticsConstants.CALL_METHOD_GET_STRATEGY, null, null);
 
         if (bundle != null) {
+            bundle.setClassLoader(getClass().getClassLoader());
             strategy = bundle.getParcelable(AnalyticsConstants.CALL_METHOD_GET_STRATEGY);
         }
 
-        return strategy != null ? strategy : (new Strategy.Builder().build());
+        return strategy != null ? strategy : Strategy.DEFAULT;
     }
 
     @Override

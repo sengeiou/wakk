@@ -12,6 +12,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.ubtrobot.analytics.Analytics;
+import com.ubtrobot.analytics.Event;
 import com.ubtrobot.analytics.Strategy;
 import com.ubtrobot.analytics.ipc.AnalyticsConstants;
 import com.ubtrobot.analytics.sal.AnalyticsFactory;
@@ -65,13 +66,28 @@ public class AnalyticsProvider extends ContentProvider {
             case AnalyticsConstants.CALL_METHOD_ENABLE:
                 enable(extras);
                 break;
+            case AnalyticsConstants.CALL_METHOD_RECORD_EVENT:
+                recordEvent(extras);
+                break;
         }
 
         return bundle;
     }
 
+    private void recordEvent(Bundle extras) {
+        if (extras == null) {
+            Log.w(TAG, "Argument(extras) is null.");
+            return;
+        }
+
+        extras.setClassLoader(getClass().getClassLoader());
+        Event event = extras.getParcelable(AnalyticsConstants.KEY_RECORD_EVENT);
+
+        mAnalytics.recordEvent(event);
+    }
+
     private void enable(Bundle extras) {
-        if (extras == null){
+        if (extras == null) {
             Log.w(TAG, "Argument(extras) is null.");
             return;
         }
@@ -81,12 +97,12 @@ public class AnalyticsProvider extends ContentProvider {
     }
 
     private void setStrategy(Bundle extras) {
-
         if (extras == null) {
             Log.w(TAG, "Argument(extras) is null.");
             return;
         }
 
+        extras.setClassLoader(getClass().getClassLoader());
         Strategy strategy = extras.getParcelable(AnalyticsConstants.KEY_STRATEGY);
         if (strategy == null) {
             Log.w(TAG, "Get strategy is null.");

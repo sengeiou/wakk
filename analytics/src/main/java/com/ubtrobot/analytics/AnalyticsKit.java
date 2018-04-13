@@ -83,6 +83,10 @@ public class AnalyticsKit {
     }
 
     public static void setStrategy(Strategy strategy) {
+        if (strategy == null) {
+            throw new IllegalArgumentException("Strategy is null.");
+        }
+
         checkAnalytics();
         sAnalytics.setStrategy(strategy);
     }

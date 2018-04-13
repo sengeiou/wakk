@@ -5,6 +5,8 @@ import android.os.Parcelable;
 
 public class Strategy implements Parcelable {
 
+    public static final Strategy DEFAULT = new Strategy.Builder().build();
+
     private static final int DEFAULT_REPORT_INTERVAL_SECONDS = 300;
     private static final int DEFAULT_REPORT_COUNT = 500;
 
@@ -69,13 +71,11 @@ public class Strategy implements Parcelable {
 
     public static class Builder {
 
-        private boolean enable;
         private long reportIntervalSeconds;
         private boolean reportAtStartup;
         private int reportCount;
 
         public Builder() {
-            enable = true;
             reportIntervalSeconds = DEFAULT_REPORT_INTERVAL_SECONDS;
             reportAtStartup = true;
             reportCount = DEFAULT_REPORT_COUNT;
@@ -85,11 +85,6 @@ public class Strategy implements Parcelable {
             reportIntervalSeconds = strategy.getReportIntervalSeconds();
             reportAtStartup = strategy.isReportAtStartup();
             reportCount = strategy.getReportCount();
-        }
-
-        public Builder setEnable(boolean enable) {
-            this.enable = enable;
-            return this;
         }
 
         public Builder setReportIntervalSeconds(long reportIntervalSeconds) {

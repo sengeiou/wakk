@@ -11,8 +11,10 @@ import com.liulishuo.okdownload.SpeedCalculator;
 import com.liulishuo.okdownload.core.breakpoint.BlockInfo;
 import com.liulishuo.okdownload.core.breakpoint.BreakpointInfo;
 import com.liulishuo.okdownload.core.cause.EndCause;
+import com.liulishuo.okdownload.core.exception.PreAllocateException;
 import com.liulishuo.okdownload.core.listener.DownloadListener4WithSpeed;
 import com.liulishuo.okdownload.core.listener.assist.Listener4SpeedAssistExtend;
+import com.ubtrobot.commons.ConnectionUtils;
 import com.ubtrobot.commons.ObjectStorage;
 import com.ubtrobot.ulog.FwLoggerFactory;
 import com.ubtrobot.ulog.Logger;
@@ -22,6 +24,9 @@ import com.ubtrobot.upgrade.FirmwarePackageGroup;
 import com.ubtrobot.upgrade.sal.AbstractFirmwareDownloadService;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -36,6 +41,8 @@ public class PlatformDownloadService extends AbstractFirmwareDownloadService {
     private static final String KEY_FIRMWARE_PACKAGE_GROUP = "firmware_package_group";
     private static final String KEY_TASK_INFO_MAP = "task_info_map";
 
+    private final Context mContext;
+
     private final ObjectStorage mObjectStorage;
     private FirmwarePackageGroup mFirmwarePackageGroup;
 
@@ -44,7 +51,9 @@ public class PlatformDownloadService extends AbstractFirmwareDownloadService {
     private Map<String, TaskInfo> mTaskInfoMap;
 
     public PlatformDownloadService(Context context, String downloadDirectory) {
-        mObjectStorage = new ObjectStorage(context.getSharedPreferences(SP_FIRMWARE_PACKAGE_DOWNLOAD,
+        mContext = context;
+
+        mObjectStorage = new ObjectStorage(mContext.getSharedPreferences(SP_FIRMWARE_PACKAGE_DOWNLOAD,
                 Context.MODE_PRIVATE));
         mDownloadDirectory = downloadDirectory;
 
@@ -210,7 +219,7 @@ public class PlatformDownloadService extends AbstractFirmwareDownloadService {
     private class OkDownloadListener extends DownloadListener4WithSpeed {
 
         private LinkedList<EndCause> mEndCauses = new LinkedList<>();
-        private ArrayList<Exception> mRealCauses = new ArrayList<>();
+        private ArrayList<DownloadException> mRealCauses = new ArrayList<>();
 
         @Override
         public void taskStart(@NonNull DownloadTask task) {
@@ -284,7 +293,6 @@ public class PlatformDownloadService extends AbstractFirmwareDownloadService {
             Map<String, TaskInfo> taskInfoMap = taskInfoMapLocked();
             TaskInfo taskInfo = taskInfoMap.get(tag);
             if (taskInfo == null) {
-                LOGGER.e("Task info NOT found. tag=%s, complete=%s", tag, complete);
                 return;
             }
 
@@ -351,10 +359,66 @@ public class PlatformDownloadService extends AbstractFirmwareDownloadService {
                 }
 
                 mEndCauses.add(cause);
-                mRealCauses.add(realCause);
+                if (realCause == null) {
+                    mRealCauses.add(null);
+                } else {
+                    DownloadException de;
+                    if (realCause instanceof UnknownHostException) {
+                        if (ConnectionUtils.isNetworkConnected(mContext)) {
+                            de = new DownloadException.Factory().fileServerError(
+                                    "Can't connect the file server. " + realCause.getMessage(),
+                                    realCause
+                            );
+                        } else {
+                            de = new DownloadException.Factory().networkDisconnected(
+                                    "Download error due to network disconnected. " +
+                                            realCause.getMessage(),
+                                    realCause
+                            );
+                        }
+                    } else if (realCause instanceof PreAllocateException) {
+                        de = new DownloadException.Factory().insufficientSpace(
+                                "Insufficient space. " + realCause.getMessage(),
+                                realCause
+                        );
+                    } else if (realCause instanceof SocketTimeoutException) {
+                        if (ConnectionUtils.isNetworkConnected(mContext)) {
+                            de = new DownloadException.Factory().networkTimeout(
+                                    "Network timeout. " + realCause.getMessage(),
+                                    realCause
+                            );
+                        } else {
+                            de = new DownloadException.Factory().networkDisconnected(
+                                    "Download error due to network disconnected. " +
+                                            realCause.getMessage(),
+                                    realCause
+                            );
+                        }
+                    } else if (realCause instanceof IOException) {
+                        de = new DownloadException.Factory().fileSystemError(
+                                "File system error. " + realCause.getMessage(),
+                                realCause
+                        );
+                    } else {
+                        de = new DownloadException.Factory().internalError(
+                                "Internal error. " + realCause.getMessage(),
+                                realCause
+                        );
+                    }
+
+                    mRealCauses.add(de);
+                    LOGGER.e(de);
+                }
 
                 if (mEndCauses.size() < downloadContextLocked().getTasks().length) {
                     return;
+                }
+
+                for (Exception exception : mRealCauses) {
+                    if (exception != null) {
+                        LOGGER.e(exception, exception.getMessage());
+                        LOGGER.e(exception.getClass().getCanonicalName());
+                    }
                 }
 
                 for (int i = 0; i < mEndCauses.size(); i++) {
@@ -362,9 +426,11 @@ public class PlatformDownloadService extends AbstractFirmwareDownloadService {
                         continue;
                     }
 
-                    Exception exception = mRealCauses.get(i);
-                    // TODO
-                    notifyError(new DownloadException.Factory().internalError("TODO"));
+                    DownloadException de = mRealCauses.get(i);
+                    if (de == null) {
+                        de = new DownloadException.Factory().internalError("OkDownload library error.");
+                    }
+                    notifyError(de);
                     return;
                 }
 

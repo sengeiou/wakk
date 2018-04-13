@@ -152,19 +152,25 @@ public abstract class AbstractUpgradeService implements UpgradeService {
             if (verifyingTask == null) {
                 throw new IllegalStateException("createVerifyingPackageTask returns null.");
             }
-            verifyingTasks.add(verifyingTask);
 
-            AsyncTask<Void, UpgradeException, UpgradeProgress> installingTask =
-                    createInstallingPackageTask(firmwarePackage);
-            if (installingTask == null) {
-                throw new IllegalStateException("createInstallingPackageTask returns null.");
-            }
-            installingTasks.put(firmwarePackage.getName(), installingTask);
+            verifyingTasks.add(verifyingTask);
         }
 
         if (!packageMap.isEmpty()) {
             throw new IllegalArgumentException("Unsupported firmware packages. packages=" +
                     packageMap.values());
+        }
+
+        List<FirmwarePackage> unmodifiableUpgradeQueue = Collections.unmodifiableList(upgradeQueue);
+        int offset = 0;
+        for (FirmwarePackage firmwarePackage : upgradeQueue) {
+            AsyncTask<Void, UpgradeException, UpgradeProgress> installingTask =
+                    createInstallingPackageTask(unmodifiableUpgradeQueue, offset++);
+            if (installingTask == null) {
+                throw new IllegalStateException("createInstallingPackageTask returns null.");
+            }
+
+            installingTasks.put(firmwarePackage.getName(), installingTask);
         }
 
         verifyAndInstallPackages(verifyingTasks, upgradeQueue, installingTasks, deferred);
@@ -174,7 +180,7 @@ public abstract class AbstractUpgradeService implements UpgradeService {
     createVerifyingPackageTask(FirmwarePackage firmwarePackage);
 
     protected abstract AsyncTask<Void, UpgradeException, UpgradeProgress>
-    createInstallingPackageTask(FirmwarePackage firmwarePackage);
+    createInstallingPackageTask(List<FirmwarePackage> firmwarePackages, int offset);
 
     private void verifyAndInstallPackages(
             final List<AsyncTask<Void, UpgradeException, Void>> verifyingTasks,

@@ -6,19 +6,14 @@ import com.ubtrobot.exception.AccessServiceException;
 
 public class DownloadException extends AccessServiceException {
 
-    private static final int CODE_ILLEGAL_OPERATION = 120000;
-    private static final int CODE_NETWORK_DISCONNECTED = 120001;
-    private static final int CODE_FILE_SERVER_ERROR = 120002;
-    private static final int CODE_FILE_SYSTEM_ERROR = 120003;
-    private static final int CODE_INSUFFICIENT_SPACE = 120004;
-    private static final int CODE_NETWORK_TIMEOUT = 120005;
+    private static final int CODE_NETWORK_DISCONNECTED = 120000;
+    private static final int CODE_FILE_SERVER_ERROR = 120001;
+    private static final int CODE_FILE_SYSTEM_ERROR = 120002;
+    private static final int CODE_INSUFFICIENT_SPACE = 120003;
+    private static final int CODE_NETWORK_TIMEOUT = 120004;
 
     protected DownloadException(int code, String message, Bundle detail, Throwable cause) {
         super(code, message, detail, cause);
-    }
-
-    public boolean causedByIllegalOperation() {
-        return getCode() == CODE_ILLEGAL_OPERATION;
     }
 
     public boolean causedByNetworkDisconnected() {
@@ -47,10 +42,6 @@ public class DownloadException extends AccessServiceException {
         protected DownloadException
         createException(int code, String message, Bundle detail, Throwable cause) {
             return new DownloadException(code, message, detail, cause);
-        }
-
-        public DownloadException illegalOperation(String message) {
-            return createException(CODE_ILLEGAL_OPERATION, message);
         }
 
         public DownloadException networkDisconnected(String message, Throwable cause) {

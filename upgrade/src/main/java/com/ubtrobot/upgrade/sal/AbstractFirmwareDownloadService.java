@@ -7,6 +7,7 @@ import com.ubtrobot.async.Deferred;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.upgrade.AbstractFirmwareDownloader;
 import com.ubtrobot.upgrade.DownloadException;
+import com.ubtrobot.upgrade.DownloadOperationException;
 import com.ubtrobot.upgrade.FirmwarePackageGroup;
 
 public abstract class AbstractFirmwareDownloadService extends AbstractFirmwareDownloader
@@ -17,12 +18,12 @@ public abstract class AbstractFirmwareDownloadService extends AbstractFirmwareDo
     }
 
     @Override
-    public Promise<Void, DownloadException, Void> ready(FirmwarePackageGroup packageGroup) {
+    public Promise<Void, DownloadOperationException, Void> ready(FirmwarePackageGroup packageGroup) {
         if (packageGroup.getPackageCount() == 0) {
             throw new IllegalArgumentException("Illegal package group which has no firmware package.");
         }
 
-        Deferred<Void, DownloadException, Void> deferred = new Deferred<>(getHandler());
+        Deferred<Void, DownloadOperationException, Void> deferred = new Deferred<>(getHandler());
         synchronized (this) {
             if (isIdle()) {
                 doReady(packageGroup);
@@ -30,7 +31,7 @@ public abstract class AbstractFirmwareDownloadService extends AbstractFirmwareDo
                 deferred.resolve(null);
                 notifyStateChange(STATE_READY, null);
             } else {
-                deferred.reject(new DownloadException.Factory().illegalOperation(
+                deferred.reject(new DownloadOperationException.Factory().illegalOperation(
                         "Should not ready when not idle."));
             }
         }
@@ -51,8 +52,8 @@ public abstract class AbstractFirmwareDownloadService extends AbstractFirmwareDo
     protected abstract FirmwarePackageGroup doGetPackageGroup();
 
     @Override
-    public Promise<Void, DownloadException, Void> start() {
-        Deferred<Void, DownloadException, Void> deferred = new Deferred<>(getHandler());
+    public Promise<Void, DownloadOperationException, Void> start() {
+        Deferred<Void, DownloadOperationException, Void> deferred = new Deferred<>(getHandler());
 
         synchronized (this) {
             if (isDownloading()) {
@@ -63,7 +64,7 @@ public abstract class AbstractFirmwareDownloadService extends AbstractFirmwareDo
                 deferred.resolve(null);
                 notifyStateChange(STATE_DOWNLOADING, null);
             } else {
-                deferred.reject(new DownloadException.Factory().illegalOperation(
+                deferred.reject(new DownloadOperationException.Factory().illegalOperation(
                         "Should not start when idle or complete."));
             }
         }
@@ -74,8 +75,8 @@ public abstract class AbstractFirmwareDownloadService extends AbstractFirmwareDo
     protected abstract void doStart();
 
     @Override
-    public Promise<Void, DownloadException, Void> stop() {
-        Deferred<Void, DownloadException, Void> deferred = new Deferred<>(getHandler());
+    public Promise<Void, DownloadOperationException, Void> stop() {
+        Deferred<Void, DownloadOperationException, Void> deferred = new Deferred<>(getHandler());
 
         synchronized (this) {
             if (isReady()) {
@@ -86,7 +87,7 @@ public abstract class AbstractFirmwareDownloadService extends AbstractFirmwareDo
                 deferred.resolve(null);
                 notifyStateChange(STATE_READY, null);
             } else {
-                deferred.reject(new DownloadException.Factory().illegalOperation(
+                deferred.reject(new DownloadOperationException.Factory().illegalOperation(
                         "Should not stop when idle, complete or error."));
             }
         }
@@ -97,8 +98,8 @@ public abstract class AbstractFirmwareDownloadService extends AbstractFirmwareDo
     protected abstract void doStop();
 
     @Override
-    public Promise<Void, DownloadException, Void> clear() {
-        Deferred<Void, DownloadException, Void> deferred = new Deferred<>(getHandler());
+    public Promise<Void, DownloadOperationException, Void> clear() {
+        Deferred<Void, DownloadOperationException, Void> deferred = new Deferred<>(getHandler());
 
         synchronized (this) {
             if (isIdle()) {

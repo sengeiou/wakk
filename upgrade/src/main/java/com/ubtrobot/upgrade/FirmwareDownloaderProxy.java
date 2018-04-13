@@ -169,7 +169,7 @@ public class FirmwareDownloaderProxy extends AbstractFirmwareDownloader {
     }
 
     @Override
-    public Promise<Void, DownloadException, Void> ready(FirmwarePackageGroup packageGroup) {
+    public Promise<Void, DownloadOperationException, Void> ready(FirmwarePackageGroup packageGroup) {
         return mUpgradeService.call(
                 UpgradeConstants.CALL_PATH_READY_FIRMWARE_PACKAGE_DOWNLOAD,
                 UpgradeConverters.toFirmwarePackageGroupProto(packageGroup),
@@ -191,7 +191,7 @@ public class FirmwareDownloaderProxy extends AbstractFirmwareDownloader {
     }
 
     @Override
-    public Promise<Void, DownloadException, Void> start() {
+    public Promise<Void, DownloadOperationException, Void> start() {
         return mUpgradeService.call(
                 UpgradeConstants.CALL_PATH_START_FIRMWARE_PACKAGE_DOWNLOAD,
                 new DownloadConverter()
@@ -199,7 +199,7 @@ public class FirmwareDownloaderProxy extends AbstractFirmwareDownloader {
     }
 
     @Override
-    public Promise<Void, DownloadException, Void> stop() {
+    public Promise<Void, DownloadOperationException, Void> stop() {
         return mUpgradeService.call(
                 UpgradeConstants.CALL_PATH_STOP_FIRMWARE_PACKAGE_DOWNLOAD,
                 new DownloadConverter()
@@ -207,7 +207,7 @@ public class FirmwareDownloaderProxy extends AbstractFirmwareDownloader {
     }
 
     @Override
-    public Promise<Void, DownloadException, Void> clear() {
+    public Promise<Void, DownloadOperationException, Void> clear() {
         return mUpgradeService.call(
                 UpgradeConstants.CALL_PATH_CLEAR_FIRMWARE_PACKAGE_DOWNLOAD,
                 new DownloadConverter()
@@ -250,11 +250,11 @@ public class FirmwareDownloaderProxy extends AbstractFirmwareDownloader {
         }
     }
 
-    private static class DownloadConverter extends CallAdapter.FConverter<DownloadException> {
+    private static class DownloadConverter extends CallAdapter.FConverter<DownloadOperationException> {
 
         @Override
-        public DownloadException convertFail(CallException e) {
-            return new DownloadException.Factory().from(e);
+        public DownloadOperationException convertFail(CallException e) {
+            return new DownloadOperationException.Factory().from(e);
         }
     }
 }

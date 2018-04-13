@@ -17,6 +17,7 @@ import com.ubtrobot.transport.message.Request;
 import com.ubtrobot.transport.message.Responder;
 import com.ubtrobot.upgrade.DetectException;
 import com.ubtrobot.upgrade.DownloadException;
+import com.ubtrobot.upgrade.DownloadOperationException;
 import com.ubtrobot.upgrade.FirmwareDownloader;
 import com.ubtrobot.upgrade.FirmwarePackageGroup;
 import com.ubtrobot.upgrade.UpgradeException;
@@ -136,9 +137,9 @@ public class UpgradeSystemService extends MasterSystemService {
 
         mCallProcessor.onCall(
                 responder,
-                new CallProcessAdapter.Callable<Void, DownloadException, Void>() {
+                new CallProcessAdapter.Callable<Void, DownloadOperationException, Void>() {
                     @Override
-                    public Promise<Void, DownloadException, Void> call() throws CallException {
+                    public Promise<Void, DownloadOperationException, Void> call() throws CallException {
                         return mDownloadService.ready(UpgradeConverters.
                                 toFirmwarePackageGroupPojo(packageGroup));
                     }
@@ -151,9 +152,9 @@ public class UpgradeSystemService extends MasterSystemService {
     public void onStartFirmwarePackageDownload(Request request, Responder responder) {
         mCallProcessor.onCall(
                 responder,
-                new CallProcessAdapter.Callable<Void, DownloadException, Void>() {
+                new CallProcessAdapter.Callable<Void, DownloadOperationException, Void>() {
                     @Override
-                    public Promise<Void, DownloadException, Void> call() throws CallException {
+                    public Promise<Void, DownloadOperationException, Void> call() throws CallException {
                         return mDownloadService.start();
                     }
                 },
@@ -165,9 +166,9 @@ public class UpgradeSystemService extends MasterSystemService {
     public void onStopFirmwarePackageDownload(Request request, Responder responder) {
         mCallProcessor.onCall(
                 responder,
-                new CallProcessAdapter.Callable<Void, DownloadException, Void>() {
+                new CallProcessAdapter.Callable<Void, DownloadOperationException, Void>() {
                     @Override
-                    public Promise<Void, DownloadException, Void> call() throws CallException {
+                    public Promise<Void, DownloadOperationException, Void> call() throws CallException {
                         return mDownloadService.stop();
                     }
                 },
@@ -179,9 +180,9 @@ public class UpgradeSystemService extends MasterSystemService {
     public void onClearFirmwarePackageDownload(Request request, Responder responder) {
         mCallProcessor.onCall(
                 responder,
-                new CallProcessAdapter.Callable<Void, DownloadException, Void>() {
+                new CallProcessAdapter.Callable<Void, DownloadOperationException, Void>() {
                     @Override
-                    public Promise<Void, DownloadException, Void> call() throws CallException {
+                    public Promise<Void, DownloadOperationException, Void> call() throws CallException {
                         return mDownloadService.clear();
                     }
                 },
@@ -260,10 +261,10 @@ public class UpgradeSystemService extends MasterSystemService {
     }
 
     private static class DownloadConverter
-            extends ProtoCallProcessAdapter.FConverter<DownloadException> {
+            extends ProtoCallProcessAdapter.FConverter<DownloadOperationException> {
 
         @Override
-        public CallException convertFail(DownloadException e) {
+        public CallException convertFail(DownloadOperationException e) {
             return new CallException(e.getCode(), e.getMessage());
         }
     }

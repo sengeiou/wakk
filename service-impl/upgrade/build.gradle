@@ -41,3 +41,4 @@ dependencies {
     testImplementation deps.junit
     androidTestImplementation deps.espressoCore
     androidTestImplementation deps.runner
+}

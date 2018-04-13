@@ -92,7 +92,7 @@ public class AnalyticsKit {
         return sAnalytics.getStrategy();
     }
 
-    public void enable(boolean enable) {
+    public static void enable(boolean enable) {
         checkAnalytics();
         sAnalytics.enable(enable);
     }

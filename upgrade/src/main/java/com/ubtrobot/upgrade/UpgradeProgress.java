@@ -18,9 +18,10 @@ public class UpgradeProgress {
     private String upgradingFirmware;
     private int upgradingFirmwareOrder;
     private int remainingSeconds;
+    private String description;
     private boolean willRoboot;
 
-    public UpgradeProgress(int state) {
+    private UpgradeProgress(int state) {
         this.state = state;
     }
 
@@ -76,6 +77,10 @@ public class UpgradeProgress {
         return remainingSeconds;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
     public boolean willRoboot() {
         return willRoboot;
     }
@@ -89,6 +94,7 @@ public class UpgradeProgress {
                 ", upgradingFirmware='" + upgradingFirmware + '\'' +
                 ", upgradingFirmwareOrder=" + upgradingFirmwareOrder +
                 ", remainingSeconds=" + remainingSeconds +
+                ", description='" + description + '\'' +
                 ", willRoboot=" + willRoboot +
                 '}';
     }
@@ -101,6 +107,7 @@ public class UpgradeProgress {
         private String upgradingFirmware = "";
         private int upgradingFirmwareOrder;
         private int remainingSeconds;
+        private String description = "";
         private boolean willRoboot;
 
         public Builder(int state) {
@@ -136,6 +143,15 @@ public class UpgradeProgress {
             return this;
         }
 
+        public Builder setDescription(String description) {
+            if (description == null) {
+                throw new IllegalArgumentException("Argument description is null.");
+            }
+
+            this.description = description;
+            return this;
+        }
+
         public Builder setWillRoboot(boolean willRoboot) {
             this.willRoboot = willRoboot;
             return this;
@@ -148,6 +164,7 @@ public class UpgradeProgress {
             progress.upgradingFirmware = upgradingFirmware;
             progress.upgradingFirmwareOrder = upgradingFirmwareOrder;
             progress.remainingSeconds = remainingSeconds;
+            progress.description = description;
             progress.willRoboot = willRoboot;
             return progress;
         }

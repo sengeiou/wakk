@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package navigation;
+
+option java_package = "com.ubtrobot.navigation.ipc";
+option java_outer_classname = "NavigationProto";
+
+message GroundOverlay {
+
+    string image = 1;
+    string remote_image = 2;
+}
+
+message LatLng {
+
+    double latitude = 1;
+    double longitude = 2;
+}
+
+message Marker {
+
+    string title = 1;
+    LatLng position = 2;
+    double elevation = 3;
+    float rotation = 4;
+}
+
+message NavMap {
+
+    string id = 1;
+    string name = 2;
+
+    repeated GroundOverlay ground_overlay = 3;
+    repeated Marker marker = 4;
+}
+
+message NavMapList {
+
+    repeated NavMap map = 1;
+    string id_selected = 2;
+}
+
+message Location {
+
+    LatLng position = 1;
+    double elevation = 2;
+    float rotation = 3;
+}

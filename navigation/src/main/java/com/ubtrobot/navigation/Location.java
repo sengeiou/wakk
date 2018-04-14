@@ -86,6 +86,7 @@ public class Location {
             this.position = position;
         }
 
+        @SuppressWarnings("unchecked")
         public T setElevation(double elevation) {
             this.elevation = elevation;
             return (T) this;

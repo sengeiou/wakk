@@ -83,11 +83,54 @@ public class FirmwareDownloaderProxy extends AbstractFirmwareDownloader {
     @Override
     public int state() {
         synchronized (this) {
-            if (!mStateSubscribed) {
-                setState(getDownloadState().getState());
-            }
-
+            syncStateLocked();
             return super.state();
+        }
+    }
+
+    private void syncStateLocked() {
+        if (!mStateSubscribed) {
+            setState(getDownloadState().getState());
+        }
+    }
+
+    @Override
+    public boolean isIdle() {
+        synchronized (this) {
+            syncStateLocked();
+            return super.isIdle();
+        }
+    }
+
+    @Override
+    public boolean isReady() {
+        synchronized (this) {
+            syncStateLocked();
+            return super.isReady();
+        }
+    }
+
+    @Override
+    public boolean isDownloading() {
+        synchronized (this) {
+            syncStateLocked();
+            return super.isDownloading();
+        }
+    }
+
+    @Override
+    public boolean isComplete() {
+        synchronized (this) {
+            syncStateLocked();
+            return super.isComplete();
+        }
+    }
+
+    @Override
+    public boolean isError() {
+        synchronized (this) {
+            syncStateLocked();
+            return super.isError();
         }
     }
 
@@ -102,6 +145,8 @@ public class FirmwareDownloaderProxy extends AbstractFirmwareDownloader {
             return UpgradeProto.DownloadState.newBuilder().setErrorCode(STATE_ERROR).build();
         }
     }
+
+
 
     @Override
     public void registerStateListener(StateListener listener) {

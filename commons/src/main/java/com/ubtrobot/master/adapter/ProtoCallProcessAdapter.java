@@ -52,6 +52,20 @@ public class ProtoCallProcessAdapter {
         );
     }
 
+    public <F> void onCall(
+            final Responder responder,
+            final CallProcessAdapter.Callable<Void, F, Void> callable,
+            final FConverter<F> converter) {
+        onCall(responder, callable, (DFPConverter<Void, F, Void>) converter);
+    }
+
+    public <D, F> void onCall(
+            final Responder responder,
+            final CallProcessAdapter.Callable<D, F, Void> callable,
+            final DFConverter<D, F> converter) {
+        onCall(responder, callable, (DFPConverter<D, F, Void>) converter);
+    }
+
     public static abstract class FConverter<F> extends DFConverter<Void, F> {
 
         @Override

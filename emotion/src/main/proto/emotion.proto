@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package emotion;
+
+option java_package = "com.ubtrobot.emotion.ipc";
+option java_outer_classname = "EmotionProto";
+
+message EmotionResource {
+
+    string package_name = 1;
+    int32 name = 2;
+    int32 icon = 3;
+}
+
+message Emotion {
+
+    string id = 1;
+    EmotionResource resource = 2;
+}
+
+message EmotionList {
+
+    repeated Emotion emotion = 1;
+}

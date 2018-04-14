@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.google.protobuf'
 
 android {
     def sdk = rootProject.ext.sdk
@@ -19,7 +20,29 @@ android {
     }
 }
 
+protobuf {
+    protoc {
+        artifact = rootProject.ext.protoc
+    }
+
+    plugins {
+        java {
+            artifact = rootProject.ext.protoc
+        }
+    }
+
+    generateProtoTasks {
+        all().each { task ->
+            task.plugins {
+                java {}
+            }
+        }
+    }
+}
+
 dependencies {
+    implementation project(':commons')
+
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     def deps = rootProject.ext.deps

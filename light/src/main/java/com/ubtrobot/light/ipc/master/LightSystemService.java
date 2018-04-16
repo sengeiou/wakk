@@ -22,6 +22,7 @@ import com.ubtrobot.master.adapter.ProtoCallProcessAdapter;
 import com.ubtrobot.master.adapter.ProtoParamParser;
 import com.ubtrobot.master.annotation.Call;
 import com.ubtrobot.master.competition.CompetingCallDelegate;
+import com.ubtrobot.master.competition.CompetingItemDetail;
 import com.ubtrobot.master.competition.ProtoCompetingCallDelegate;
 import com.ubtrobot.master.param.ProtoParam;
 import com.ubtrobot.master.service.MasterSystemService;
@@ -29,6 +30,7 @@ import com.ubtrobot.transport.message.CallException;
 import com.ubtrobot.transport.message.Request;
 import com.ubtrobot.transport.message.Responder;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public class LightSystemService extends MasterSystemService {
@@ -54,6 +56,30 @@ public class LightSystemService extends MasterSystemService {
         Handler handler = new Handler(getMainLooper());
         mCallProcessor = new ProtoCallProcessAdapter(handler);
         mCompetingCallDelegate = new ProtoCompetingCallDelegate(this, handler);
+    }
+
+    @Override
+    protected List<CompetingItemDetail> getCompetingItems() {
+        try {
+            List<LightDevice> lightList = mService.getLightList().getDone();
+            LinkedList<CompetingItemDetail> details = new LinkedList<>();
+            for (LightDevice lightDevice : lightList) {
+                details.add(
+                        new CompetingItemDetail.Builder(getName(),
+                                LightConstants.COMPETING_ITEM_PREFIX_LIGHT + lightDevice.getId()).
+                                setDescription("Light competing item").
+                                addCallPath(LightConstants.CALL_PATH_TURN_ON).
+                                addCallPath(LightConstants.CALL_PATH_CHANGE_COLOR).
+                                addCallPath(LightConstants.CALL_PATH_TURN_OFF).
+                                build()
+                );
+            }
+
+            return details;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException(e);
+        }
     }
 
     @Call(path = LightConstants.CALL_PATH_GET_LIGHT_LIST)

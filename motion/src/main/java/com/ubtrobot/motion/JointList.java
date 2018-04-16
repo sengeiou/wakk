@@ -1,5 +1,7 @@
 package com.ubtrobot.motion;
 
+import android.os.Handler;
+
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.ubtrobot.cache.CachedField;
 import com.ubtrobot.device.ipc.DeviceProto;
@@ -20,7 +22,7 @@ public class JointList {
 
     private final CachedField<List<Joint>> mJoints;
 
-    JointList(final ProtoCallAdapter motionService) {
+    JointList(final ProtoCallAdapter motionService, final Handler handler) {
         mJoints = new CachedField<>(new CachedField.FieldGetter<List<Joint>>() {
             @Override
             public List<Joint> get() {
@@ -29,7 +31,8 @@ public class JointList {
                             MotionConstants.CALL_PATH_GET_JOINT_LIST, DeviceProto.DeviceList.class);
                     LinkedList<Joint> joints = new LinkedList<>();
                     for (DeviceProto.Device device : deviceList.getDeviceList()) {
-                        joints.add(new Joint(MotionConverters.toJointDevicePojo(device)));
+                        joints.add(new Joint(motionService,
+                                MotionConverters.toJointDevicePojo(device), handler));
                     }
 
                     return Collections.unmodifiableList(joints);

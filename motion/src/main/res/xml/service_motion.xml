@@ -3,4 +3,7 @@
     name="motion"
     level="system">
     <call path="/joint/device/list" />
+    <call path="/joint/query-is-rotating" />
+    <call path="/joint/angle" />
+    <call path="/joint/rotate" />
 </service>

@@ -13,3 +13,21 @@ message JointDeviceExt {
     float maxSpeed = 4;
     float defaultSpeed = 5;
 }
+
+message JointRotatingOption {
+
+    string jointId = 1;
+    bool relatively = 2;
+    float angle = 3;
+    bool useSpeed = 4;
+    float speed = 5;
+    int64 timeMillis = 6;
+}
+
+message JointRotatingProgress {
+
+    int32 state = 1;
+    float currentAngle = 2;
+    float rotatedAngle = 3;
+    float rotatedTimeMillis = 4;
+}

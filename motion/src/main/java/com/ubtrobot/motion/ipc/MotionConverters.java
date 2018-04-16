@@ -3,6 +3,7 @@ package com.ubtrobot.motion.ipc;
 import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.ubtrobot.device.ipc.DeviceProto;
+import com.ubtrobot.motion.Joint;
 import com.ubtrobot.motion.JointDevice;
 
 import java.util.List;
@@ -52,5 +53,47 @@ public class MotionConverters {
         }
 
         return builder.build();
+    }
+
+    public static MotionProto.JointRotatingOption
+    toJointRotatingOptionProto(String jointId, boolean relatively, float angle, float speed) {
+        return MotionProto.JointRotatingOption.newBuilder().
+                setJointId(jointId).
+                setRelatively(relatively).
+                setAngle(angle).
+                setUseSpeed(true).
+                setSpeed(speed).
+                build();
+    }
+
+    public static MotionProto.JointRotatingOption
+    toJointRotatingOptionProto(String jointId, boolean relatively, float angle, long timeMillis) {
+        return MotionProto.JointRotatingOption.newBuilder().
+                setJointId(jointId).
+                setRelatively(relatively).
+                setAngle(angle).
+                setUseSpeed(false).
+                setTimeMillis(timeMillis).
+                build();
+    }
+
+    public static MotionProto.JointRotatingProgress
+    toJointRotatingProgressProto(Joint.RotatingProgress progress) {
+        return MotionProto.JointRotatingProgress.newBuilder().
+                setState(progress.getState()).
+                setCurrentAngle(progress.getCurrentAngle()).
+                setRotatedAngle(progress.getRotatedAngle()).
+                setRotatedTimeMillis(progress.getRotatedTimeMillis()).
+                build();
+    }
+
+    public static Joint.RotatingProgress
+    toJointRotatingProgressPojo(MotionProto.JointRotatingProgress progress) {
+        return new Joint.RotatingProgress(
+                progress.getState(),
+                progress.getCurrentAngle(),
+                progress.getRotatedAngle(),
+                progress.getRotatedTimeMillis()
+        );
     }
 }

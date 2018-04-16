@@ -4,6 +4,7 @@ import android.os.Handler;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractPromise<D, F, P> implements Promise<D, F, P> {
 
@@ -82,6 +83,7 @@ public abstract class AbstractPromise<D, F, P> implements Promise<D, F, P> {
             }
 
             clearCallbacksLocked();
+            notifyAll();
         }
     }
 
@@ -110,6 +112,7 @@ public abstract class AbstractPromise<D, F, P> implements Promise<D, F, P> {
             }
 
             clearCallbacksLocked();
+            notifyAll();
         }
     }
 
@@ -220,6 +223,60 @@ public abstract class AbstractPromise<D, F, P> implements Promise<D, F, P> {
     }
 
     protected abstract CancelHandler getCancelHandler();
+
+    private void waitSafely() throws InterruptedException {
+        waitSafely(-1);
+    }
+
+    private void waitSafely(long timeout) throws InterruptedException {
+        final long startTime = System.currentTimeMillis();
+        synchronized (this) {
+            while (this.isPending()) {
+                try {
+                    if (timeout <= 0) {
+                        wait();
+                    } else {
+                        final long elapsed = (System.currentTimeMillis() - startTime);
+                        final long waitTime = timeout - elapsed;
+                        wait(waitTime);
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw e;
+                }
+
+                if (timeout > 0 && ((System.currentTimeMillis() - startTime) >= timeout)) {
+                    return;
+                } else {
+                    continue; // keep looping
+                }
+            }
+        }
+    }
+
+    @Override
+    public D getDone() throws InterruptedException {
+        waitSafely();
+        return mResolveResult;
+    }
+
+    @Override
+    public D getDone(long timeout, TimeUnit unit) throws InterruptedException {
+        waitSafely(unit.toMillis(timeout));
+        return mResolveResult;
+    }
+
+    @Override
+    public F getFail() throws InterruptedException {
+        waitSafely();
+        return mRejectResult;
+    }
+
+    @Override
+    public F getFail(long timeout, TimeUnit unit) throws InterruptedException {
+        waitSafely(unit.toMillis(timeout));
+        return mRejectResult;
+    }
 
     public Promise<D, F, P> promise() {
         return this;

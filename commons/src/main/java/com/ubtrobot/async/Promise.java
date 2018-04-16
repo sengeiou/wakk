@@ -1,5 +1,7 @@
 package com.ubtrobot.async;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * 异步回调结果的"承诺"
  *
@@ -34,4 +36,12 @@ public interface Promise<D, F, P> extends Cancelable {
     Promise<D, F, P> fail(FailCallback<? super F> callback);
 
     Promise<D, F, P> progress(ProgressCallback<? super P> callback);
+
+    D getDone() throws InterruptedException;
+
+    D getDone(long timeout, TimeUnit unit) throws InterruptedException;
+
+    F getFail() throws InterruptedException;
+
+    F getFail(long timeout, TimeUnit unit) throws InterruptedException;
 }

@@ -1,6 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.ubtrobot.light.sal">
 
+    <uses-permission android:name="com.ubtrobot.master.permission.MASTER" />
+
     <application>
         <service
             android:name="com.ubtrobot.light.ipc.master.LightSystemService"

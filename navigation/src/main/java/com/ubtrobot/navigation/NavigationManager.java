@@ -5,6 +5,9 @@ import android.os.Looper;
 
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.master.adapter.ProtoCallAdapter;
+import com.ubtrobot.master.competition.ActivateException;
+import com.ubtrobot.master.competition.CompetitionSession;
+import com.ubtrobot.master.competition.CompetitionSessionExt;
 import com.ubtrobot.master.context.MasterContext;
 import com.ubtrobot.navigation.ipc.NavigationConstants;
 
@@ -16,14 +19,19 @@ public class NavigationManager {
 
     private final NavMapList mNavMapList;
 
+    private final Navigator mNavigator;
+    private volatile CompetitionSessionExt<Navigator> mSession;
+
     public NavigationManager(MasterContext masterContext) {
         mMasterContext = masterContext;
+        Handler handler = new Handler(Looper.getMainLooper());
 
         ProtoCallAdapter navigationService = new ProtoCallAdapter(
                 mMasterContext.createSystemServiceProxy(NavigationConstants.SERVICE_NAME),
-                new Handler(Looper.getMainLooper())
+                handler
         );
         mNavMapList = new NavMapList(navigationService);
+        mNavigator = new Navigator(handler);
     }
 
     public List<NavMap> getNavMapList() {
@@ -52,5 +60,75 @@ public class NavigationManager {
 
     public Promise<NavMap, NavMapException, Void> removeNavMap(String navMapId) {
         return mNavMapList.remove(navMapId);
+    }
+
+    private CompetitionSessionExt<Navigator> navigatorSession() {
+        if (mSession != null) {
+            return mSession;
+        }
+
+        synchronized (this) {
+            if (mSession != null) {
+                return mSession;
+            }
+
+            mSession = new CompetitionSessionExt<>(mMasterContext.openCompetitionSession());
+            return mSession;
+        }
+    }
+
+    public Promise<Location, LocateException, Void> locateSelf() {
+        return locateSelf(LocateOption.DEFAULT);
+    }
+
+    public Promise<Location, LocateException, Void>
+    locateSelf(final LocateOption option) {
+        return navigatorSession().execute(
+                mNavigator,
+                new CompetitionSessionExt.SessionCallable<
+                        Location, LocateException, Void, Navigator>() {
+                    @Override
+                    public Promise<Location, LocateException, Void>
+                    call(CompetitionSession session, Navigator navigator) {
+                        return navigator.locateSelf(session, option);
+                    }
+                },
+                new CompetitionSessionExt.Converter<LocateException>() {
+                    @Override
+                    public LocateException convert(ActivateException e) {
+                        return new LocateException.Factory().occupied(e);
+                    }
+                }
+        );
+    }
+
+    public Promise<Void, NavigateException, Navigator.NavigatingProgress>
+    navigate(Location destination) {
+        return navigate(destination, NavigateOption.DEFAULT);
+    }
+
+    public Promise<Void, NavigateException, Navigator.NavigatingProgress>
+    navigate(final Location destination, final NavigateOption option) {
+        return navigatorSession().execute(
+                mNavigator,
+                new CompetitionSessionExt.SessionCallable<
+                        Void, NavigateException, Navigator.NavigatingProgress, Navigator>() {
+                    @Override
+                    public Promise<Void, NavigateException, Navigator.NavigatingProgress>
+                    call(CompetitionSession session, Navigator navigator) {
+                        return navigator.navigate(session, destination, option);
+                    }
+                },
+                new CompetitionSessionExt.Converter<NavigateException>() {
+                    @Override
+                    public NavigateException convert(ActivateException e) {
+                        return new NavigateException.Factory().occupied(e);
+                    }
+                }
+        );
+    }
+
+    public Navigator navigator() {
+        return mNavigator;
     }
 }

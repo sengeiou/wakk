@@ -4,8 +4,12 @@ import android.util.Pair;
 
 import com.ubtrobot.navigation.GroundOverlay;
 import com.ubtrobot.navigation.LatLng;
+import com.ubtrobot.navigation.LocateOption;
+import com.ubtrobot.navigation.Location;
 import com.ubtrobot.navigation.Marker;
 import com.ubtrobot.navigation.NavMap;
+import com.ubtrobot.navigation.NavigateOption;
+import com.ubtrobot.navigation.Navigator;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -74,5 +78,68 @@ public class NavigationConverters {
         }
 
         return new Pair<>(maps, mapListProto.getIdSelected());
+    }
+
+    public static Location toLocationPojo(NavigationProto.Location location) {
+        return new Location.Builder(new LatLng(
+                location.getPosition().getLatitude(),
+                location.getPosition().getLongitude()
+        )).setElevation(location.getElevation()).setRotation(location.getRotation()).build();
+    }
+
+    public static NavigationProto.Location toLocationProto(Location location) {
+        return NavigationProto.Location.newBuilder().
+                setPosition(NavigationProto.LatLng.newBuilder().
+                        setLatitude(location.getPosition().getLatitude()).
+                        setLongitude(location.getPosition().getLongitude()).build()).
+                setRotation(location.getRotation()).
+                setElevation(location.getElevation()).
+                build();
+    }
+
+    public static NavigationProto.LocateOption toLocateOptionProto(LocateOption option) {
+        return NavigationProto.LocateOption.newBuilder().setUseNearby(option.useNearby()).
+                setNearby(NavigationProto.Location.newBuilder()
+                        .setPosition(NavigationProto.LatLng.newBuilder()
+                                .setLatitude(option.getNearby().getPosition().getLatitude())
+                                .setLongitude(option.getNearby().getPosition().getLongitude())
+                                .build()
+                        ).setRotation(option.getNearby().getRotation())
+                        .setElevation(option.getNearby().getElevation())
+                        .build()).build();
+    }
+
+    public static LocateOption toLocateOptionPojo(NavigationProto.LocateOption option) {
+        if (option.getUseNearby()) {
+            return new LocateOption.Builder().setNearby(toLocationPojo(option.getNearby())).build();
+        } else {
+            return new LocateOption.Builder().build();
+        }
+    }
+
+    public static NavigationProto.NavigateOption
+    toNavigateOptionProto(Location destination, NavigateOption option) {
+        return NavigationProto.NavigateOption.newBuilder().
+                setDestination(toLocationProto(destination)).
+                setMaxSpeed(option.getMaxSpeed()).
+                setRetryCount(option.getRetryCount()).
+                build();
+    }
+
+    public static NavigateOption toNavigateOptionPojo(NavigationProto.NavigateOption option) {
+        return new NavigateOption.Builder().setMaxSpeed(option.getMaxSpeed()).
+                setRetryCount(option.getRetryCount()).build();
+    }
+
+    public static NavigationProto.NavigatingProgress
+    toNavigatingProgressProto(Navigator.NavigatingProgress progress) {
+        return NavigationProto.NavigatingProgress.newBuilder().setState(progress.getState()).
+                setLocation(toLocationProto(progress.getLocation())).build();
+    }
+
+    public static Navigator.NavigatingProgress
+    toNavigatingProgressPojo(NavigationProto.NavigatingProgress progress) {
+        return new Navigator.NavigatingProgress.Builder(
+                progress.getState()).setLocation(toLocationPojo(progress.getLocation())).build();
     }
 }

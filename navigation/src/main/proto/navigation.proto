@@ -46,3 +46,22 @@ message Location {
     double elevation = 2;
     float rotation = 3;
 }
+
+message LocateOption {
+
+    bool useNearby = 2;
+    Location nearby = 1;
+}
+
+message NavigateOption {
+
+    Location destination = 1;
+    float maxSpeed = 2;
+    int32 retryCount = 3;
+}
+
+message NavigatingProgress {
+
+    int32 state = 1;
+    Location location = 2;
+}

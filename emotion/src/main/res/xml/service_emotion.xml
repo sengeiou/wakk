@@ -3,4 +3,6 @@
     name="emotion"
     level="system">
     <call path="/emotion/list" />
+    <call path="/emotion/express" />
+    <call path="/emotion/dismiss" />
 </service>

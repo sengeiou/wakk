@@ -2,6 +2,7 @@ package com.ubtrobot.emotion.ipc;
 
 import com.ubtrobot.emotion.Emotion;
 import com.ubtrobot.emotion.EmotionResource;
+import com.ubtrobot.emotion.ExpressOption;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -48,5 +49,23 @@ public class EmotionConverters {
                         emotionProto.getResource().getIcon()
                 )
         );
+    }
+
+    public static EmotionProto.ExpressOption
+    toExpressOptionProto(String emotionId, ExpressOption option) {
+        return EmotionProto.ExpressOption.newBuilder().
+                setEmotionId(emotionId).
+                setLoops(option.getLoops()).
+                setDismissAfterEnd(option.isDismissAfterEnd()).
+                setLoopDefaultAfterEnd(option.isLoopDefaultAfterEnd()).
+                build();
+    }
+
+    public static ExpressOption
+    toExpressOptionPojo(EmotionProto.ExpressOption option) {
+        return new ExpressOption.Builder().setLoops(option.getLoops()).
+                setDismissAfterEnd(option.getDismissAfterEnd()).
+                setLoopDefaultAfterEnd(option.getLoopDefaultAfterEnd()).
+                build();
     }
 }

@@ -22,3 +22,11 @@ message EmotionList {
 
     repeated Emotion emotion = 1;
 }
+
+message ExpressOption {
+
+    string emotionId = 1;
+    int32 loops = 2;
+    bool dismiss_after_end = 3;
+    bool loop_default_after_end = 4;
+}

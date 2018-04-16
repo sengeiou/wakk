@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package motion;
+
+option java_package = "com.ubtrobot.motion.ipc";
+option java_outer_classname = "MotionProto";
+
+message JointDeviceExt {
+
+    float minAngle = 1;
+    float maxAngle = 2;
+    float minSpeed = 3;
+    float maxSpeed = 4;
+    float defaultSpeed = 5;
+}

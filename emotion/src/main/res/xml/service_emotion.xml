@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<service
+    name="emotion"
+    level="system">
+    <call path="/emotion/list" />
+</service>

@@ -20,6 +20,15 @@ public class EmotionConverters {
         return emotionList;
     }
 
+    public static EmotionProto.EmotionList toEmotionListProto(List<Emotion> emotions) {
+        EmotionProto.EmotionList.Builder builder = EmotionProto.EmotionList.newBuilder();
+        for (Emotion emotion : emotions) {
+            builder.addEmotion(toEmotionProto(emotion));
+        }
+
+        return builder.build();
+    }
+
     public static EmotionProto.Emotion toEmotionProto(Emotion emotion) {
         return EmotionProto.Emotion.newBuilder().setId(emotion.getId()).
                 setResource(EmotionProto.EmotionResource.newBuilder().

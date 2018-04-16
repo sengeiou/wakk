@@ -2,6 +2,8 @@ package com.ubtrobot.device;
 
 public class Device {
 
+    public static final Device DEFAULT = new Device.Builder("", "").build();
+
     private final String id;
     private final String name;
     private String description;
@@ -69,14 +71,23 @@ public class Device {
 
         private final String id;
         private final String name;
-        private String description;
+        private String description = "";
 
         public GenericBuilder(String id, String name) {
+            if (id == null || name == null) {
+                throw new IllegalArgumentException("Argument id or name is null.");
+            }
+
             this.id = id;
             this.name = name;
         }
 
+        @SuppressWarnings("unchecked")
         public T setDescription(String description) {
+            if (description == null) {
+                throw new IllegalArgumentException("Argument description is null.");
+            }
+
             this.description = description;
             return (T) this;
         }

@@ -74,7 +74,8 @@ public class EmotionManager {
                 return mSession;
             }
 
-            mSession = new CompetitionSessionExt<>(mMasterContext.openCompetitionSession());
+            mSession = new CompetitionSessionExt<>(mMasterContext.openCompetitionSession().
+                    addCompeting(mExpresser));
             return mSession;
         }
     }

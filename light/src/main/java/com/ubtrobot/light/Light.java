@@ -4,6 +4,7 @@ import android.os.Handler;
 
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Int32Value;
+import com.google.protobuf.StringValue;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.light.ipc.LightConstants;
 import com.ubtrobot.light.ipc.LightConverters;
@@ -92,7 +93,8 @@ public class Light implements Competing {
 
     public boolean isTurnOn() {
         try {
-            return mLightService.syncCall(LightConstants.CALL_PATH_GET_IS_TURN_ON, BoolValue.class).
+            return mLightService.syncCall(LightConstants.CALL_PATH_GET_IS_TURN_ON,
+                    StringValue.newBuilder().setValue(getId()).build(), BoolValue.class).
                     getValue();
         } catch (CallException e) {
             LOGGER.e(e, "Framework error when querying if the light is on.");
@@ -123,7 +125,8 @@ public class Light implements Competing {
 
     public int getColor() {
         try {
-            return mLightService.syncCall(LightConstants.CALL_PATH_GET_COLOR, Int32Value.class).
+            return mLightService.syncCall(LightConstants.CALL_PATH_GET_COLOR,
+                    StringValue.newBuilder().setValue(getId()).build(), Int32Value.class).
                     getValue();
         } catch (CallException e) {
             LOGGER.e(e, "Framework error when getting the light's color.");
@@ -141,6 +144,7 @@ public class Light implements Competing {
         );
         return lightService.call(
                 LightConstants.CALL_PATH_TURN_ON,
+                StringValue.newBuilder().setValue(getId()).build(),
                 new CallAdapter.FConverter<LightException>() {
                     @Override
                     public LightException convertFail(CallException e) {

@@ -1,5 +1,7 @@
 package com.ubtrobot.light;
 
+import android.os.Handler;
+
 import com.ubtrobot.cache.CachedField;
 import com.ubtrobot.device.ipc.DeviceProto;
 import com.ubtrobot.light.ipc.LightConstants;
@@ -19,7 +21,7 @@ public class LightList {
 
     private CachedField<List<Light>> mLights;
 
-    public LightList(final ProtoCallAdapter lightService) {
+    public LightList(final ProtoCallAdapter lightService, final Handler handler) {
         mLights = new CachedField<>(new CachedField.FieldGetter<List<Light>>() {
             @Override
             public List<Light> get() {
@@ -28,7 +30,8 @@ public class LightList {
                             LightConstants.CALL_PATH_GET_LIGHT_LIST, DeviceProto.DeviceList.class);
                     LinkedList<Light> lights = new LinkedList<>();
                     for (DeviceProto.Device device : deviceList.getDeviceList()) {
-                        lights.add(new Light(LightConverters.toLightDevicePojo(device)));
+                        lights.add(new Light(lightService, LightList.this,
+                                LightConverters.toLightDevicePojo(device), handler));
                     }
 
                     return Collections.unmodifiableList(lights);

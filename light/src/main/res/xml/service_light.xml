@@ -3,4 +3,9 @@
     name="light"
     level="system">
     <call path="/light/device/list" />
+    <call path="/light/turn-on" />
+    <call path="/light/turn-off" />
+    <call path="/light/query-is-turn-on" />
+    <call path="/light/color" />
+    <call path="/light/color/change" />
 </service>

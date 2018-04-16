@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package light;
+
+option java_package = "com.ubtrobot.light.ipc";
+option java_outer_classname = "LightProto";
+
+message LightColor {
+
+    string light_id = 1;
+    int32 color = 2;
+}

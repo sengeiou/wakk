@@ -2,16 +2,15 @@ package com.ubtrobot.light;
 
 import android.os.Bundle;
 
-import com.ubtrobot.exception.AccessServiceException;
+import com.ubtrobot.exception.AccessServiceCompetingItemException;
 
-public class LightException extends AccessServiceException {
+public class LightException extends AccessServiceCompetingItemException {
 
     private LightException(int code, String message, Bundle detail, Throwable cause) {
         super(code, message, detail, cause);
     }
 
-    public static class Factory extends AccessServiceException.Factory<LightException> {
-
+    public static class Factory extends AccessServiceCompetingItemException.Factory<LightException> {
         @Override
         protected LightException
         createException(int code, String message, Bundle detail, Throwable cause) {

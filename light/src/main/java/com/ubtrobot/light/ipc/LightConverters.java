@@ -25,4 +25,8 @@ public class LightConverters {
 
         return builder.build();
     }
+
+    public static LightProto.LightColor toLightColorProto(String lightId, int argb) {
+        return LightProto.LightColor.newBuilder().setLightId(lightId).setColor(argb).build();
+    }
 }

@@ -72,7 +72,8 @@ public class NavigationManager {
                 return mSession;
             }
 
-            mSession = new CompetitionSessionExt<>(mMasterContext.openCompetitionSession());
+            mSession = new CompetitionSessionExt<>(mMasterContext.openCompetitionSession().
+                    addCompeting(navigator()));
             return mSession;
         }
     }

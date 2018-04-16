@@ -29,19 +29,19 @@ public abstract class AsyncTask<D, F, P> extends AbstractPromise<D, F, P> {
     protected abstract void onStart();
 
     @Override
-    protected AsyncTask<D, F, P> resolve(D resolve) {
+    public AsyncTask<D, F, P> resolve(D resolve) {
         super.resolve(resolve);
         return this;
     }
 
     @Override
-    protected AsyncTask<D, F, P> reject(F reject) {
+    public AsyncTask<D, F, P> reject(F reject) {
         super.reject(reject);
         return this;
     }
 
     @Override
-    protected AsyncTask<D, F, P> notify(P progress) {
+    public AsyncTask<D, F, P> notify(P progress) {
         super.notify(progress);
         return this;
     }

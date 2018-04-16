@@ -20,7 +20,8 @@ public class NavigationConverters {
     }
 
     public static NavigationProto.NavMap toNavMapProto(NavMap map) {
-        NavigationProto.NavMap.Builder builder = NavigationProto.NavMap.newBuilder();
+        NavigationProto.NavMap.Builder builder = NavigationProto.NavMap.newBuilder().
+                setId(map.getId()).setName(map.getName());
         for (GroundOverlay groundOverlay : map.getGroundOverlayList()) {
             builder.addGroundOverlay(NavigationProto.GroundOverlay.newBuilder().
                     setImage(groundOverlay.getImage()).

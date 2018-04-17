@@ -51,7 +51,7 @@ public class Strategy implements Parcelable {
     @Override
     public String toString() {
         return "Strategy{" +
-                ", reportIntervalSeconds=" + reportIntervalSeconds +
+                "reportIntervalSeconds=" + reportIntervalSeconds +
                 ", reportAtStartup=" + reportAtStartup +
                 ", reportCount=" + reportCount +
                 '}';
@@ -113,7 +113,7 @@ public class Strategy implements Parcelable {
         @Override
         public String toString() {
             return "Builder{" +
-                    ", reportIntervalSeconds=" + reportIntervalSeconds +
+                    "reportIntervalSeconds=" + reportIntervalSeconds +
                     ", reportAtStartup=" + reportAtStartup +
                     ", reportCount=" + reportCount +
                     '}';

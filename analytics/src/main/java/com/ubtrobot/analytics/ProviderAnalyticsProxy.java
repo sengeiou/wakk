@@ -44,7 +44,7 @@ public class ProviderAnalyticsProxy implements Analytics {
 
         if (bundle != null) {
             bundle.setClassLoader(getClass().getClassLoader());
-            strategy = bundle.getParcelable(AnalyticsConstants.CALL_METHOD_GET_STRATEGY);
+            strategy = bundle.getParcelable(AnalyticsConstants.KEY_STRATEGY);
         }
 
         return strategy != null ? strategy : Strategy.DEFAULT;

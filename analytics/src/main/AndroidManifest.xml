@@ -2,7 +2,7 @@
     package="com.ubtrobot.analytics.sal">
 
     <permission
-        android:name="ubtrobot.permissions.AnalyticsProvider"
+        android:name="com.ubtrobot.analytics.permissions.ANALYTICS"
         android:protectionLevel="normal" />
 
     <application>
@@ -10,7 +10,7 @@
             android:name="com.ubtrobot.analytics.ipc.provider.AnalyticsProvider"
             android:authorities="com.ubtrobot.analytics.ipc.provider.AnalyticsProvider"
             android:exported="true"
-            android:permission="ubtrobot.permissions.AnalyticsProvider" />
+            android:permission="com.ubtrobot.analytics.permissions.ANALYTICS" />
 
     </application>
 </manifest>

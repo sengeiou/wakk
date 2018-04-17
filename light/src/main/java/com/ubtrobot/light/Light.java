@@ -143,7 +143,7 @@ public class Light implements Competing {
                 mHandler
         );
         return lightService.call(
-                LightConstants.CALL_PATH_TURN_ON,
+                LightConstants.CALL_PATH_TURN_OFF,
                 StringValue.newBuilder().setValue(getId()).build(),
                 new CallAdapter.FConverter<LightException>() {
                     @Override

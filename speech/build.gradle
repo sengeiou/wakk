@@ -1,5 +1,5 @@
 apply plugin: 'com.android.library'
-
+apply plugin: 'com.google.protobuf'
 android {
     def sdk = rootProject.ext.sdk
     compileSdkVersion sdk.compileSdkVersion
@@ -14,19 +14,34 @@ android {
 
     buildTypes {
         release {
-            postprocessing {
-                removeUnusedCode false
-                removeUnusedResources false
-                obfuscate false
-                optimizeCode false
-                proguardFile 'proguard-rules.pro'
-            }
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+protobuf {
+    protoc {
+        artifact = rootProject.ext.protoc
+    }
+
+    plugins {
+        java {
+            artifact = rootProject.ext.protoc
         }
     }
 
+    generateProtoTasks {
+        all().each { task ->
+            task.plugins {
+                java {}
+            }
+        }
+    }
 }
 
 dependencies {
+    api project(':commons')
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     def deps = rootProject.ext.deps

@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option java_package = "com.ubtrobot.speech.ipc";
+option java_outer_classname = "SpeechProto";
+
+message SynthesizeOption {
+    string sentence = 1;
+    string speaker_id = 2;
+    int32 speak_speed = 3;
+    int32 speak_volume = 4;
+
+}
+
+message SynthesizingProgress {
+    int32 state = 1;
+    float progress = 2;
+}

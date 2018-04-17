@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<service
+    name="speech"
+    level="system">
+
+    <call path="/speech/synthesize" />
+    <call path="/speech/synthesize/doing" />
+</service>

@@ -53,7 +53,7 @@ public class CompetingCallDelegate {
                 try {
                     promise = callable.call();
                 } catch (CallException e) {
-                    responder.respondFailure(e.getCode(), e.getMessage(), e.getDetail());
+                    responder.respondFailure(e);
                     return;
                 }
 
@@ -86,7 +86,7 @@ public class CompetingCallDelegate {
                     public void onFail(F result) {
                         if (mCallEnvs.remove(request.getId()) != null) {
                             CallException e = converter.convertFail(result);
-                            responder.respondFailure(e.getCode(), e.getMessage(), e.getDetail());
+                            responder.respondFailure(e);
                         }
                     }
                 });

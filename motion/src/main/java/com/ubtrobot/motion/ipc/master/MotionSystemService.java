@@ -7,6 +7,7 @@ import com.google.protobuf.BoolValue;
 import com.google.protobuf.FloatValue;
 import com.google.protobuf.Message;
 import com.ubtrobot.async.Promise;
+import com.ubtrobot.exception.AccessServiceException;
 import com.ubtrobot.master.adapter.CallProcessAdapter;
 import com.ubtrobot.master.adapter.ProtoCallProcessAdapter;
 import com.ubtrobot.master.adapter.ProtoParamParser;
@@ -18,7 +19,6 @@ import com.ubtrobot.master.service.MasterSystemService;
 import com.ubtrobot.master.transport.message.CallGlobalCode;
 import com.ubtrobot.motion.Joint;
 import com.ubtrobot.motion.JointDevice;
-import com.ubtrobot.motion.JointDeviceException;
 import com.ubtrobot.motion.JointException;
 import com.ubtrobot.motion.JointList;
 import com.ubtrobot.motion.ipc.MotionConstants;
@@ -62,21 +62,21 @@ public class MotionSystemService extends MasterSystemService {
     public void onGetJointList(Request request, Responder responder) {
         mCallProcessor.onCall(
                 responder,
-                new CallProcessAdapter.Callable<List<JointDevice>, JointDeviceException, Void>() {
+                new CallProcessAdapter.Callable<List<JointDevice>, AccessServiceException, Void>() {
                     @Override
-                    public Promise<List<JointDevice>, JointDeviceException, Void>
+                    public Promise<List<JointDevice>, AccessServiceException, Void>
                     call() throws CallException {
                         return mService.getJointList();
                     }
                 },
-                new ProtoCallProcessAdapter.DFConverter<List<JointDevice>, JointDeviceException>() {
+                new ProtoCallProcessAdapter.DFConverter<List<JointDevice>, AccessServiceException>() {
                     @Override
                     public Message convertDone(List<JointDevice> jointDevices) {
                         return MotionConverters.toJointDeviceListProto(jointDevices);
                     }
 
                     @Override
-                    public CallException convertFail(JointDeviceException e) {
+                    public CallException convertFail(AccessServiceException e) {
                         return new CallException(e.getCode(), e.getMessage());
                     }
                 }

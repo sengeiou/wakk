@@ -10,7 +10,6 @@ import com.google.protobuf.Message;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.exception.AccessServiceException;
 import com.ubtrobot.light.LightDevice;
-import com.ubtrobot.light.LightDeviceException;
 import com.ubtrobot.light.LightException;
 import com.ubtrobot.light.LightingEffect;
 import com.ubtrobot.light.ipc.LightConstants;
@@ -92,21 +91,21 @@ public class LightSystemService extends MasterSystemService {
     public void onGetLightList(Request request, Responder responder) {
         mCallProcessor.onCall(
                 responder,
-                new CallProcessAdapter.Callable<List<LightDevice>, LightDeviceException, Void>() {
+                new CallProcessAdapter.Callable<List<LightDevice>, AccessServiceException, Void>() {
                     @Override
-                    public Promise<List<LightDevice>, LightDeviceException, Void>
+                    public Promise<List<LightDevice>, AccessServiceException, Void>
                     call() throws CallException {
                         return mService.getLightList();
                     }
                 },
-                new ProtoCallProcessAdapter.DFConverter<List<LightDevice>, LightDeviceException>() {
+                new ProtoCallProcessAdapter.DFConverter<List<LightDevice>, AccessServiceException>() {
                     @Override
                     public Message convertDone(List<LightDevice> deviceList) {
                         return LightConverters.toLightDeviceListProto(deviceList);
                     }
 
                     @Override
-                    public CallException convertFail(LightDeviceException e) {
+                    public CallException convertFail(AccessServiceException e) {
                         return new CallException(e.getCode(), e.getMessage());
                     }
                 }

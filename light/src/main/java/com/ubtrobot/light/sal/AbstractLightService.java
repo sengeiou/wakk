@@ -5,7 +5,6 @@ import com.ubtrobot.async.InterruptibleAsyncTask;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.exception.AccessServiceException;
 import com.ubtrobot.light.LightDevice;
-import com.ubtrobot.light.LightDeviceException;
 import com.ubtrobot.light.LightException;
 import com.ubtrobot.light.LightingEffect;
 import com.ubtrobot.master.competition.InterruptibleTaskHelper;
@@ -26,8 +25,8 @@ public abstract class AbstractLightService implements LightService {
     }
 
     @Override
-    public Promise<List<LightDevice>, LightDeviceException, Void> getLightList() {
-        AsyncTask<List<LightDevice>, LightDeviceException, Void> task = createGetLightListTask();
+    public Promise<List<LightDevice>, AccessServiceException, Void> getLightList() {
+        AsyncTask<List<LightDevice>, AccessServiceException, Void> task = createGetLightListTask();
         if (task == null) {
             throw new IllegalStateException("createGetLightListTask returns null.");
         }
@@ -36,7 +35,7 @@ public abstract class AbstractLightService implements LightService {
         return task.promise();
     }
 
-    protected abstract AsyncTask<List<LightDevice>, LightDeviceException, Void>
+    protected abstract AsyncTask<List<LightDevice>, AccessServiceException, Void>
     createGetLightListTask();
 
     @Override

@@ -6,7 +6,6 @@ import android.os.Handler;
 import com.google.protobuf.Message;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.emotion.Emotion;
-import com.ubtrobot.emotion.EmotionException;
 import com.ubtrobot.emotion.ExpressException;
 import com.ubtrobot.emotion.ipc.EmotionConstants;
 import com.ubtrobot.emotion.ipc.EmotionConverters;
@@ -14,6 +13,7 @@ import com.ubtrobot.emotion.ipc.EmotionProto;
 import com.ubtrobot.emotion.sal.AbstractEmotionService;
 import com.ubtrobot.emotion.sal.EmotionFactory;
 import com.ubtrobot.emotion.sal.EmotionService;
+import com.ubtrobot.exception.AccessServiceException;
 import com.ubtrobot.master.adapter.CallProcessAdapter;
 import com.ubtrobot.master.adapter.ProtoCallProcessAdapter;
 import com.ubtrobot.master.adapter.ProtoParamParser;
@@ -70,21 +70,21 @@ public class EmotionSystemService extends MasterSystemService {
     public void onGetEmotionList(Request request, Responder responder) {
         mCallProcessor.onCall(
                 responder,
-                new CallProcessAdapter.Callable<List<Emotion>, EmotionException, Void>() {
+                new CallProcessAdapter.Callable<List<Emotion>, AccessServiceException, Void>() {
                     @Override
-                    public Promise<List<Emotion>, EmotionException, Void>
+                    public Promise<List<Emotion>, AccessServiceException, Void>
                     call() throws CallException {
                         return mService.getEmotionList();
                     }
                 },
-                new ProtoCallProcessAdapter.DFConverter<List<Emotion>, EmotionException>() {
+                new ProtoCallProcessAdapter.DFConverter<List<Emotion>, AccessServiceException>() {
                     @Override
                     public Message convertDone(List<Emotion> emotions) {
                         return EmotionConverters.toEmotionListProto(emotions);
                     }
 
                     @Override
-                    public CallException convertFail(EmotionException e) {
+                    public CallException convertFail(AccessServiceException e) {
                         return new CallException(e.getCode(), e.getMessage());
                     }
                 }

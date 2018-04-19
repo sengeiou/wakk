@@ -4,9 +4,9 @@ import com.ubtrobot.async.AsyncTask;
 import com.ubtrobot.async.InterruptibleAsyncTask;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.emotion.Emotion;
-import com.ubtrobot.emotion.EmotionException;
 import com.ubtrobot.emotion.ExpressException;
 import com.ubtrobot.emotion.ExpressOption;
+import com.ubtrobot.exception.AccessServiceException;
 import com.ubtrobot.master.competition.InterruptibleTaskHelper;
 
 import java.util.List;
@@ -24,8 +24,8 @@ public abstract class AbstractEmotionService implements EmotionService {
     }
 
     @Override
-    public Promise<List<Emotion>, EmotionException, Void> getEmotionList() {
-        AsyncTask<List<Emotion>, EmotionException, Void> task = createGetEmotionListTask();
+    public Promise<List<Emotion>, AccessServiceException, Void> getEmotionList() {
+        AsyncTask<List<Emotion>, AccessServiceException, Void> task = createGetEmotionListTask();
         if (task == null) {
             throw new IllegalArgumentException("Argument task is null.");
         }
@@ -34,7 +34,7 @@ public abstract class AbstractEmotionService implements EmotionService {
         return task.promise();
     }
 
-    protected abstract AsyncTask<List<Emotion>, EmotionException, Void>
+    protected abstract AsyncTask<List<Emotion>, AccessServiceException, Void>
     createGetEmotionListTask();
 
     @Override

@@ -3,10 +3,10 @@ package com.ubtrobot.motion.sal;
 import com.ubtrobot.async.AsyncTask;
 import com.ubtrobot.async.InterruptibleAsyncTask;
 import com.ubtrobot.async.Promise;
+import com.ubtrobot.exception.AccessServiceException;
 import com.ubtrobot.master.competition.InterruptibleTaskHelper;
 import com.ubtrobot.motion.Joint;
 import com.ubtrobot.motion.JointDevice;
-import com.ubtrobot.motion.JointDeviceException;
 import com.ubtrobot.motion.JointException;
 
 import java.util.List;
@@ -23,8 +23,8 @@ public abstract class AbstractMotionService implements MotionService {
     }
 
     @Override
-    public Promise<List<JointDevice>, JointDeviceException, Void> getJointList() {
-        AsyncTask<List<JointDevice>, JointDeviceException, Void> task = createGetJointListTask();
+    public Promise<List<JointDevice>, AccessServiceException, Void> getJointList() {
+        AsyncTask<List<JointDevice>, AccessServiceException, Void> task = createGetJointListTask();
         if (task == null) {
             throw new IllegalStateException("createGetJointListTask returns null.");
         }
@@ -33,7 +33,7 @@ public abstract class AbstractMotionService implements MotionService {
         return task.promise();
     }
 
-    protected abstract AsyncTask<List<JointDevice>, JointDeviceException, Void>
+    protected abstract AsyncTask<List<JointDevice>, AccessServiceException, Void>
     createGetJointListTask();
 
     @Override

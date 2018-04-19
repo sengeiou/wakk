@@ -1,16 +1,16 @@
 package com.ubtrobot.motion.sal;
 
 import com.ubtrobot.async.Promise;
+import com.ubtrobot.exception.AccessServiceException;
 import com.ubtrobot.motion.Joint;
 import com.ubtrobot.motion.JointDevice;
-import com.ubtrobot.motion.JointDeviceException;
 import com.ubtrobot.motion.JointException;
 
 import java.util.List;
 
 public interface MotionService {
 
-    Promise<List<JointDevice>, JointDeviceException, Void> getJointList();
+    Promise<List<JointDevice>, AccessServiceException, Void> getJointList();
 
     boolean isJointRotating(String jointId);
 

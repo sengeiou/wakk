@@ -48,6 +48,13 @@ public class InterruptibleTaskHelper {
         }
     }
 
+    public boolean isRunning(String receiver, String name) {
+        synchronized (mTasks) {
+            TaskEnv<?, ?, ?> taskEnv = mTasks.get(receiver);
+            return taskEnv != null && taskEnv.name.equals(name);
+        }
+    }
+
     @SuppressWarnings("unchecked")
     public <D> boolean resolve(String receiver, String name, D done) {
         synchronized (mTasks) {

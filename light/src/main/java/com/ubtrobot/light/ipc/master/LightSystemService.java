@@ -8,9 +8,11 @@ import com.google.protobuf.BoolValue;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.ubtrobot.async.Promise;
+import com.ubtrobot.exception.AccessServiceException;
 import com.ubtrobot.light.LightDevice;
 import com.ubtrobot.light.LightDeviceException;
 import com.ubtrobot.light.LightException;
+import com.ubtrobot.light.LightingEffect;
 import com.ubtrobot.light.ipc.LightConstants;
 import com.ubtrobot.light.ipc.LightConverters;
 import com.ubtrobot.light.ipc.LightProto;
@@ -29,11 +31,15 @@ import com.ubtrobot.master.service.MasterSystemService;
 import com.ubtrobot.transport.message.CallException;
 import com.ubtrobot.transport.message.Request;
 import com.ubtrobot.transport.message.Responder;
+import com.ubtrobot.ulog.FwLoggerFactory;
+import com.ubtrobot.ulog.Logger;
 
 import java.util.LinkedList;
 import java.util.List;
 
 public class LightSystemService extends MasterSystemService {
+
+    private static final Logger LOGGER = FwLoggerFactory.getLogger("LightSystemService");
 
     private LightService mService;
     private ProtoCallProcessAdapter mCallProcessor;
@@ -203,6 +209,32 @@ public class LightSystemService extends MasterSystemService {
                 new ProtoCompetingCallDelegate.FConverter<LightException>() {
                     @Override
                     public CallException convertFail(LightException e) {
+                        return new CallException(e.getCode(), e.getMessage());
+                    }
+                }
+        );
+    }
+
+    @Call(path = LightConstants.CALL_PATH_GET_LIGHTING_EFFECT_LIST)
+    public void onGetEffectList(Request request, Responder responder) {
+        mCallProcessor.onCall(
+                responder,
+                new CallProcessAdapter.Callable<List<LightingEffect>, AccessServiceException, Void>() {
+                    @Override
+                    public Promise<List<LightingEffect>, AccessServiceException, Void> call() {
+                        return mService.getEffectList();
+                    }
+                },
+                new ProtoCallProcessAdapter.DFConverter<
+                        List<LightingEffect>, AccessServiceException>() {
+                    @Override
+                    public Message convertDone(List<LightingEffect> effectList) {
+                        return LightConverters.toLightingEffectListProto(effectList);
+                    }
+
+                    @Override
+                    public CallException convertFail(AccessServiceException e) {
+                        LOGGER.e(e, "Get light effect list failed.");
                         return new CallException(e.getCode(), e.getMessage());
                     }
                 }

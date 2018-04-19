@@ -8,4 +8,5 @@
     <call path="/light/query-is-turn-on" />
     <call path="/light/color" />
     <call path="/light/color/change" />
+    <call path="/light/effect/list" />
 </service>

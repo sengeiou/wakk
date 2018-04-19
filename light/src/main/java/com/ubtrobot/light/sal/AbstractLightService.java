@@ -3,9 +3,11 @@ package com.ubtrobot.light.sal;
 import com.ubtrobot.async.AsyncTask;
 import com.ubtrobot.async.InterruptibleAsyncTask;
 import com.ubtrobot.async.Promise;
+import com.ubtrobot.exception.AccessServiceException;
 import com.ubtrobot.light.LightDevice;
 import com.ubtrobot.light.LightDeviceException;
 import com.ubtrobot.light.LightException;
+import com.ubtrobot.light.LightingEffect;
 import com.ubtrobot.master.competition.InterruptibleTaskHelper;
 
 import java.util.List;
@@ -132,6 +134,20 @@ public abstract class AbstractLightService implements LightService {
     }
 
     protected abstract int doGetColor(String lightId);
+
+    @Override
+    public Promise<List<LightingEffect>, AccessServiceException, Void> getEffectList() {
+        AsyncTask<List<LightingEffect>, AccessServiceException, Void> task = createGetEffectList();
+        if (task == null) {
+            throw new IllegalStateException("createGetEffectList return null.");
+        }
+
+        task.start();
+        return task.promise();
+    }
+
+    protected abstract AsyncTask<List<LightingEffect>, AccessServiceException, Void>
+    createGetEffectList();
 
     @Override
     public Promise<Void, LightException, Void> turnOff(final String lightId) {

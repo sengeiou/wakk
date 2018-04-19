@@ -19,6 +19,7 @@ public class LightManager {
     private final MasterContext mMasterContext;
 
     private final LightList mLightList;
+    private final LightingEffectList mEffectList;
 
     private final HashMap<String, CompetitionSessionExt<Light>> mLightSessions = new HashMap<>();
 
@@ -34,6 +35,7 @@ public class LightManager {
                 handler
         );
         mLightList = new LightList(lightService, handler);
+        mEffectList = new LightingEffectList(lightService);
     }
 
     public List<Light> getLightList() {
@@ -106,6 +108,14 @@ public class LightManager {
 
     public int getColor(String lightId) {
         return getLight(lightId).getColor();
+    }
+
+    public List<LightingEffect> getEffectList() {
+        return mEffectList.all();
+    }
+
+    public LightingEffect getEffect(String effectId) {
+        return mEffectList.get(effectId);
     }
 
     public Promise<Void, LightException, Void> turnOff(String lightId) {

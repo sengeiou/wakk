@@ -36,7 +36,7 @@ public class DownloadException extends AccessServiceException {
         return getCode() == CODE_NETWORK_TIMEOUT;
     }
 
-    public static class Factory extends AccessServiceException.Factory<DownloadException> {
+    public static class Factory extends GenericFactory<DownloadException> {
 
         @Override
         protected DownloadException

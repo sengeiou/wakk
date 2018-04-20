@@ -10,7 +10,7 @@ public class ExpressException extends AccessServiceCompetingItemException {
         super(code, message, detail, cause);
     }
 
-    public static class Factory extends AccessServiceCompetingItemException.Factory<ExpressException> {
+    public static class Factory extends GenericFactory<ExpressException> {
 
         @Override
         protected ExpressException

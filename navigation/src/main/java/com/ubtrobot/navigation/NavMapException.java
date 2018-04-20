@@ -10,7 +10,7 @@ public class NavMapException extends AccessServiceException {
         super(code, message, detail, cause);
     }
 
-    public static class Factory extends AccessServiceException.Factory<NavMapException> {
+    public static class Factory extends GenericFactory<NavMapException> {
 
         @Override
         protected NavMapException

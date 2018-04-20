@@ -26,7 +26,7 @@ public class DetectException extends AccessServiceException {
         return getCode() == CODE_SERVER_ERROR;
     }
 
-    public static class Factory extends AccessServiceException.Factory<DetectException> {
+    public static class Factory extends GenericFactory<DetectException> {
 
         @Override
         protected DetectException

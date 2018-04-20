@@ -10,7 +10,7 @@ public class JointException extends AccessServiceCompetingItemException {
         super(code, message, detail, cause);
     }
 
-    public static class Factory extends AccessServiceCompetingItemException.Factory<JointException> {
+    public static class Factory extends GenericFactory<JointException> {
 
         @Override
         protected JointException

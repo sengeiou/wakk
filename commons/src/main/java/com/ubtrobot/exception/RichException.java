@@ -2,7 +2,7 @@ package com.ubtrobot.exception;
 
 import android.os.Bundle;
 
-public abstract class RichException extends Exception {
+public class RichException extends Exception {
 
     private final int code;
     private volatile Bundle detail;
@@ -29,7 +29,16 @@ public abstract class RichException extends Exception {
         return detail;
     }
 
-    public abstract static class Factory<E extends RichException> {
+    public static class Factory extends GenericFactory<RichException> {
+
+        @Override
+        protected RichException
+        createException(int code, String message, Bundle detail, Throwable cause) {
+            return new RichException(code, message, detail, cause);
+        }
+    }
+
+    protected abstract static class GenericFactory<E extends RichException> {
 
         protected abstract E createException(
                 int code, String message,

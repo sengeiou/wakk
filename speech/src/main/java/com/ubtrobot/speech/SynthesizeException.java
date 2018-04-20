@@ -11,10 +11,11 @@ public class SynthesizeException extends AccessServiceCompetingItemException {
         super(code, message, detail, cause);
     }
 
-    public static class Factory extends AccessServiceCompetingItemException.Factory<SynthesizeException> {
+    public static class Factory extends GenericFactory<SynthesizeException> {
 
         @Override
-        protected SynthesizeException createException(int code, String message, Bundle detail, Throwable cause) {
+        protected SynthesizeException
+        createException(int code, String message, Bundle detail, Throwable cause) {
             return new SynthesizeException(code, message, detail, cause);
         }
     }

@@ -22,8 +22,17 @@ public class AccessServiceException extends RichException {
         return getCode() == CODE_INTERNAL_ERROR;
     }
 
-    public static abstract class Factory<E extends AccessServiceException>
-            extends RichException.Factory<E> {
+    public static class Factory extends GenericFactory<AccessServiceException> {
+
+        @Override
+        protected AccessServiceException
+        createException(int code, String message, Bundle detail, Throwable cause) {
+            return new AccessServiceException(code, message, detail, cause);
+        }
+    }
+
+    protected static abstract class GenericFactory<E extends AccessServiceException>
+            extends RichException.GenericFactory<E> {
 
         public E from(CallException e) {
             // TODO TODO 待 Master 更新 SDK 后，使用 e.getDetail

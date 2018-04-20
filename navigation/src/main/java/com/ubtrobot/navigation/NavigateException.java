@@ -3,7 +3,6 @@ package com.ubtrobot.navigation;
 import android.os.Bundle;
 
 import com.ubtrobot.exception.AccessServiceCompetingItemException;
-import com.ubtrobot.exception.AccessServiceException;
 
 public class NavigateException extends AccessServiceCompetingItemException {
 
@@ -11,7 +10,7 @@ public class NavigateException extends AccessServiceCompetingItemException {
         super(code, message, detail, cause);
     }
 
-    public static class Factory extends AccessServiceCompetingItemException.Factory<NavigateException> {
+    public static class Factory extends GenericFactory<NavigateException> {
 
         @Override
         protected NavigateException

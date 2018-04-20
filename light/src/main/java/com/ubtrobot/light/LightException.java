@@ -10,7 +10,7 @@ public class LightException extends AccessServiceCompetingItemException {
         super(code, message, detail, cause);
     }
 
-    public static class Factory extends AccessServiceCompetingItemException.Factory<LightException> {
+    public static class Factory extends GenericFactory<LightException> {
         @Override
         protected LightException
         createException(int code, String message, Bundle detail, Throwable cause) {

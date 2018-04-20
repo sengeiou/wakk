@@ -22,8 +22,17 @@ public class AccessServiceCompetingItemException extends AccessServiceException 
         return getCode() == CODE_OCCUPIED;
     }
 
-    public static abstract class Factory<E extends AccessServiceCompetingItemException>
-            extends AccessServiceException.Factory<E> {
+    public static class Factory extends GenericFactory<AccessServiceCompetingItemException> {
+
+        @Override
+        protected AccessServiceCompetingItemException
+        createException(int code, String message, Bundle detail, Throwable cause) {
+            return new AccessServiceCompetingItemException(code, message, detail, cause);
+        }
+    }
+
+    protected static abstract class GenericFactory<E extends AccessServiceCompetingItemException>
+            extends AccessServiceException.GenericFactory<E> {
 
         public E interrupted(String message) {
             return createException(CODE_INTERRUPTED, message);

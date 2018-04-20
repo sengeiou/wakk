@@ -10,7 +10,7 @@ public class LocateException extends AccessServiceCompetingItemException {
         super(code, message, detail, cause);
     }
 
-    public static class Factory extends AccessServiceCompetingItemException.Factory<LocateException> {
+    public static class Factory extends GenericFactory<LocateException> {
 
         @Override
         protected LocateException

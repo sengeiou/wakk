@@ -16,7 +16,7 @@ public class DownloadOperationException extends AccessServiceException {
         return getCode() == CODE_ILLEGAL_OPERATION;
     }
 
-    public static class Factory extends AccessServiceException.Factory<DownloadOperationException> {
+    public static class Factory extends GenericFactory<DownloadOperationException> {
 
         @Override
         protected DownloadOperationException

@@ -26,7 +26,7 @@ public class UpgradeException extends AccessServiceException {
         return getCode() == CODE_EXECUTING_UPGRADE_ERROR;
     }
 
-    public static class Factory extends AccessServiceException.Factory<UpgradeException> {
+    public static class Factory extends GenericFactory<UpgradeException> {
 
         @Override
         protected UpgradeException

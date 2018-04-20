@@ -57,7 +57,8 @@ public class SpeechManager {
         }
     }
 
-    public Promise<Void, SynthesizeException, Synthesizer.SynthesizingProgress> synthesize(final String sentence, final SynthesizeOption option) {
+    public Promise<Void, SynthesizeException, Synthesizer.SynthesizingProgress> synthesize(
+            final String sentence, final SynthesizeOption option) {
         return synthesizerSession().execute(mSynthesizer, new CompetitionSessionExt.SessionCallable<
                 Void, SynthesizeException, Synthesizer.SynthesizingProgress, Synthesizer>() {
             @Override
@@ -73,7 +74,8 @@ public class SpeechManager {
         });
     }
 
-    public Promise<Void, SynthesizeException, Synthesizer.SynthesizingProgress> synthesize(final String sentence) {
+    public Promise<Void, SynthesizeException, Synthesizer.SynthesizingProgress> synthesize(
+            final String sentence) {
         return synthesize(sentence, SynthesizeOption.DEFAULT);
     }
 

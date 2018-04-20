@@ -80,7 +80,8 @@ public class Synthesizer implements Competing {
                     }
 
                     @Override
-                    public SynthesizingProgress convertProgress(SpeechProto.SynthesizingProgress progress) {
+                    public SynthesizingProgress convertProgress(
+                            SpeechProto.SynthesizingProgress progress) {
                         return SpeechConverters.toSynthesizingProgressPojo(progress);
                     }
                 });

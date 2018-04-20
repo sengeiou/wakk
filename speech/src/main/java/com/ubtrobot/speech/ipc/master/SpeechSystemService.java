@@ -92,7 +92,9 @@ public class SpeechSystemService extends MasterSystemService {
                     @Override
                     public Promise<Void, SynthesizeException, Synthesizer.SynthesizingProgress>
                     call() throws CallException {
-                        return mSpeechService.synthesize(option.getSentence(), SpeechConverters.toSynthesizeOptionPojo(option));
+                        return mSpeechService.synthesize(
+                                option.getSentence(),
+                                SpeechConverters.toSynthesizeOptionPojo(option));
                     }
                 },
                 new ProtoCompetingCallDelegate.DFPConverter<

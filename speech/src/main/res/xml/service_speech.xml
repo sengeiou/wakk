@@ -5,4 +5,6 @@
 
     <call path="/speech/synthesize" />
     <call path="/speech/synthesize/doing" />
+    <call path="/speech/recognize" />
+    <call path="/speech/recognize/doing" />
 </service>

@@ -20,7 +20,10 @@ public class SpeechManager {
 
     private final MasterContext mMasterContext;
     private final Synthesizer mSynthesizer;
+    private final Recognizer mRecognizer;
+
     private volatile CompetitionSessionExt mSynthesizerSession;
+    private volatile CompetitionSessionExt<Recognizer> mRecognizeSession;
 
     private Handler mHandler;
 
@@ -38,6 +41,7 @@ public class SpeechManager {
         );
 
         mSynthesizer = new Synthesizer(mSpeechService, mHandler);
+        mRecognizer = new Recognizer(mSpeechService, mHandler);
     }
 
     private CompetitionSessionExt<Synthesizer> synthesizerSession() {
@@ -81,5 +85,46 @@ public class SpeechManager {
 
     public Synthesizer synthesizer() {
         return mSynthesizer;
+    }
+
+    private CompetitionSessionExt<Recognizer> recognizerSession() {
+        if (mRecognizeSession != null) {
+            return mRecognizeSession;
+        }
+
+        synchronized (this) {
+            if (mRecognizeSession != null) {
+                return mRecognizeSession;
+            }
+
+            mRecognizeSession = new CompetitionSessionExt<>(
+                    mMasterContext.openCompetitionSession().addCompeting(mRecognizer));
+            return mRecognizeSession;
+        }
+    }
+
+    public Recognizer recognizer() {
+        return mRecognizer;
+    }
+
+    public Promise<Recognizer.RecognizeResult, RecognizeException, Recognizer.RecognizingProgress> recognize(
+            final RecognizeOption option) {
+        return recognizerSession().execute(mRecognizer, new CompetitionSessionExt.SessionCallable<
+                Recognizer.RecognizeResult, RecognizeException, Recognizer.RecognizingProgress, Recognizer>() {
+            @Override
+            public Promise<Recognizer.RecognizeResult, RecognizeException, Recognizer.RecognizingProgress>
+            call(CompetitionSession session, Recognizer competing) {
+                return mRecognizer.recognize(session, option);
+            }
+        }, new CompetitionSessionExt.Converter<RecognizeException>() {
+            @Override
+            public RecognizeException convert(ActivateException e) {
+                return new RecognizeException.Factory().occupied(e);
+            }
+        });
+    }
+
+    public Promise<Recognizer.RecognizeResult, RecognizeException, Recognizer.RecognizingProgress> recognize() {
+        return recognize(RecognizeOption.DEFAULT);
     }
 }

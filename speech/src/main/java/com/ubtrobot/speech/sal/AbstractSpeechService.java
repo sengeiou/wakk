@@ -3,6 +3,9 @@ package com.ubtrobot.speech.sal;
 import com.ubtrobot.async.InterruptibleAsyncTask;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.master.competition.InterruptibleTaskHelper;
+import com.ubtrobot.speech.RecognizeException;
+import com.ubtrobot.speech.RecognizeOption;
+import com.ubtrobot.speech.Recognizer;
 import com.ubtrobot.speech.SynthesizeException;
 import com.ubtrobot.speech.SynthesizeOption;
 import com.ubtrobot.speech.Synthesizer;
@@ -17,6 +20,9 @@ public abstract class AbstractSpeechService implements SpeechService {
 
     private static final String TASK_RECEIVER_SYNTHESIZER = "receiver_synthesizer";
     private static final String TASK_NAME_SYNTHESIZE = "synthesize";
+
+    private static final String TASK_RECEIVER_RECOGNIZER = "receiver_recognizer";
+    private static final String TASK_NAME_RECOGNIZE = "recognize";
 
     private final InterruptibleTaskHelper mInterruptibleTaskHelper;
 
@@ -80,5 +86,62 @@ public abstract class AbstractSpeechService implements SpeechService {
     @Override
     public boolean isSynthesizing() {
         return mInterruptibleTaskHelper.isRunning(TASK_RECEIVER_SYNTHESIZER, TASK_NAME_SYNTHESIZE);
+    }
+
+    @Override
+    public Promise<Recognizer.RecognizeResult, RecognizeException, Recognizer.RecognizingProgress> recognize(
+            final RecognizeOption option) {
+        return mInterruptibleTaskHelper.start(TASK_RECEIVER_RECOGNIZER, TASK_NAME_RECOGNIZE,
+                new InterruptibleAsyncTask<
+                        Recognizer.RecognizeResult,
+                        RecognizeException,
+                        Recognizer.RecognizingProgress>() {
+                    @Override
+                    protected void onCancel() {
+                        stopRecognizing();
+                    }
+
+                    @Override
+                    protected void onStart() {
+                        startRecognizing(option);
+                    }
+                },
+                new InterruptibleTaskHelper.InterruptedExceptionCreator<RecognizeException>() {
+                    @Override
+                    public RecognizeException createInterruptedException(Set<String> interrupters) {
+                        return new RecognizeException.Factory().interrupted(
+                                "Interrupted by " + interrupters);
+                    }
+                });
+    }
+
+    protected abstract void startRecognizing(RecognizeOption option);
+
+    protected abstract void stopRecognizing();
+
+    @Override
+    public boolean isRecognizing() {
+        return mInterruptibleTaskHelper.isRunning(TASK_RECEIVER_RECOGNIZER, TASK_NAME_RECOGNIZE);
+    }
+
+    public void notifyRecognizingProgress(Recognizer.RecognizingProgress progress) {
+        mInterruptibleTaskHelper.notify(TASK_RECEIVER_RECOGNIZER, TASK_NAME_RECOGNIZE, progress);
+    }
+
+    public void resolveRecognizing(Recognizer.RecognizeResult done) {
+        mInterruptibleTaskHelper.resolve(TASK_RECEIVER_RECOGNIZER, TASK_NAME_RECOGNIZE, done);
+    }
+
+    /**
+     * Abort Stop 的情况统一回调这里
+     *
+     * @param e
+     */
+    public void rejectRecognizing(final RecognizeException e) {
+        if (null == e) {
+            throw new IllegalArgumentException("RecognizeException must not be null.");
+        }
+
+        mInterruptibleTaskHelper.reject(TASK_RECEIVER_RECOGNIZER, TASK_NAME_RECOGNIZE, e);
     }
 }

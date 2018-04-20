@@ -8,10 +8,23 @@ message SynthesizeOption {
     string speaker_id = 2;
     int32 speak_speed = 3;
     int32 speak_volume = 4;
-
 }
 
 message SynthesizingProgress {
     int32 state = 1;
     float progress = 2;
+}
+
+message RecognizingProgress {
+    int32 state = 1;
+    int32 volume = 2;
+    RecognizeResult result = 3;
+}
+
+message RecognizeResult {
+    string text = 1;
+}
+
+message RecognizeOption {
+    int32 mode = 1;
 }

@@ -15,6 +15,9 @@ import com.ubtrobot.master.competition.CompetitionSessionInfo;
 import com.ubtrobot.master.competition.ProtoCompetingCallDelegate;
 import com.ubtrobot.master.param.ProtoParam;
 import com.ubtrobot.master.service.MasterSystemService;
+import com.ubtrobot.speech.RecognizeException;
+import com.ubtrobot.speech.RecognizeOption;
+import com.ubtrobot.speech.Recognizer;
 import com.ubtrobot.speech.SynthesizeException;
 import com.ubtrobot.speech.Synthesizer;
 import com.ubtrobot.speech.ipc.SpeechConstant;
@@ -64,10 +67,16 @@ public class SpeechSystemService extends MasterSystemService {
     @Override
     protected List<CompetingItemDetail> getCompetingItems() {
         List<CompetingItemDetail> list = new LinkedList<>();
-        list.add(new CompetingItemDetail.Builder(SpeechConstant.SERVICE_NAME, SpeechConstant.COMPETING_ITEM_SYNTHESIZER).
-                setDescription("the synthesize competing item").
-                addCallPath(SpeechConstant.CALL_PATH_SYNTHESIZE).
-                build());
+        list.add(new CompetingItemDetail.Builder(SpeechConstant.SERVICE_NAME, SpeechConstant.COMPETING_ITEM_SYNTHESIZER)
+                .setDescription("the synthesize competing item")
+                .addCallPath(SpeechConstant.CALL_PATH_SYNTHESIZE)
+                .build());
+
+        list.add(new CompetingItemDetail.Builder(SpeechConstant.SERVICE_NAME, SpeechConstant.COMPETING_ITEM_RECOGNIZER)
+                .setDescription("the recognize competing item")
+                .addCallPath(SpeechConstant.CALL_PATH_RECOGNIZE)
+                .build());
+
         return list;
 
     }
@@ -120,6 +129,58 @@ public class SpeechSystemService extends MasterSystemService {
     public void isSynthesizing(Request request, Responder responder) {
         responder.respondSuccess(ProtoParam.create(BoolValue.newBuilder()
                 .setValue(mSpeechService.isSynthesizing())
+                .build()));
+    }
+
+    @Call(path = SpeechConstant.CALL_PATH_RECOGNIZE)
+    public void recognize(Request request, Responder responder) {
+        final SpeechProto.RecognizeOption protoOption = ProtoParamParser.parseParam(
+                request,
+                SpeechProto.RecognizeOption.class,
+                responder
+        );
+
+        if (protoOption == null) {
+            LOGGER.w("recognize option == null");
+            return;
+        }
+
+        final RecognizeOption option = SpeechConverters.toRecognizeOptionPojo(protoOption);
+        mCompetingCallDelegate.onCall(
+                request,
+                SpeechConstant.COMPETING_ITEM_RECOGNIZER,
+                responder,
+                new CompetingCallDelegate.SessionCallable<
+                        Recognizer.RecognizeResult, RecognizeException, Recognizer.RecognizingProgress>() {
+                    @Override
+                    public Promise<Recognizer.RecognizeResult, RecognizeException, Recognizer.RecognizingProgress>
+                    call() throws CallException {
+                        return mSpeechService.recognize(option);
+                    }
+                },
+                new ProtoCompetingCallDelegate.DFPConverter<
+                        Recognizer.RecognizeResult, RecognizeException, Recognizer.RecognizingProgress>() {
+                    @Override
+                    public Message convertDone(Recognizer.RecognizeResult done) {
+                        return SpeechConverters.toRecognizeResultProto(done);
+                    }
+
+                    @Override
+                    public CallException convertFail(RecognizeException fail) {
+                        return new CallException(fail.getCode(), fail.getMessage());
+                    }
+
+                    @Override
+                    public Message convertProgress(Recognizer.RecognizingProgress progress) {
+                        return SpeechConverters.toRecognizingProgressProto(progress);
+                    }
+                });
+    }
+
+    @Call(path = SpeechConstant.CALL_PATH_RECOGNIZING)
+    public void isRecognizing(Request request, Responder responder) {
+        responder.respondSuccess(ProtoParam.create(BoolValue.newBuilder()
+                .setValue(mSpeechService.isRecognizing())
                 .build()));
     }
 

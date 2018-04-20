@@ -6,11 +6,11 @@ public class SynthesizeOption {
 
     public static final SynthesizeOption DEFAULT = new SynthesizeOption.Builder().build();
 
-    private static final int SPEAKING_SPEED_MAX = 100;
-    private static final int SPEAKING_SPEED_MIN = 0;
+    public static final int SPEAKING_SPEED_MAX = 100;
+    public static final int SPEAKING_SPEED_MIN = 0;
 
-    private static final int SPEAKING_VOLUME_MAX = 100;
-    private static final int SPEAKING_VOLUME_MIN = 0;
+    public static final int SPEAKING_VOLUME_MAX = 100;
+    public static final int SPEAKING_VOLUME_MIN = 0;
 
     private String speakerId;
     private int speakingSpeed;

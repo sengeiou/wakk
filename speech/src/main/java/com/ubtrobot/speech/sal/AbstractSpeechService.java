@@ -9,6 +9,8 @@ import com.ubtrobot.speech.Synthesizer;
 import com.ubtrobot.ulog.FwLoggerFactory;
 import com.ubtrobot.ulog.Logger;
 
+import java.util.Set;
+
 public abstract class AbstractSpeechService implements SpeechService {
 
     private static final Logger LOGGER = FwLoggerFactory.getLogger("AbstractSpeechService");
@@ -25,8 +27,10 @@ public abstract class AbstractSpeechService implements SpeechService {
     @Override
     public Promise<Void, SynthesizeException, Synthesizer.SynthesizingProgress>
     synthesize(final String sentence, final SynthesizeOption option) {
-        return mInterruptibleTaskHelper.start(TASK_RECEIVER_SYNTHESIZER, TASK_NAME_SYNTHESIZE,
-                new InterruptibleAsyncTask<Void, SynthesizeException, Synthesizer.SynthesizingProgress>() {
+        return mInterruptibleTaskHelper.start(
+                TASK_RECEIVER_SYNTHESIZER, TASK_NAME_SYNTHESIZE,
+                new InterruptibleAsyncTask<
+                        Void, SynthesizeException, Synthesizer.SynthesizingProgress>() {
                     @Override
                     protected void onCancel() {
                         stopSynthesizing();
@@ -36,13 +40,16 @@ public abstract class AbstractSpeechService implements SpeechService {
                     protected void onStart() {
                         startSynthesizing(sentence, option);
                     }
-                }, new InterruptibleTaskHelper.InterruptedExceptionCreator<SynthesizeException>() {
+                },
+                new InterruptibleTaskHelper.InterruptedExceptionCreator<SynthesizeException>() {
                     @Override
-                    public SynthesizeException createInterruptedException(String interrupter) {
-                        return new SynthesizeException.Factory().interrupted("Interrupt the " +
-                                interrupter + " task.");
+                    public SynthesizeException
+                    createInterruptedException(Set<String> interrupters) {
+                        return new SynthesizeException.Factory().interrupted(
+                                "Interrupted by " + interrupters);
                     }
-                });
+                }
+        );
     }
 
     protected abstract void startSynthesizing(String sentence, SynthesizeOption option);

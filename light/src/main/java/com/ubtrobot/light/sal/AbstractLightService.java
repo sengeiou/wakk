@@ -10,6 +10,7 @@ import com.ubtrobot.light.LightingEffect;
 import com.ubtrobot.master.competition.InterruptibleTaskHelper;
 
 import java.util.List;
+import java.util.Set;
 
 public abstract class AbstractLightService implements LightService {
 
@@ -56,9 +57,10 @@ public abstract class AbstractLightService implements LightService {
                 },
                 new InterruptibleTaskHelper.InterruptedExceptionCreator<LightException>() {
                     @Override
-                    public LightException createInterruptedException(String interrupter) {
-                        return new LightException.Factory().interrupted("Interrupt the " +
-                                interrupter + " task.");
+                    public LightException
+                    createInterruptedException(Set<String> interrupters) {
+                        return new LightException.Factory().interrupted(
+                                "Interrupted by " + interrupters);
                     }
                 }
         );
@@ -103,9 +105,10 @@ public abstract class AbstractLightService implements LightService {
                 },
                 new InterruptibleTaskHelper.InterruptedExceptionCreator<LightException>() {
                     @Override
-                    public LightException createInterruptedException(String interrupter) {
-                        return new LightException.Factory().interrupted("Interrupt the " +
-                                interrupter + " task.");
+                    public LightException
+                    createInterruptedException(Set<String> interrupters) {
+                        return new LightException.Factory().interrupted(
+                                "Interrupted by " + interrupters);
                     }
                 }
         );
@@ -166,9 +169,10 @@ public abstract class AbstractLightService implements LightService {
                 },
                 new InterruptibleTaskHelper.InterruptedExceptionCreator<LightException>() {
                     @Override
-                    public LightException createInterruptedException(String interrupter) {
-                        return new LightException.Factory().interrupted("Interrupt the " +
-                                interrupter + " task.");
+                    public LightException
+                    createInterruptedException(Set<String> interrupters) {
+                        return new LightException.Factory().interrupted(
+                                "Interrupted by " + interrupters);
                     }
                 }
         );

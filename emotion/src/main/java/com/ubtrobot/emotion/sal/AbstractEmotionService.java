@@ -10,6 +10,7 @@ import com.ubtrobot.exception.AccessServiceException;
 import com.ubtrobot.master.competition.InterruptibleTaskHelper;
 
 import java.util.List;
+import java.util.Set;
 
 public abstract class AbstractEmotionService implements EmotionService {
 
@@ -56,9 +57,10 @@ public abstract class AbstractEmotionService implements EmotionService {
                 },
                 new InterruptibleTaskHelper.InterruptedExceptionCreator<ExpressException>() {
                     @Override
-                    public ExpressException createInterruptedException(String interrupter) {
-                        return new ExpressException.Factory().interrupted("Interrupt the " +
-                                interrupter + " task.");
+                    public ExpressException
+                    createInterruptedException(Set<String> interrupters) {
+                        return new ExpressException.Factory().interrupted(
+                                "Interrupted by " + interrupters);
                     }
                 }
         );
@@ -96,9 +98,10 @@ public abstract class AbstractEmotionService implements EmotionService {
                 },
                 new InterruptibleTaskHelper.InterruptedExceptionCreator<ExpressException>() {
                     @Override
-                    public ExpressException createInterruptedException(String interrupter) {
-                        return new ExpressException.Factory().interrupted("Interrupt the " +
-                                interrupter + " task.");
+                    public ExpressException
+                    createInterruptedException(Set<String> interrupters) {
+                        return new ExpressException.Factory().interrupted(
+                                "Interrupted by " + interrupters);
                     }
                 }
         );

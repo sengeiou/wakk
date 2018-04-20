@@ -10,6 +10,7 @@ import com.ubtrobot.motion.JointDevice;
 import com.ubtrobot.motion.JointException;
 
 import java.util.List;
+import java.util.Set;
 
 public abstract class AbstractMotionService implements MotionService {
 
@@ -69,9 +70,10 @@ public abstract class AbstractMotionService implements MotionService {
                 task,
                 new InterruptibleTaskHelper.InterruptedExceptionCreator<JointException>() {
                     @Override
-                    public JointException createInterruptedException(String interrupter) {
-                        return new JointException.Factory().interrupted("Interrupt the " +
-                                interrupter + " task.");
+                    public JointException
+                    createInterruptedException(Set<String> interrupters) {
+                        return new JointException.Factory().interrupted(
+                                "Interrupted by " + interrupters);
                     }
                 }
         );

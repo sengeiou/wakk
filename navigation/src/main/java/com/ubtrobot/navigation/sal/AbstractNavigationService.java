@@ -16,6 +16,7 @@ import com.ubtrobot.navigation.NavigateOption;
 import com.ubtrobot.navigation.Navigator;
 
 import java.util.List;
+import java.util.Set;
 
 public abstract class AbstractNavigationService implements NavigationService {
 
@@ -116,9 +117,10 @@ public abstract class AbstractNavigationService implements NavigationService {
                 },
                 new InterruptibleTaskHelper.InterruptedExceptionCreator<LocateException>() {
                     @Override
-                    public LocateException createInterruptedException(String interrupter) {
-                        return new LocateException.Factory().interrupted("Interrupt the " +
-                                interrupter + " task.");
+                    public LocateException
+                    createInterruptedException(Set<String> interrupters) {
+                        return new LocateException.Factory().interrupted(
+                                "Interrupted by " + interrupters);
                     }
                 }
         );
@@ -163,9 +165,10 @@ public abstract class AbstractNavigationService implements NavigationService {
                 },
                 new InterruptibleTaskHelper.InterruptedExceptionCreator<NavigateException>() {
                     @Override
-                    public NavigateException createInterruptedException(String interrupter) {
-                        return new NavigateException.Factory().interrupted("Interrupt the " +
-                                interrupter + " task.");
+                    public NavigateException
+                    createInterruptedException(Set<String> interrupters) {
+                        return new NavigateException.Factory().interrupted(
+                                "Interrupted by " + interrupters);
                     }
                 }
         );

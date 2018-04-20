@@ -38,7 +38,8 @@ public class Synthesizer implements Competing {
                 (SpeechConstant.SERVICE_NAME, SpeechConstant.COMPETING_ITEM_SYNTHESIZER));
     }
 
-    Promise<Void, SynthesizeException, SynthesizingProgress> synthesize(CompetitionSession session, String sentence, final SynthesizeOption option) {
+    public Promise<Void, SynthesizeException, SynthesizingProgress> synthesize(
+            CompetitionSession session, String sentence, final SynthesizeOption option) {
         checkSession(session);
 
         LOGGER.i("call synthesize");

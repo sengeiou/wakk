@@ -9,4 +9,5 @@
     <call path="/light/color" />
     <call path="/light/color/change" />
     <call path="/light/effect/list" />
+    <call path="/light/effect/display" />
 </service>

@@ -73,4 +73,19 @@ public class LightConverters {
 
         return builder.build();
     }
+
+    public static LightProto.DisplayOption
+    toDisplayOptionProto(List<String> lightIds, String effectId, DisplayOption option) {
+        LightProto.DisplayOption.Builder builder = LightProto.DisplayOption.newBuilder();
+        for (String lightId : lightIds) {
+            builder.addLightId(lightId);
+        }
+
+        return builder.setLoops(option.getLoops()).setEffectId(effectId).build();
+    }
+
+    public static DisplayOption
+    toDisplayOptionPojo(LightProto.DisplayOption option) {
+        return new DisplayOption.Builder().setLoops(option.getLoops()).build();
+    }
 }

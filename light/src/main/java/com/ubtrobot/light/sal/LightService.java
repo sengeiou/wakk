@@ -2,6 +2,8 @@ package com.ubtrobot.light.sal;
 
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.exception.AccessServiceException;
+import com.ubtrobot.light.DisplayException;
+import com.ubtrobot.light.DisplayOption;
 import com.ubtrobot.light.LightDevice;
 import com.ubtrobot.light.LightException;
 import com.ubtrobot.light.LightingEffect;
@@ -23,4 +25,7 @@ public interface LightService {
     Promise<Void, LightException, Void> turnOff(String lightId);
 
     Promise<List<LightingEffect>, AccessServiceException, Void> getEffectList();
+
+    Promise<Void, DisplayException, Void> display(
+            List<String> lightIds, String effectId, DisplayOption option);
 }

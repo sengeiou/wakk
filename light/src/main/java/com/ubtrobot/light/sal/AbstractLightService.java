@@ -4,11 +4,14 @@ import com.ubtrobot.async.AsyncTask;
 import com.ubtrobot.async.InterruptibleAsyncTask;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.exception.AccessServiceException;
+import com.ubtrobot.light.DisplayException;
+import com.ubtrobot.light.DisplayOption;
 import com.ubtrobot.light.LightDevice;
 import com.ubtrobot.light.LightException;
 import com.ubtrobot.light.LightingEffect;
 import com.ubtrobot.master.competition.InterruptibleTaskHelper;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -17,6 +20,7 @@ public abstract class AbstractLightService implements LightService {
     private static final String TASK_RECEIVER_LIGHT_PREFIX = "light-";
     private static final String TASK_NAME_TURN_ON = "turn-on";
     private static final String TASK_NAME_CHANGE_COLOR = "change-color";
+    private static final String TASK_NAME_DISPLAY_EFFECT = "display-effect";
     private static final String TASK_NAME_TURN_OFF = "turn-off";
 
     private final InterruptibleTaskHelper mInterruptibleTaskHelper;
@@ -150,6 +154,64 @@ public abstract class AbstractLightService implements LightService {
 
     protected abstract AsyncTask<List<LightingEffect>, AccessServiceException, Void>
     createGetEffectList();
+
+    @Override
+    public Promise<Void, DisplayException, Void>
+    display(final List<String> lightIds, final String effectId, final DisplayOption option) {
+        return mInterruptibleTaskHelper.start(
+                lightsReceivers(lightIds),
+                TASK_NAME_DISPLAY_EFFECT,
+                new InterruptibleAsyncTask<Void, DisplayException, Void>() {
+                    @Override
+                    protected void onStart() {
+                        startDisplayingEffect(lightIds, effectId, option);
+                    }
+
+                    @Override
+                    protected void onCancel() {
+                        // Ignore
+                    }
+                },
+                new InterruptibleTaskHelper.InterruptedExceptionCreator<DisplayException>() {
+                    @Override
+                    public DisplayException createInterruptedException(Set<String> interrupters) {
+                        return new DisplayException.Factory().interrupted(
+                                "Interrupted by " + interrupters);
+                    }
+                }
+        );
+    }
+
+    private List<String> lightsReceivers(List<String> lightIds) {
+        LinkedList<String> receivers = new LinkedList<>();
+        for (String lightId : lightIds) {
+            receivers.add(TASK_RECEIVER_LIGHT_PREFIX + lightId);
+        }
+        return receivers;
+    }
+
+    protected abstract void
+    startDisplayingEffect(List<String> lightIds, String effectId, DisplayOption options);
+
+    public void resolveDisplayingEffect(List<String> lightIds) {
+        if (lightIds == null || lightIds.isEmpty()) {
+            throw new IllegalArgumentException("Argument lightIds is null or an empty list.");
+        }
+
+        mInterruptibleTaskHelper.resolve(lightsReceivers(lightIds), TASK_NAME_DISPLAY_EFFECT, null);
+    }
+
+    public void rejectDisplayingEffect(List<String> lightIds, DisplayException e) {
+        if (lightIds == null || lightIds.isEmpty()) {
+            throw new IllegalArgumentException("Argument lightIds is null or an empty list.");
+        }
+        if (e == null) {
+            throw new IllegalArgumentException("Argument e is null.");
+        }
+
+        mInterruptibleTaskHelper.reject(lightsReceivers(lightIds), TASK_NAME_DISPLAY_EFFECT, e);
+
+    }
 
     @Override
     public Promise<Void, LightException, Void> turnOff(final String lightId) {

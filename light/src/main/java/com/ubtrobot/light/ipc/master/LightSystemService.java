@@ -9,6 +9,7 @@ import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.exception.AccessServiceException;
+import com.ubtrobot.light.DisplayException;
 import com.ubtrobot.light.LightDevice;
 import com.ubtrobot.light.LightException;
 import com.ubtrobot.light.LightingEffect;
@@ -234,6 +235,39 @@ public class LightSystemService extends MasterSystemService {
                     @Override
                     public CallException convertFail(AccessServiceException e) {
                         LOGGER.e(e, "Get light effect list failed.");
+                        return new CallException(e.getCode(), e.getMessage());
+                    }
+                }
+        );
+    }
+
+    @Call(path = LightConstants.CALL_PATH_DISPLAY_LIGHTING_EFFECT)
+    public void onDisplayEffect(Request request, Responder responder) {
+        final LightProto.DisplayOption option = ProtoParamParser.parseParam(request,
+                LightProto.DisplayOption.class, responder);
+        if (option == null) {
+            return;
+        }
+
+        LinkedList<String> competingItemIds = new LinkedList<>();
+        for (String lightId : option.getLightIdList()) {
+            competingItemIds.add(LightConstants.COMPETING_ITEM_PREFIX_LIGHT + lightId);
+        }
+
+        mCompetingCallDelegate.onCall(
+                request,
+                competingItemIds,
+                responder,
+                new CompetingCallDelegate.SessionCallable<Void, DisplayException, Void>() {
+                    @Override
+                    public Promise<Void, DisplayException, Void> call() throws CallException {
+                        return mService.display(option.getLightIdList(), option.getEffectId(),
+                                LightConverters.toDisplayOptionPojo(option));
+                    }
+                },
+                new ProtoCompetingCallDelegate.FConverter<DisplayException>() {
+                    @Override
+                    public CallException convertFail(DisplayException e) {
                         return new CallException(e.getCode(), e.getMessage());
                     }
                 }

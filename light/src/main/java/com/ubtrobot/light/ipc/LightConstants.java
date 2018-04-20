@@ -16,4 +16,5 @@ public class LightConstants {
     public static final String CALL_PATH_GET_COLOR = "/light/color";
     public static final String CALL_PATH_CHANGE_COLOR = "/light/color/change";
     public static final String CALL_PATH_GET_LIGHTING_EFFECT_LIST = "/light/effect/list";
+    public static final String CALL_PATH_DISPLAY_LIGHTING_EFFECT = "/light/effect/display";
 }

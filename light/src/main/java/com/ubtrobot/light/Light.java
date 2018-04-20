@@ -81,7 +81,7 @@ public class Light implements Competing {
         }
 
         if (!session.containsCompeting(this)) {
-            throw new IllegalArgumentException("The competition session does NOT contain the expresser.");
+            throw new IllegalArgumentException("The competition session does NOT contain the light.");
         }
     }
 

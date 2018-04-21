@@ -15,7 +15,6 @@ import com.ubtrobot.speech.understand.UnderstandResult;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -309,6 +308,4 @@ public class SpeechConverters {
                 .setRecognizingMode(configuration.getRecognizeMode())
                 .setUnderstandTimeout(configuration.getUnderstandTimeout())
                 .build();
-
-    }
 }

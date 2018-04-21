@@ -8,4 +8,5 @@
     <call path="/speech/recognize" />
     <call path="/speech/recognize/doing" />
     <call path="/speech/understand" />
+    <call path="/speech/speaker/list" />
 </service>

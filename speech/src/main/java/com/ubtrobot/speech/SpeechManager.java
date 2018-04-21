@@ -14,6 +14,8 @@ import com.ubtrobot.speech.ipc.SpeechConstant;
 import com.ubtrobot.ulog.FwLoggerFactory;
 import com.ubtrobot.ulog.Logger;
 
+import java.util.List;
+
 public class SpeechManager {
 
     private Logger LOGGER = FwLoggerFactory.getLogger("SpeechManager");
@@ -22,6 +24,8 @@ public class SpeechManager {
     private final Synthesizer mSynthesizer;
     private final Recognizer mRecognizer;
     private final Understander mUnderstander;
+
+    private final SpeakerList mSpeakerList;
 
     private volatile CompetitionSessionExt mSynthesizerSession;
     private volatile CompetitionSessionExt<Recognizer> mRecognizeSession;
@@ -44,6 +48,7 @@ public class SpeechManager {
         mSynthesizer = new Synthesizer(mSpeechService, mHandler);
         mRecognizer = new Recognizer(mSpeechService, mHandler);
         mUnderstander = new Understander(mSpeechService, mHandler);
+        mSpeakerList = new SpeakerList(mSpeechService);
     }
 
     private CompetitionSessionExt<Synthesizer> synthesizerSession() {
@@ -61,6 +66,10 @@ public class SpeechManager {
 
             return mSynthesizerSession;
         }
+    }
+
+    public List<Speaker> getSpeakerList() {
+        return mSpeakerList.all();
     }
 
     public Promise<Void, SynthesizeException, Synthesizer.SynthesizingProgress> synthesize(

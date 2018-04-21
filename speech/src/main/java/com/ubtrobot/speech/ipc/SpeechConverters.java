@@ -4,10 +4,15 @@ import android.text.TextUtils;
 
 import com.ubtrobot.speech.RecognizeOption;
 import com.ubtrobot.speech.Recognizer;
+import com.ubtrobot.speech.Speaker;
 import com.ubtrobot.speech.SynthesizeOption;
 import com.ubtrobot.speech.Synthesizer;
 import com.ubtrobot.speech.UnderstandOption;
 import com.ubtrobot.speech.Understander;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 public class SpeechConverters {
 
@@ -67,7 +72,9 @@ public class SpeechConverters {
 
     public static Recognizer.RecognizingProgress toRecognizingProgressPojo
             (SpeechProto.RecognizingProgress progress) {
-        Recognizer.RecognizingProgress.Builder builder = new Recognizer.RecognizingProgress.Builder(progress.getState());
+        Recognizer.RecognizingProgress.Builder builder = new Recognizer.RecognizingProgress.Builder(
+                progress.getState());
+
         if (progress.getState() == Recognizer.RecognizingProgress.STATE_RESULT) {
             builder.setResult(toRecognizeResultPojo(progress.getResult()));
 
@@ -122,4 +129,42 @@ public class SpeechConverters {
                 .setTimeout(option.getTimeOut())
                 .build();
     }
+
+    public static Speaker toSpeakerPojo(SpeechProto.Speaker speaker) {
+        return new Speaker.Builder(speaker.getId())
+                .setName(speaker.getName())
+                .setGender(speaker.getGender())
+                .build();
+    }
+
+    public static SpeechProto.Speaker toSpeakerProto(Speaker speaker) {
+        return SpeechProto.Speaker.newBuilder()
+                .setName(speaker.getName())
+                .setId(speaker.getId())
+                .setGender(speaker.getGender())
+                .build();
+    }
+
+    public static List<Speaker> toSpeakersPojo(SpeechProto.Speakers speakers) {
+        LinkedList<Speaker> list = new LinkedList<>();
+        for (SpeechProto.Speaker speaker : speakers.getSpeakersList()) {
+            list.add(toSpeakerPojo(speaker));
+        }
+        return list;
+    }
+
+    public static SpeechProto.Speakers toSpeakersProto(List<Speaker> speakers) {
+        if (null == speakers) {
+            throw new IllegalArgumentException("SpeechConverters refuse null param");
+        }
+
+        SpeechProto.Speakers.Builder builder = SpeechProto.Speakers.newBuilder();
+        for (Speaker speaker : speakers) {
+            builder.addSpeakers(toSpeakerProto(speaker));
+        }
+
+        return builder.build();
+    }
+
+
 }

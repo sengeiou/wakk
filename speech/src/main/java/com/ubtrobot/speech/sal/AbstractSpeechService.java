@@ -4,10 +4,12 @@ import com.ubtrobot.async.AsyncTask;
 import com.ubtrobot.async.CancelableAsyncTask;
 import com.ubtrobot.async.InterruptibleAsyncTask;
 import com.ubtrobot.async.Promise;
+import com.ubtrobot.exception.AccessServiceException;
 import com.ubtrobot.master.competition.InterruptibleTaskHelper;
 import com.ubtrobot.speech.RecognizeException;
 import com.ubtrobot.speech.RecognizeOption;
 import com.ubtrobot.speech.Recognizer;
+import com.ubtrobot.speech.Speaker;
 import com.ubtrobot.speech.SynthesizeException;
 import com.ubtrobot.speech.SynthesizeOption;
 import com.ubtrobot.speech.Synthesizer;
@@ -17,6 +19,7 @@ import com.ubtrobot.speech.Understander;
 import com.ubtrobot.ulog.FwLoggerFactory;
 import com.ubtrobot.ulog.Logger;
 
+import java.util.List;
 import java.util.Set;
 
 public abstract class AbstractSpeechService implements SpeechService {
@@ -163,4 +166,18 @@ public abstract class AbstractSpeechService implements SpeechService {
     }
 
     protected abstract CancelableAsyncTask<Understander.UnderstandResult, UnderstandException, Void> createUnderstandTask(String question, UnderstandOption option);
+
+    @Override
+    public Promise<List<Speaker>, AccessServiceException, Void> getSpeakerList() {
+        AsyncTask<List<Speaker>, AccessServiceException, Void> task = createGetSpeakerListTask();
+
+        if (task == null) {
+            throw new IllegalStateException("createGetSpeakerListTask return null.");
+        }
+
+        task.start();
+        return task.promise();
+    }
+
+    protected abstract AsyncTask<List<Speaker>, AccessServiceException, Void> createGetSpeakerListTask();
 }

@@ -3,6 +3,16 @@ syntax = "proto3";
 option java_package = "com.ubtrobot.speech.ipc";
 option java_outer_classname = "SpeechProto";
 
+message Speakers {
+    repeated Speaker speakers = 1;
+}
+
+message Speaker {
+    string id = 1;
+    string name = 2;
+    int32 gender = 3;
+}
+
 message SynthesizeOption {
     string sentence = 1;
     string speaker_id = 2;

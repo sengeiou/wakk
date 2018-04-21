@@ -7,6 +7,7 @@ import android.os.Looper;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Message;
 import com.ubtrobot.async.Promise;
+import com.ubtrobot.exception.AccessServiceException;
 import com.ubtrobot.master.adapter.CallProcessAdapter;
 import com.ubtrobot.master.adapter.ProtoCallProcessAdapter;
 import com.ubtrobot.master.adapter.ProtoParamParser;
@@ -20,6 +21,7 @@ import com.ubtrobot.master.service.MasterSystemService;
 import com.ubtrobot.speech.RecognizeException;
 import com.ubtrobot.speech.RecognizeOption;
 import com.ubtrobot.speech.Recognizer;
+import com.ubtrobot.speech.Speaker;
 import com.ubtrobot.speech.SynthesizeException;
 import com.ubtrobot.speech.Synthesizer;
 import com.ubtrobot.speech.UnderstandException;
@@ -203,20 +205,45 @@ public class SpeechSystemService extends MasterSystemService {
 
         final String question = understandOption.getQuestion();
 
-        mCallProcessor.onCall(responder, new CallProcessAdapter.Callable<Understander.UnderstandResult, UnderstandException, Void>() {
-            @Override
-            public Promise<Understander.UnderstandResult, UnderstandException, Void> call() throws CallException {
-                return mSpeechService.understand(question,SpeechConverters.toUnderstandOptionPojo(understandOption));
-            }
-        }, new ProtoCallProcessAdapter.DFConverter<Understander.UnderstandResult, UnderstandException>() {
-            @Override
-            public Message convertDone(Understander.UnderstandResult result) {
-                return SpeechConverters.toUnderstandResultProto(result);
+        mCallProcessor.onCall(responder, new CallProcessAdapter.Callable<
+                        Understander.UnderstandResult, UnderstandException, Void>() {
+                    @Override
+                    public Promise<Understander.UnderstandResult, UnderstandException, Void>
+                    call() throws CallException {
+                        return mSpeechService.understand(question,
+                                SpeechConverters.toUnderstandOptionPojo(understandOption));
+                    }
+                },
+                new ProtoCallProcessAdapter.DFConverter<Understander.UnderstandResult, UnderstandException>() {
+                    @Override
+                    public Message convertDone(Understander.UnderstandResult result) {
+                        return SpeechConverters.toUnderstandResultProto(result);
 
+                    }
+
+                    @Override
+                    public CallException convertFail(UnderstandException fail) {
+                        return new CallException(fail.getCode(), fail.getMessage());
+                    }
+                });
+    }
+
+    @Call(path = SpeechConstant.CALL_PATH_SPEAKER_LIST)
+    public void getSpeakerList(Request request, Responder responder) {
+        mCallProcessor.onCall(responder, new CallProcessAdapter.Callable<
+                List<Speaker>, AccessServiceException, Void>() {
+            @Override
+            public Promise<List<Speaker>, AccessServiceException, Void> call() throws CallException {
+                return mSpeechService.getSpeakerList();
+            }
+        }, new ProtoCallProcessAdapter.DFConverter<List<Speaker>, AccessServiceException>() {
+            @Override
+            public Message convertDone(List<Speaker> speakers) {
+                return SpeechConverters.toSpeakersProto(speakers);
             }
 
             @Override
-            public CallException convertFail(UnderstandException fail) {
+            public CallException convertFail(AccessServiceException fail) {
                 return new CallException(fail.getCode(), fail.getMessage());
             }
         });

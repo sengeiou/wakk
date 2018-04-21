@@ -15,6 +15,8 @@ public class SpeechConstant {
 
     public final static String CALL_PATH_UNDERSTAND = "/speech/understand";
 
+    public final static String CALL_PATH_SPEAKER_LIST = "/speech/speaker/list";
+
     public static final String COMPETING_ITEM_SYNTHESIZER = "synthesizer";
     public static final String COMPETING_ITEM_RECOGNIZER = "recognizer";
 }

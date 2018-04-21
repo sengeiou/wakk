@@ -1,5 +1,7 @@
 package com.ubtrobot.speech.sal;
 
+import com.ubtrobot.async.AsyncTask;
+import com.ubtrobot.async.CancelableAsyncTask;
 import com.ubtrobot.async.InterruptibleAsyncTask;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.master.competition.InterruptibleTaskHelper;
@@ -9,6 +11,9 @@ import com.ubtrobot.speech.Recognizer;
 import com.ubtrobot.speech.SynthesizeException;
 import com.ubtrobot.speech.SynthesizeOption;
 import com.ubtrobot.speech.Synthesizer;
+import com.ubtrobot.speech.UnderstandException;
+import com.ubtrobot.speech.UnderstandOption;
+import com.ubtrobot.speech.Understander;
 import com.ubtrobot.ulog.FwLoggerFactory;
 import com.ubtrobot.ulog.Logger;
 
@@ -144,4 +149,18 @@ public abstract class AbstractSpeechService implements SpeechService {
 
         mInterruptibleTaskHelper.reject(TASK_RECEIVER_RECOGNIZER, TASK_NAME_RECOGNIZE, e);
     }
+
+    @Override
+    public Promise<Understander.UnderstandResult, UnderstandException, Void> understand(final String question, UnderstandOption option) {
+        CancelableAsyncTask<Understander.UnderstandResult, UnderstandException, Void> task = createUnderstandTask(question, option);
+
+        if (task == null) {
+            throw new IllegalStateException("createUnderstandTask return null.");
+        }
+
+        task.start();
+        return task.promise();
+    }
+
+    protected abstract CancelableAsyncTask<Understander.UnderstandResult, UnderstandException, Void> createUnderstandTask(String question, UnderstandOption option);
 }

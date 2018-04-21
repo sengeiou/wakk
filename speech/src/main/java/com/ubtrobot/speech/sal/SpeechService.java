@@ -7,6 +7,9 @@ import com.ubtrobot.speech.Recognizer;
 import com.ubtrobot.speech.SynthesizeException;
 import com.ubtrobot.speech.SynthesizeOption;
 import com.ubtrobot.speech.Synthesizer;
+import com.ubtrobot.speech.UnderstandException;
+import com.ubtrobot.speech.UnderstandOption;
+import com.ubtrobot.speech.Understander;
 
 public interface SpeechService {
 
@@ -19,4 +22,6 @@ public interface SpeechService {
             RecognizeOption option);
 
     boolean isRecognizing();
+
+    Promise<Understander.UnderstandResult, UnderstandException, Void> understand(String question, UnderstandOption option);
 }

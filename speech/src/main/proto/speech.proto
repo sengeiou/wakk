@@ -28,3 +28,13 @@ message RecognizeResult {
 message RecognizeOption {
     int32 mode = 1;
 }
+
+message UnderstandOption {
+    string question = 1;
+    float time_out = 2;
+}
+
+message UnderstandResult {
+    string question = 1;
+    string answer = 2;
+}

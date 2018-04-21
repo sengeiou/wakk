@@ -21,6 +21,7 @@ public class SpeechManager {
     private final MasterContext mMasterContext;
     private final Synthesizer mSynthesizer;
     private final Recognizer mRecognizer;
+    private final Understander mUnderstander;
 
     private volatile CompetitionSessionExt mSynthesizerSession;
     private volatile CompetitionSessionExt<Recognizer> mRecognizeSession;
@@ -42,6 +43,7 @@ public class SpeechManager {
 
         mSynthesizer = new Synthesizer(mSpeechService, mHandler);
         mRecognizer = new Recognizer(mSpeechService, mHandler);
+        mUnderstander = new Understander(mSpeechService, mHandler);
     }
 
     private CompetitionSessionExt<Synthesizer> synthesizerSession() {
@@ -126,5 +128,13 @@ public class SpeechManager {
 
     public Promise<Recognizer.RecognizeResult, RecognizeException, Recognizer.RecognizingProgress> recognize() {
         return recognize(RecognizeOption.DEFAULT);
+    }
+
+    public Promise<Understander.UnderstandResult, UnderstandException, Void> understand(String question, UnderstandOption option) {
+        return mUnderstander.understand(question, option);
+    }
+
+    public Promise<Understander.UnderstandResult, UnderstandException, Void> understand(String question) {
+        return understand(question, UnderstandOption.DEFAULT);
     }
 }

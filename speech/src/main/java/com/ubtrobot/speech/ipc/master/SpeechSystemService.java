@@ -7,6 +7,8 @@ import android.os.Looper;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Message;
 import com.ubtrobot.async.Promise;
+import com.ubtrobot.master.adapter.CallProcessAdapter;
+import com.ubtrobot.master.adapter.ProtoCallProcessAdapter;
 import com.ubtrobot.master.adapter.ProtoParamParser;
 import com.ubtrobot.master.annotation.Call;
 import com.ubtrobot.master.competition.CompetingCallDelegate;
@@ -20,6 +22,8 @@ import com.ubtrobot.speech.RecognizeOption;
 import com.ubtrobot.speech.Recognizer;
 import com.ubtrobot.speech.SynthesizeException;
 import com.ubtrobot.speech.Synthesizer;
+import com.ubtrobot.speech.UnderstandException;
+import com.ubtrobot.speech.Understander;
 import com.ubtrobot.speech.ipc.SpeechConstant;
 import com.ubtrobot.speech.ipc.SpeechConverters;
 import com.ubtrobot.speech.ipc.SpeechProto;
@@ -41,6 +45,7 @@ public class SpeechSystemService extends MasterSystemService {
 
     private SpeechService mSpeechService;
 
+    private ProtoCallProcessAdapter mCallProcessor;
     private ProtoCompetingCallDelegate mCompetingCallDelegate;
 
     @Override
@@ -61,7 +66,10 @@ public class SpeechSystemService extends MasterSystemService {
                     "Application must return a AbstractSpeechService instance");
         }
 
-        mCompetingCallDelegate = new ProtoCompetingCallDelegate(this, new Handler(Looper.getMainLooper()));
+        Handler handler = new Handler(Looper.getMainLooper());
+
+        mCompetingCallDelegate = new ProtoCompetingCallDelegate(this, handler);
+        mCallProcessor = new ProtoCallProcessAdapter(handler);
     }
 
     @Override
@@ -182,6 +190,36 @@ public class SpeechSystemService extends MasterSystemService {
         responder.respondSuccess(ProtoParam.create(BoolValue.newBuilder()
                 .setValue(mSpeechService.isRecognizing())
                 .build()));
+    }
+
+    @Call(path = SpeechConstant.CALL_PATH_UNDERSTAND)
+    public void understand(Request request, final Responder responder) {
+        final SpeechProto.UnderstandOption understandOption = ProtoParamParser.parseParam(request,
+                SpeechProto.UnderstandOption.class, responder);
+        if (understandOption == null) {
+            LOGGER.w("Service understand receive null option");
+            return;
+        }
+
+        final String question = understandOption.getQuestion();
+
+        mCallProcessor.onCall(responder, new CallProcessAdapter.Callable<Understander.UnderstandResult, UnderstandException, Void>() {
+            @Override
+            public Promise<Understander.UnderstandResult, UnderstandException, Void> call() throws CallException {
+                return mSpeechService.understand(question,SpeechConverters.toUnderstandOptionPojo(understandOption));
+            }
+        }, new ProtoCallProcessAdapter.DFConverter<Understander.UnderstandResult, UnderstandException>() {
+            @Override
+            public Message convertDone(Understander.UnderstandResult result) {
+                return SpeechConverters.toUnderstandResultProto(result);
+
+            }
+
+            @Override
+            public CallException convertFail(UnderstandException fail) {
+                return new CallException(fail.getCode(), fail.getMessage());
+            }
+        });
     }
 
     @Override

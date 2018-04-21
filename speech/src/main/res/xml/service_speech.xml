@@ -7,4 +7,5 @@
     <call path="/speech/synthesize/doing" />
     <call path="/speech/recognize" />
     <call path="/speech/recognize/doing" />
+    <call path="/speech/understand" />
 </service>

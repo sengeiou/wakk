@@ -13,6 +13,8 @@ public class SpeechConstant {
     public final static String CALL_PATH_RECOGNIZE = "/speech/recognize";
     public final static String CALL_PATH_RECOGNIZING = "/speech/recognize/doing";
 
+    public final static String CALL_PATH_UNDERSTAND = "/speech/understand";
+
     public static final String COMPETING_ITEM_SYNTHESIZER = "synthesizer";
     public static final String COMPETING_ITEM_RECOGNIZER = "recognizer";
 }

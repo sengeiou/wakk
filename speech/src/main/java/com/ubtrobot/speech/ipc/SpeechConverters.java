@@ -6,6 +6,8 @@ import com.ubtrobot.speech.RecognizeOption;
 import com.ubtrobot.speech.Recognizer;
 import com.ubtrobot.speech.SynthesizeOption;
 import com.ubtrobot.speech.Synthesizer;
+import com.ubtrobot.speech.UnderstandOption;
+import com.ubtrobot.speech.Understander;
 
 public class SpeechConverters {
 
@@ -93,6 +95,31 @@ public class SpeechConverters {
     public static SpeechProto.RecognizeOption toRecognizeOptionProto(RecognizeOption option) {
         return SpeechProto.RecognizeOption.newBuilder()
                 .setMode(option.getMode())
+                .build();
+    }
+
+    public static Understander.UnderstandResult toUnderstandResultPojo(SpeechProto.UnderstandResult result) {
+        return new Understander.UnderstandResult.Builder(result.getQuestion(), result.getAnswer())
+                .build();
+    }
+
+    public static SpeechProto.UnderstandResult toUnderstandResultProto(Understander.UnderstandResult result) {
+        return SpeechProto.UnderstandResult.newBuilder()
+                .setQuestion(result.getQuestion())
+                .setAnswer(result.getAnswer())
+                .build();
+    }
+
+    public static SpeechProto.UnderstandOption toUnderstandOptionProto(UnderstandOption option, String question) {
+        return SpeechProto.UnderstandOption.newBuilder()
+                .setQuestion(question)
+                .setTimeOut(option.getTimeout())
+                .build();
+    }
+
+    public static UnderstandOption toUnderstandOptionPojo(SpeechProto.UnderstandOption option) {
+        return new UnderstandOption.Builder()
+                .setTimeout(option.getTimeOut())
                 .build();
     }
 }

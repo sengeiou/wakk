@@ -15,6 +15,7 @@ import com.liulishuo.okdownload.core.exception.PreAllocateException;
 import com.liulishuo.okdownload.core.listener.DownloadListener4WithSpeed;
 import com.liulishuo.okdownload.core.listener.assist.Listener4SpeedAssistExtend;
 import com.ubtrobot.commons.ConnectionUtils;
+import com.ubtrobot.commons.FileUtils;
 import com.ubtrobot.commons.ObjectStorage;
 import com.ubtrobot.ulog.FwLoggerFactory;
 import com.ubtrobot.ulog.Logger;
@@ -55,7 +56,7 @@ public class PlatformDownloadService extends AbstractFirmwareDownloadService {
 
         mObjectStorage = new ObjectStorage(mContext.getSharedPreferences(SP_FIRMWARE_PACKAGE_DOWNLOAD,
                 Context.MODE_PRIVATE));
-        mDownloadDirectory = downloadDirectory;
+        mDownloadDirectory = new File(downloadDirectory, "firmwares").getAbsolutePath();
 
         FirmwarePackageGroup group = groupLocked();
         if (group.getPackageCount() == 0) {
@@ -189,8 +190,10 @@ public class PlatformDownloadService extends AbstractFirmwareDownloadService {
                 downloadTask.cancel();
             }
 
-            for (TaskInfo taskInfo : taskInfoMapLocked().values()) {
-                new File(taskInfo.filePath).delete();
+            try {
+                FileUtils.deleteDirectory(new File(mDownloadDirectory));
+            } catch (IOException e) {
+                LOGGER.e(e, "Remove firmware download directory failed.");
             }
 
             mObjectStorage.remove(KEY_FIRMWARE_PACKAGE_GROUP);

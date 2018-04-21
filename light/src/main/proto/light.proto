@@ -28,8 +28,8 @@ message LightingEffectList {
 
 message DisplayOption {
 
-    repeated string lightId = 1;
-    string effectId = 2;
+    repeated string light_id = 1;
+    string effect_id = 2;
     int32 loops = 3;
     google.protobuf.Any extension = 4; // TODO for DisplayOption pojo 子类
 }

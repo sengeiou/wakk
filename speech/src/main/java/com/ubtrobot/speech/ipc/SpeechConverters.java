@@ -2,6 +2,7 @@ package com.ubtrobot.speech.ipc;
 
 import android.text.TextUtils;
 
+import com.ubtrobot.speech.Configuration;
 import com.ubtrobot.speech.RecognizeOption;
 import com.ubtrobot.speech.Recognizer;
 import com.ubtrobot.speech.Speaker;
@@ -10,7 +11,6 @@ import com.ubtrobot.speech.Synthesizer;
 import com.ubtrobot.speech.UnderstandOption;
 import com.ubtrobot.speech.Understander;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -166,5 +166,24 @@ public class SpeechConverters {
         return builder.build();
     }
 
+    public static SpeechProto.Configuration toConfigurationProto(Configuration configuration) {
+        return SpeechProto.Configuration.newBuilder()
+                .setSpeakerId(configuration.getSpeakerId())
+                .setSpeakingSpeed(configuration.getSpeakingSpeed())
+                .setSpeakingVolume(configuration.getSpeakingVolume())
+                .setRecognizeMode(configuration.getRecognizingMode())
+                .setUnderstandTimeout(configuration.getUnderstandTimeout())
+                .build();
+    }
 
+    public static Configuration toConfigurationPojo(SpeechProto.Configuration configuration) {
+        return new Configuration.Builder()
+                .setSpeakerId(configuration.getSpeakerId())
+                .setSpeakingSpeed(configuration.getSpeakingSpeed())
+                .setSpeakingVolume(configuration.getSpeakingVolume())
+                .setRecognizingMode(configuration.getRecognizeMode())
+                .setUnderstandTimeout(configuration.getUnderstandTimeout())
+                .build();
+
+    }
 }

@@ -6,6 +6,7 @@ import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.exception.AccessServiceException;
 import com.ubtrobot.master.competition.InterruptibleTaskHelper;
+import com.ubtrobot.speech.Configuration;
 import com.ubtrobot.speech.RecognizeException;
 import com.ubtrobot.speech.RecognizeOption;
 import com.ubtrobot.speech.Recognizer;
@@ -179,4 +180,22 @@ public abstract class AbstractSpeechService implements SpeechService {
     }
 
     protected abstract AsyncTask<List<Speaker>, AccessServiceException> createGetSpeakerListTask();
+
+    @Override
+    public Promise<Configuration, AccessServiceException> getConfiguration() {
+        AsyncTask<Configuration, AccessServiceException> task = createGetConfigurationTask();
+        task.start();
+        return task.promise();
+    }
+
+    protected abstract AsyncTask<Configuration, AccessServiceException> createGetConfigurationTask();
+
+    @Override
+    public Promise<Void, AccessServiceException> setConfiguration(Configuration configuration) {
+        AsyncTask<Void, AccessServiceException> task = createSetConfigurationTask(configuration);
+        task.start();
+        return task.promise();
+    }
+
+    protected abstract AsyncTask<Void, AccessServiceException> createSetConfigurationTask(Configuration configuration);
 }

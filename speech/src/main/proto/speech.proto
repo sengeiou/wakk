@@ -22,6 +22,13 @@ message SynthesizeOption {
     int32 speak_volume = 4;
 }
 
+message Configuration {
+    string speaker_id = 1;
+    int32 speaking_speed = 2;
+    int32 speaking_volume = 3;
+    int32 recognize_mode = 4;
+    float understand_timeout = 5;
+}
 message SynthesizingProgress {
     int32 state = 1;
     float progress = 2;

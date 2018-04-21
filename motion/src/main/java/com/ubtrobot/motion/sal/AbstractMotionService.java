@@ -8,6 +8,7 @@ import com.ubtrobot.master.competition.InterruptibleTaskHelper;
 import com.ubtrobot.motion.Joint;
 import com.ubtrobot.motion.JointDevice;
 import com.ubtrobot.motion.JointException;
+import com.ubtrobot.motion.LocomotorDevice;
 
 import java.util.List;
 import java.util.Set;
@@ -121,6 +122,20 @@ public abstract class AbstractMotionService implements MotionService {
     }
 
     protected abstract void jointStartRotatingTo(String jointId, float angle, long timeMillis);
+
+    @Override
+    public Promise<LocomotorDevice, AccessServiceException, Void> getLocomotor() {
+        AsyncTask<LocomotorDevice, AccessServiceException, Void> task = createGetLocomotorTask();
+        if (task == null) {
+            throw new IllegalStateException("createGetLocomotorTask returns null.");
+        }
+
+        task.start();
+        return task.promise();
+    }
+
+    protected abstract AsyncTask<LocomotorDevice, AccessServiceException, Void>
+    createGetLocomotorTask();
 
     private abstract class JointInterruptibleAsyncTask
             extends InterruptibleAsyncTask<Void, JointException, Joint.RotatingProgress> {

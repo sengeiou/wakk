@@ -31,3 +31,13 @@ message JointRotatingProgress {
     float rotatedAngle = 3;
     float rotatedTimeMillis = 4;
 }
+
+message LocomotorDeviceExt {
+
+    float min_turning_speed = 1;
+    float max_turning_speed = 2;
+    float default_turning_speed = 3;
+    float min_moving_speed = 4;
+    float max_moving_speed = 5;
+    float default_moving_speed = 6;
+}

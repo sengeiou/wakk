@@ -21,6 +21,7 @@ import com.ubtrobot.motion.Joint;
 import com.ubtrobot.motion.JointDevice;
 import com.ubtrobot.motion.JointException;
 import com.ubtrobot.motion.JointList;
+import com.ubtrobot.motion.LocomotorDevice;
 import com.ubtrobot.motion.ipc.MotionConstants;
 import com.ubtrobot.motion.ipc.MotionConverters;
 import com.ubtrobot.motion.ipc.MotionProto;
@@ -177,6 +178,31 @@ public class MotionSystemService extends MasterSystemService {
                     @Override
                     public Message convertProgress(Joint.RotatingProgress progress) {
                         return MotionConverters.toJointRotatingProgressProto(progress);
+                    }
+                }
+        );
+    }
+
+    @Call(path = MotionConstants.CALL_PATH_GET_LOCOMOTOR)
+    public void onGetLocomotor(final Request request, final Responder responder) {
+        mCallProcessor.onCall(
+                responder,
+                new CallProcessAdapter.Callable<LocomotorDevice, AccessServiceException, Void>() {
+                    @Override
+                    public Promise<LocomotorDevice, AccessServiceException, Void>
+                    call() throws CallException {
+                        return mService.getLocomotor();
+                    }
+                },
+                new ProtoCallProcessAdapter.DFConverter<LocomotorDevice, AccessServiceException>() {
+                    @Override
+                    public Message convertDone(LocomotorDevice locomotorDevice) {
+                        return MotionConverters.toLocomotorDeviceProto(locomotorDevice);
+                    }
+
+                    @Override
+                    public CallException convertFail(AccessServiceException e) {
+                        return new CallException(e.getCode(), e.getMessage());
                     }
                 }
         );

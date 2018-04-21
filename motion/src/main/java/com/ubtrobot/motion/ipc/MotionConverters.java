@@ -5,6 +5,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.ubtrobot.device.ipc.DeviceProto;
 import com.ubtrobot.motion.Joint;
 import com.ubtrobot.motion.JointDevice;
+import com.ubtrobot.motion.LocomotorDevice;
 
 import java.util.List;
 
@@ -95,5 +96,40 @@ public class MotionConverters {
                 progress.getRotatedAngle(),
                 progress.getRotatedTimeMillis()
         );
+    }
+
+    public static LocomotorDevice toLocomotorDevicePojo(DeviceProto.Device deviceProto)
+            throws InvalidProtocolBufferException {
+        LocomotorDevice.Builder builder = new LocomotorDevice.Builder(
+                deviceProto.getId(), deviceProto.getName());
+        MotionProto.LocomotorDeviceExt ext = deviceProto.getExtension().
+                unpack(MotionProto.LocomotorDeviceExt.class);
+        return builder.
+                setDescription(deviceProto.getDescription()).
+                setMinTurningSpeed(ext.getMinTurningSpeed()).
+                setMaxTurningSpeed(ext.getMaxTurningSpeed()).
+                setDefaultTurningSpeed(ext.getDefaultTurningSpeed()).
+                setMinMovingSpeed(ext.getMinMovingSpeed()).
+                setMaxMovingSpeed(ext.getMaxMovingSpeed()).
+                setDefaultMovingSpeed(ext.getDefaultMovingSpeed()).
+                build();
+    }
+
+    public static DeviceProto.Device toLocomotorDeviceProto(LocomotorDevice device) {
+        return DeviceProto.Device.newBuilder().
+                setId(device.getId()).
+                setName(device.getName()).
+                setDescription(device.getDescription()).
+                setExtension(Any.pack(
+                        MotionProto.LocomotorDeviceExt.newBuilder().
+                                setMinTurningSpeed(device.getMinTurningSpeed()).
+                                setMaxTurningSpeed(device.getMaxTurningSpeed()).
+                                setDefaultTurningSpeed(device.getDefaultTurningSpeed()).
+                                setMinMovingSpeed(device.getMinMovingSpeed()).
+                                setMaxMovingSpeed(device.getMaxMovingSpeed()).
+                                setDefaultMovingSpeed(device.getDefaultMovingSpeed()).
+                                build()
+                )).
+                build();
     }
 }

@@ -6,4 +6,5 @@
     <call path="/joint/query-is-rotating" />
     <call path="/joint/angle" />
     <call path="/joint/rotate" />
+    <call path="/locomotor/device" />
 </service>

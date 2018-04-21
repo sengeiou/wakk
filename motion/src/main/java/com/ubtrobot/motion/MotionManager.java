@@ -17,8 +17,11 @@ import java.util.List;
 public class MotionManager {
 
     private final MasterContext mMasterContext;
+
     private final JointList mJointList;
     private final HashMap<String, CompetitionSessionExt<Joint>> mJointSessions = new HashMap<>();
+
+    private final LocomotorGetter mLocomotorGetter;
 
     public MotionManager(MasterContext masterContext) {
         if (masterContext == null) {
@@ -31,7 +34,9 @@ public class MotionManager {
                 mMasterContext.createSystemServiceProxy(MotionConstants.SERVICE_NAME),
                 handler
         );
+
         mJointList = new JointList(motionService, handler);
+        mLocomotorGetter = new LocomotorGetter(motionService);
     }
 
     /**
@@ -247,5 +252,14 @@ public class MotionManager {
                     }
                 }
         );
+    }
+
+    /**
+     * 获取移动装置
+     *
+     * @return 移动装置
+     */
+    public Locomotor getLocomotor() {
+        return mLocomotorGetter.get();
     }
 }

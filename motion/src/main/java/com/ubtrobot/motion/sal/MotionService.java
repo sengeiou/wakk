@@ -5,6 +5,7 @@ import com.ubtrobot.exception.AccessServiceException;
 import com.ubtrobot.motion.Joint;
 import com.ubtrobot.motion.JointDevice;
 import com.ubtrobot.motion.JointException;
+import com.ubtrobot.motion.LocomotorDevice;
 
 import java.util.List;
 
@@ -27,4 +28,6 @@ public interface MotionService {
 
     Promise<Void, JointException, Joint.RotatingProgress>
     jointRotateTo(String jointId, float angle, long timeMillis);
+
+    Promise<LocomotorDevice, AccessServiceException, Void> getLocomotor();
 }

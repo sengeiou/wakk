@@ -6,12 +6,17 @@ import android.os.Looper;
 
 import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
+import com.ubtrobot.exception.AccessServiceException;
+import com.ubtrobot.master.adapter.CallAdapter;
 import com.ubtrobot.master.adapter.ProtoCallAdapter;
 import com.ubtrobot.master.competition.ActivateException;
 import com.ubtrobot.master.competition.CompetitionSession;
 import com.ubtrobot.master.competition.CompetitionSessionExt;
 import com.ubtrobot.master.context.MasterContext;
 import com.ubtrobot.speech.ipc.SpeechConstant;
+import com.ubtrobot.speech.ipc.SpeechConverters;
+import com.ubtrobot.speech.ipc.SpeechProto;
+import com.ubtrobot.transport.message.CallException;
 import com.ubtrobot.ulog.FwLoggerFactory;
 import com.ubtrobot.ulog.Logger;
 
@@ -31,6 +36,7 @@ public class SpeechManager {
     private volatile CompetitionSessionExt mSynthesizerSession;
     private volatile CompetitionSessionExt<Recognizer> mRecognizeSession;
 
+    private ProtoCallAdapter mSpeechService;
     private Handler mHandler;
 
     public SpeechManager(MasterContext masterContext) {
@@ -41,7 +47,7 @@ public class SpeechManager {
         mMasterContext = masterContext;
 
         mHandler = new Handler(Looper.getMainLooper());
-        ProtoCallAdapter mSpeechService = new ProtoCallAdapter(
+        mSpeechService = new ProtoCallAdapter(
                 mMasterContext.createSystemServiceProxy(SpeechConstant.SERVICE_NAME),
                 mHandler
         );
@@ -149,5 +155,28 @@ public class SpeechManager {
 
     public Promise<Understander.UnderstandResult, UnderstandException> understand(String question) {
         return understand(question, UnderstandOption.DEFAULT);
+    }
+
+
+    public Configuration getConfiguration() {
+        try {
+            SpeechProto.Configuration configuration = mSpeechService.syncCall(SpeechConstant.CALL_PATH_GET_CONFIG, SpeechProto.Configuration.class);
+            return SpeechConverters.toConfigurationPojo(configuration);
+        } catch (CallException e) {
+            LOGGER.e(e, "Framework error when getConfiguration");
+        }
+
+        return new Configuration.Builder().build();
+    }
+
+    public void setConfiguration(Configuration configuration) {
+        //todo 这只是设置一个配置参数过去，用的同步还是异步
+        mSpeechService.call(SpeechConstant.CALL_PATH_SET_CONFIG,
+                SpeechConverters.toConfigurationProto(configuration), new CallAdapter.FConverter<AccessServiceException>() {
+                    @Override
+                    public AccessServiceException convertFail(CallException e) {
+                        return new AccessServiceException.Factory().from(e);
+                    }
+                });
     }
 }

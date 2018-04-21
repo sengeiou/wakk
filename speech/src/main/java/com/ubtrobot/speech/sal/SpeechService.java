@@ -3,6 +3,7 @@ package com.ubtrobot.speech.sal;
 import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.exception.AccessServiceException;
+import com.ubtrobot.speech.Configuration;
 import com.ubtrobot.speech.RecognizeException;
 import com.ubtrobot.speech.RecognizeOption;
 import com.ubtrobot.speech.Recognizer;
@@ -31,4 +32,8 @@ public interface SpeechService {
     Promise<Understander.UnderstandResult, UnderstandException> understand(String question, UnderstandOption option);
 
     Promise<List<Speaker>, AccessServiceException> getSpeakerList();
+
+    Promise<Configuration, AccessServiceException> getConfiguration();
+
+    Promise<Void, AccessServiceException> setConfiguration(Configuration configuration);
 }

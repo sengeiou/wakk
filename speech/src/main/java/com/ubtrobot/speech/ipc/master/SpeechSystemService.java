@@ -19,6 +19,7 @@ import com.ubtrobot.master.competition.CompetitionSessionInfo;
 import com.ubtrobot.master.competition.ProtoCompetingCallDelegate;
 import com.ubtrobot.master.param.ProtoParam;
 import com.ubtrobot.master.service.MasterSystemService;
+import com.ubtrobot.speech.Configuration;
 import com.ubtrobot.speech.RecognizeException;
 import com.ubtrobot.speech.RecognizeOption;
 import com.ubtrobot.speech.Recognizer;
@@ -243,6 +244,48 @@ public class SpeechSystemService extends MasterSystemService {
                 return SpeechConverters.toSpeakersProto(speakers);
             }
 
+            @Override
+            public CallException convertFail(AccessServiceException fail) {
+                return new CallException(fail.getCode(), fail.getMessage());
+            }
+        });
+    }
+
+    @Call(path = SpeechConstant.CALL_PATH_GET_CONFIG)
+    public void getConfiguration(Request request, Responder responder) {
+        mCallProcessor.onCall(responder, new CallProcessAdapter.Callable<Configuration, AccessServiceException, Void>() {
+            @Override
+            public Promise<Configuration, AccessServiceException, Void> call() throws CallException {
+                return mSpeechService.getConfiguration();
+            }
+        }, new ProtoCallProcessAdapter.DFConverter<Configuration, AccessServiceException>() {
+            @Override
+            public Message convertDone(Configuration configuration) {
+                return SpeechConverters.toConfigurationProto(configuration);
+            }
+
+            @Override
+            public CallException convertFail(AccessServiceException fail) {
+                return new CallException(fail.getCode(), fail.getMessage());
+            }
+        });
+    }
+
+    @Call(path = SpeechConstant.CALL_PATH_SET_CONFIG)
+    public void setConfiguration(Request request, Responder responder) {
+        final SpeechProto.Configuration configuration = ProtoParamParser.parseParam(request,
+                SpeechProto.Configuration.class, responder);
+
+        if (configuration == null) {
+            return;
+        }
+
+        mCallProcessor.onCall(responder, new CallProcessAdapter.Callable<Void, AccessServiceException, Void>() {
+            @Override
+            public Promise<Void, AccessServiceException, Void> call() throws CallException {
+                return mSpeechService.setConfiguration(SpeechConverters.toConfigurationPojo(configuration));
+            }
+        }, new ProtoCallProcessAdapter.FConverter<AccessServiceException>() {
             @Override
             public CallException convertFail(AccessServiceException fail) {
                 return new CallException(fail.getCode(), fail.getMessage());

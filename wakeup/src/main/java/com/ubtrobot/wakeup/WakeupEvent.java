@@ -1,6 +1,9 @@
 package com.ubtrobot.wakeup;
 
-public class WakeupEvent {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class WakeupEvent implements Parcelable {
 
     public static final int TYPE_VOICE = 0;
     public static final int TYPE_SIMULATE = 1;
@@ -23,6 +26,18 @@ public class WakeupEvent {
      * 唤醒距离
      */
     private float distance;
+
+    public static final Parcelable.Creator<WakeupEvent> CREATOR = new Parcelable.Creator<WakeupEvent>() {
+        @Override
+        public WakeupEvent createFromParcel(Parcel source) {
+            return new WakeupEvent(source);
+        }
+
+        @Override
+        public WakeupEvent[] newArray(int size) {
+            return new WakeupEvent[size];
+        }
+    };
 
     private WakeupEvent(int type) {
         this.type = type;
@@ -100,6 +115,24 @@ public class WakeupEvent {
             }
         }
     }
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(this.type);
+        dest.writeInt(this.angle);
+        dest.writeFloat(this.distance);
+    }
+
+    protected WakeupEvent(Parcel in) {
+        this.type = in.readInt();
+        this.angle = in.readInt();
+        this.distance = in.readFloat();
+    }
+
 
     @Override
     public String toString() {
@@ -109,4 +142,5 @@ public class WakeupEvent {
                 ", distance=" + distance +
                 '}';
     }
+
 }

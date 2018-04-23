@@ -71,8 +71,8 @@ ext {
             uRestAdapter       : 'com.ubtrobot.http.rest:retrofit-urest-adapter:0.1.3',
             signInterceptor    : 'com.ubtrobot.http.rest:okhttp-sign-interceptor:0.1.0',
             authInterceptor    : 'com.ubtrobot.http.rest:okhttp-auth-interceptor:0.1.0',
-            okDownload         : 'com.liulishuo.okdownload:okdownload:1.0.0',
-            okDownloadSqlite   : 'com.liulishuo.okdownload:sqlite:1.0.0',
-            okDownloadOkHttp   : 'com.liulishuo.okdownload:okhttp:1.0.0',
+            okDownload         : 'com.liulishuo.okdownload:okdownload:1.0.1',
+            okDownloadSqlite   : 'com.liulishuo.okdownload:sqlite:1.0.1',
+            okDownloadOkHttp   : 'com.liulishuo.okdownload:okhttp:1.0.1',
     ]
 }

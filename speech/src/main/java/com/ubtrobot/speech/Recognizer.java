@@ -155,9 +155,10 @@ public class Recognizer implements Competing {
                 }
             }
 
-            public void setResult(RecognizeResult result) {
+            public Builder setResult(RecognizeResult result) {
                 checkResult(result);
                 this.result = result;
+                return this;
             }
 
             private void checkResult(RecognizeResult result) {

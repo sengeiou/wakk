@@ -1,4 +1,4 @@
-package com.ubtrobot.wakeup.sal;
+package com.ubtrobot.wakeup;
 
 import com.ubtrobot.master.adapter.StaticProtoEventReceiver;
 import com.ubtrobot.master.context.MasterContext;
@@ -8,9 +8,9 @@ import com.ubtrobot.wakeup.WakeupEvent;
 import com.ubtrobot.wakeup.ipc.WakeupConverter;
 import com.ubtrobot.wakeup.ipc.WakeupProto;
 
-public abstract class AbstractStaticEventReceiver extends StaticProtoEventReceiver<WakeupProto.WakeupEvent> {
+public abstract class StaticWakeupEventReceiver extends StaticProtoEventReceiver<WakeupProto.WakeupEvent> {
 
-    private static final Logger LOGGER = FwLoggerFactory.getLogger("AbstractStaticEventReceiver");
+    private static final Logger LOGGER = FwLoggerFactory.getLogger("StaticWakeupEventReceiver");
 
     @Override
     public final void onReceive(MasterContext masterContext, String action, WakeupProto.WakeupEvent event) {

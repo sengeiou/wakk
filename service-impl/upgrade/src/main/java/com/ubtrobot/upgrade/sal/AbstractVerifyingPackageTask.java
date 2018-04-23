@@ -54,11 +54,10 @@ public abstract class AbstractVerifyingPackageTask extends
             } else {
                 if (!md5.equalsIgnoreCase(mFirmwarePackage.getPackageMd5())) {
                     throw new UpgradeException.Factory().verifyPackageError("Verify package md5 " +
-                            "error. expected=" + mFirmwarePackage.getIncrementMd5() + ", actual=" +
+                            "error. expected=" + mFirmwarePackage.getPackageMd5() + ", actual=" +
                             md5);
                 }
             }
-
         } catch (IOException e) {
             UpgradeException ue = new UpgradeException.Factory().internalError("Verify " +
                     "package md5 failed due to package file error or system permission problem.", e);

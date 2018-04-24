@@ -20,7 +20,7 @@ public abstract class CancelableAsyncTask<D, F, P> extends AsyncTask<D, F, P> {
         return new CancelHandler() {
             @Override
             public void onCancel() {
-                onCancel();
+                CancelableAsyncTask.this.onCancel();
             }
         };
     }

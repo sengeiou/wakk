@@ -4,9 +4,9 @@ public class RecognizeOption {
 
     public static final RecognizeOption DEFAULT = new RecognizeOption.Builder().build();
 
-    public static final int MODE_UNKNOWN = -1;
-    public static final int MODE_SINGLE = 0;
-    public static final int MODE_CONTINUOUS = 1;
+    public static final int MODE_UNKNOWN = 0;
+    public static final int MODE_SINGLE = 1;
+    public static final int MODE_CONTINUOUS = 2;
 
     private int mode;
 
@@ -31,7 +31,7 @@ public class RecognizeOption {
         }
 
         private void checkMode(int mode) {
-            if (mode != MODE_SINGLE && mode != MODE_CONTINUOUS) {
+            if (mode != MODE_UNKNOWN && mode != MODE_SINGLE && mode != MODE_CONTINUOUS) {
                 throw new IllegalArgumentException("Invalid mode value, verify for " +
                         "RecognizeOption.MODE__MODE_SINGLE or RecognizeOption.MODE_CONTINUOUS");
             }

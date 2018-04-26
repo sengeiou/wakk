@@ -150,7 +150,7 @@ public class DiskEventStorage implements EventStorage {
 
     private static class Scheme {
 
-        static final String DATABASE = "uanalytics";
+        static final String DATABASE = "analytics";
         static final int VERSION = 1;
 
         static final String TABLE_EVENT = "event";

@@ -5,7 +5,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
 import com.google.gson.Gson;
-import com.ubtrobot.analytics.sal.impl.BuildConfig;
 import com.ubtrobot.http.rest.UCodes;
 import com.ubtrobot.http.rest.URestException;
 import com.ubtrobot.okhttp.interceptor.sign.AuthorizationInterceptor;

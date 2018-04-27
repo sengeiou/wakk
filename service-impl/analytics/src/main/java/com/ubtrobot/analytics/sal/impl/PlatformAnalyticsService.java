@@ -152,6 +152,7 @@ public class PlatformAnalyticsService extends AbstractAnalyticsService {
                 boolean isReportEventsSuccess = reportEvents(events);
                 if (!isReportEventsSuccess) {
                     mForbidReportAt = System.nanoTime() + FORBID_INTERVAL;
+                    break;
                 } else {
                     removeEventsDiskStorage(events);
                 }

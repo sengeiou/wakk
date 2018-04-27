@@ -1,5 +1,6 @@
 package com.ubtrobot.upgrade.sal.impl;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.RecoverySystem;
 
@@ -35,6 +36,7 @@ public class AndroidInstallingPackageTask
     @Override
     protected void onStart() {
         mExecutor.execute(new Runnable() {
+            @SuppressLint("MissingPermission")
             @Override
             public void run() {
                 try {

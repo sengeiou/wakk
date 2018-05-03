@@ -10,6 +10,7 @@ public class ProviderAnalyticsProxy implements Analytics {
 
     private ContentResolver mContentResolver;
     private Uri mUri;
+    private volatile boolean mIsProviderInstalled;
 
     public ProviderAnalyticsProxy(ContentResolver contentResolver) {
         if (contentResolver == null) {
@@ -22,6 +23,8 @@ public class ProviderAnalyticsProxy implements Analytics {
 
     @Override
     public void enable(boolean enable) {
+        checkProviderInstalled(mUri, mContentResolver);
+
         Bundle bundle = new Bundle();
         bundle.putBoolean(AnalyticsConstants.KEY_ENABLE, enable);
         mContentResolver.call(mUri, AnalyticsConstants.CALL_METHOD_ENABLE, null, bundle);
@@ -32,6 +35,9 @@ public class ProviderAnalyticsProxy implements Analytics {
         if (strategy == null) {
             return;
         }
+
+        checkProviderInstalled(mUri, mContentResolver);
+
         Bundle bundle = new Bundle();
         bundle.putParcelable(AnalyticsConstants.KEY_STRATEGY, strategy);
         mContentResolver.call(mUri, AnalyticsConstants.CALL_METHOD_SET_STRATEGY, null, bundle);
@@ -39,6 +45,8 @@ public class ProviderAnalyticsProxy implements Analytics {
 
     @Override
     public Strategy getStrategy() {
+        checkProviderInstalled(mUri, mContentResolver);
+
         Strategy strategy = null;
         Bundle bundle = mContentResolver.call(mUri, AnalyticsConstants.CALL_METHOD_GET_STRATEGY, null, null);
 
@@ -52,8 +60,33 @@ public class ProviderAnalyticsProxy implements Analytics {
 
     @Override
     public void recordEvent(Event event) {
+        checkProviderInstalled(mUri, mContentResolver);
+
         Bundle bundle = new Bundle();
         bundle.putParcelable(AnalyticsConstants.KEY_RECORD_EVENT, event);
         mContentResolver.call(mUri, AnalyticsConstants.CALL_METHOD_RECORD_EVENT, null, bundle);
+    }
+
+    private void checkProviderInstalled(Uri uri, ContentResolver resolver) {
+        if (mIsProviderInstalled) {
+            return;
+        }
+
+        synchronized (ProviderAnalyticsProxy.class) {
+            if (mIsProviderInstalled) {
+                return;
+            }
+
+            try {
+                Bundle bundle = resolver.call(uri, AnalyticsConstants.CALL_METHOD_PING, null, null);
+                if (bundle == null || !(bundle.getBoolean(AnalyticsConstants.KEY_PROVIDER_PONG))) {
+                    throw new IllegalStateException("Provider illegal.");
+                }
+            } catch (IllegalArgumentException e) {
+                throw new IllegalStateException("Pleases install AnalyticsSystemService.");
+            }
+
+            mIsProviderInstalled = true;
+        }
     }
 }

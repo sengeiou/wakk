@@ -3,8 +3,6 @@ package com.ubtrobot.analytics;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.net.Uri;
-import android.os.Bundle;
 
 import com.ubtrobot.analytics.ipc.AnalyticsConstants;
 
@@ -45,17 +43,7 @@ public class AnalyticsKit {
             if (cls != null) {
                 sAnalytics = new AnalyticsDelegate(cls);
             } else {
-                Uri uri = Uri.parse(AnalyticsConstants.PROVIDER_URI);
                 ContentResolver resolver = context.getContentResolver();
-                try {
-                    Bundle bundle = resolver.call(uri, AnalyticsConstants.CALL_METHOD_PING, null, null);
-                    if (bundle == null || !(bundle.getBoolean(AnalyticsConstants.KEY_PROVIDER_PONG))) {
-                        throw new IllegalStateException("Provider illegal.");
-                    }
-                } catch (IllegalArgumentException e) {
-                    throw new IllegalStateException("Pleases install AnalyticsSystemService.");
-                }
-
                 sAnalytics = new ProviderAnalyticsProxy(resolver);
             }
         }

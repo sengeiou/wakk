@@ -73,6 +73,11 @@ public class WakeupManager {
             WakeupEvent wakeupEvent = WakeupConverter.toWakeUpEventPojo(event);
             notifyListener(wakeupEvent);
         }
+
+        @Override
+        protected Class<WakeupProto.WakeupEvent> protoClass() {
+            return WakeupProto.WakeupEvent.class;
+        }
     };
 
     private void notifyListener(final WakeupEvent event) {

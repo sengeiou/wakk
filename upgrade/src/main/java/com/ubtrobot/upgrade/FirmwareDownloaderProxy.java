@@ -147,7 +147,6 @@ public class FirmwareDownloaderProxy extends AbstractFirmwareDownloader {
     }
 
 
-
     @Override
     public void registerStateListener(StateListener listener) {
         super.registerStateListener(listener);
@@ -276,6 +275,11 @@ public class FirmwareDownloaderProxy extends AbstractFirmwareDownloader {
                 notifyStateChange(state.getState(), e);
             }
         }
+
+        @Override
+        protected Class<UpgradeProto.DownloadState> protoClass() {
+            return UpgradeProto.DownloadState.class;
+        }
     }
 
     private class ProgressReceiver extends ProtoEventReceiver<UpgradeProto.DownloadProgress> {
@@ -292,6 +296,11 @@ public class FirmwareDownloaderProxy extends AbstractFirmwareDownloader {
 
                 notifyProgressChange(downloadedBytes(), speed());
             }
+        }
+
+        @Override
+        protected Class<UpgradeProto.DownloadProgress> protoClass() {
+            return UpgradeProto.DownloadProgress.class;
         }
     }
 

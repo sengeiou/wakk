@@ -15,13 +15,6 @@ public abstract class StaticProtoEventReceiver<M extends Message> extends Static
 
     private static final Logger LOGGER = FwLoggerFactory.getLogger("StaticProtoEventReceiver");
 
-    private final Class<M> mGenericClass;
-
-    public StaticProtoEventReceiver() {
-        mGenericClass = (Class) ((ParameterizedType) (getClass().getGenericSuperclass()))
-                .getActualTypeArguments()[0];
-    }
-
     @Override
     public final void onReceive(MasterContext masterContext, Event event) {
         if (event.getParam().isEmpty()) {
@@ -31,11 +24,13 @@ public abstract class StaticProtoEventReceiver<M extends Message> extends Static
 
         try {
             onReceive(masterContext, event.getAction(),
-                    ProtoParam.from(event.getParam(), mGenericClass).getProtoMessage());
+                    ProtoParam.from(event.getParam(), protoClass()).getProtoMessage());
         } catch (ProtoParam.InvalidProtoParamException e) {
             LOGGER.e(e, "Framework error when parse event param. event=%s", event);
         }
     }
+
+    protected abstract Class<M> protoClass();
 
     public abstract void onReceive(MasterContext masterContext, String action, M param);
 }

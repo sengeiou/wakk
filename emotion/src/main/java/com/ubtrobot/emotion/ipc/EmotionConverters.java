@@ -34,8 +34,8 @@ public class EmotionConverters {
         return EmotionProto.Emotion.newBuilder().setId(emotion.getId()).
                 setResource(EmotionProto.EmotionResource.newBuilder().
                         setPackageName(emotion.getResource().getPackageName()).
-                        setName(emotion.getResource().getName()).
-                        setIcon(emotion.getResource().getIcon()).
+                        setNameResource(emotion.getResource().getNameResource()).
+                        setIconUri(emotion.getResource().getIconUri()).
                         build()).
                 build();
     }
@@ -45,8 +45,8 @@ public class EmotionConverters {
                 emotionProto.getId(),
                 new EmotionResource(
                         emotionProto.getResource().getPackageName(),
-                        emotionProto.getResource().getName(),
-                        emotionProto.getResource().getIcon()
+                        emotionProto.getResource().getNameResource(),
+                        emotionProto.getResource().getIconUri()
                 )
         );
     }

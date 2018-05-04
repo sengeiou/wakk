@@ -3,13 +3,19 @@ package com.ubtrobot.emotion;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
+import android.util.Log;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * 情绪
  */
 public class Emotion {
+
+    private static final String TAG = "Emotion";
 
     public static final Emotion DEFAULT = new Emotion("", EmotionResource.DEFAULT);
 
@@ -34,6 +40,10 @@ public class Emotion {
     }
 
     public String getName(Context context) {
+        return getResApkContext(context).getString(resource.getNameResource());
+    }
+
+    private Context getResApkContext(Context context) {
         if (context == null) {
             throw new IllegalArgumentException("Argument context is null.");
         }
@@ -43,7 +53,7 @@ public class Emotion {
             throw new Resources.NotFoundException();
         }
 
-        return context.getString(resource.getName());
+        return resApkContext;
     }
 
     private Context resApkContext(Context context) {
@@ -56,20 +66,27 @@ public class Emotion {
     }
 
     public Drawable getIcon(Context context) {
+        Context resApkContext = getResApkContext(context);
+
+        return new BitmapDrawable(resApkContext.getResources(),
+                getAssetsInputStream(resApkContext, resource.getIconUri()));
+    }
+
+    private InputStream getAssetsInputStream(Context context, String uri) {
         if (context == null) {
             throw new IllegalArgumentException("Argument context is null.");
         }
 
         Context resApkContext = resApkContext(context);
-        if (resApkContext == null) {
-            throw new Resources.NotFoundException();
+
+        try {
+            return resApkContext.getAssets().open(uri);
+        } catch (IOException e) {
+            // 不处理: 不能正常获取资源时，会抛异常
+            Log.e(TAG, "Please check uri : " + uri);
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            return resApkContext.getDrawable(resource.getIcon());
-        } else {
-            return resApkContext.getResources().getDrawable(resource.getIcon(), null);
-        }
+        throw new Resources.NotFoundException();
     }
 
     @Override
@@ -79,4 +96,5 @@ public class Emotion {
                 ", resource=" + resource +
                 '}';
     }
+
 }

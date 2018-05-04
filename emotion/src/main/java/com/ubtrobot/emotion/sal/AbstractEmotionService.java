@@ -14,9 +14,9 @@ import java.util.Set;
 
 public abstract class AbstractEmotionService implements EmotionService {
 
-    private static final String TASK_RECEIVER_EXRESSOR = "expressor";
+    private static final String TASK_RECEIVER_EXPRESSOR = "expressor";
     private static final String TASK_NAME_EXPRESS = "express";
-    private static final String TASK_NAME_DISSMISS = "dissmiss";
+    private static final String TASK_NAME_DISMISS = "dismiss";
 
     private final InterruptibleTaskHelper mInterruptibleTaskHelper;
 
@@ -42,7 +42,7 @@ public abstract class AbstractEmotionService implements EmotionService {
     public Promise<Void, ExpressException>
     express(final String emotionId, final ExpressOption option) {
         return mInterruptibleTaskHelper.start(
-                TASK_RECEIVER_EXRESSOR,
+                TASK_RECEIVER_EXPRESSOR,
                 TASK_NAME_EXPRESS,
                 new InterruptibleAsyncTask<Void, ExpressException>() {
                     @Override
@@ -69,7 +69,7 @@ public abstract class AbstractEmotionService implements EmotionService {
     protected abstract void doStartExpressing(String emotionId, ExpressOption expressOption);
 
     public void resolveExpressing() {
-        mInterruptibleTaskHelper.resolve(TASK_RECEIVER_EXRESSOR, TASK_NAME_EXPRESS, null);
+        mInterruptibleTaskHelper.resolve(TASK_RECEIVER_EXPRESSOR, TASK_NAME_EXPRESS, null);
     }
 
     public void rejectExpressing(ExpressException e) {
@@ -77,14 +77,14 @@ public abstract class AbstractEmotionService implements EmotionService {
             throw new IllegalArgumentException("Argument e is null.");
         }
 
-        mInterruptibleTaskHelper.reject(TASK_RECEIVER_EXRESSOR, TASK_NAME_EXPRESS, e);
+        mInterruptibleTaskHelper.reject(TASK_RECEIVER_EXPRESSOR, TASK_NAME_EXPRESS, e);
     }
 
     @Override
     public Promise<Void, ExpressException> dismiss() {
         return mInterruptibleTaskHelper.start(
-                TASK_RECEIVER_EXRESSOR,
-                TASK_NAME_DISSMISS,
+                TASK_RECEIVER_EXPRESSOR,
+                TASK_NAME_DISMISS,
                 new InterruptibleAsyncTask<Void, ExpressException>() {
                     @Override
                     protected void onStart() {
@@ -110,7 +110,7 @@ public abstract class AbstractEmotionService implements EmotionService {
     protected abstract void doStartDismissing();
 
     public void resolveDismissing() {
-        mInterruptibleTaskHelper.resolve(TASK_RECEIVER_EXRESSOR, TASK_NAME_DISSMISS, null);
+        mInterruptibleTaskHelper.resolve(TASK_RECEIVER_EXPRESSOR, TASK_NAME_DISMISS, null);
     }
 
     public void rejectDismissing(ExpressException e) {
@@ -118,6 +118,6 @@ public abstract class AbstractEmotionService implements EmotionService {
             throw new IllegalArgumentException("Argument e is null.");
         }
 
-        mInterruptibleTaskHelper.reject(TASK_RECEIVER_EXRESSOR, TASK_NAME_DISSMISS, e);
+        mInterruptibleTaskHelper.reject(TASK_RECEIVER_EXPRESSOR, TASK_NAME_DISMISS, e);
     }
 }

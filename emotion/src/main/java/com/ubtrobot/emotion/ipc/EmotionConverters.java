@@ -36,6 +36,7 @@ public class EmotionConverters {
                         setPackageName(emotion.getResource().getPackageName()).
                         setNameResource(emotion.getResource().getNameResource()).
                         setIconUri(emotion.getResource().getIconUri()).
+                        setName(emotion.getResource().getName()).
                         build()).
                 build();
     }
@@ -43,11 +44,12 @@ public class EmotionConverters {
     public static Emotion toEmotionPojo(EmotionProto.Emotion emotionProto) {
         return new Emotion(
                 emotionProto.getId(),
-                new EmotionResource(
+                new EmotionResource.Builder(
                         emotionProto.getResource().getPackageName(),
                         emotionProto.getResource().getNameResource(),
-                        emotionProto.getResource().getIconUri()
-                )
+                        emotionProto.getResource().getIconUri(),
+                        emotionProto.getResource().getName()
+                ).build()
         );
     }
 

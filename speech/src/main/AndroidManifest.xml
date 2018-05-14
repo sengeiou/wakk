@@ -2,7 +2,7 @@
     package="com.ubtrobot.speech.sal">
 
     <uses-permission android:name="com.ubtrobot.master.permission.MASTER" />
-
+    <uses-permission android:name="android.permission.INTERNET" />
     <application>
         <service
             android:name="com.ubtrobot.speech.ipc.master.SpeechSystemService"

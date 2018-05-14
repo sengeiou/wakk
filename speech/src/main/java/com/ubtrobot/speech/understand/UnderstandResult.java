@@ -706,7 +706,6 @@ public class UnderstandResult implements Parcelable {
         }
 
         public UnderstandResult build() {
-
             UnderstandResult understandResult = new UnderstandResult();
             understandResult.sessionId = sessionId;
             understandResult.source = source;

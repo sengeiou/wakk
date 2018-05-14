@@ -82,6 +82,7 @@ public class SpeechManager {
 
     public ProgressivePromise<Void, SynthesizeException, Synthesizer.SynthesizingProgress> synthesize(
             final String sentence, final SynthesizeOption option) {
+        LOGGER.i("Speech Manager synthesize");
         return synthesizerSession().execute(mSynthesizer, new CompetitionSessionExt.SessionProgressiveCallable<
                 Void, SynthesizeException, Synthesizer.SynthesizingProgress, Synthesizer>() {
             @Override
@@ -156,7 +157,6 @@ public class SpeechManager {
     public Promise<UnderstandResult, UnderstandException> understand(String question) {
         return understand(question, UnderstandOption.DEFAULT);
     }
-
 
     public Configuration getConfiguration() {
         try {

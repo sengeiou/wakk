@@ -15,6 +15,10 @@ import com.ubtrobot.speech.understand.UnderstandResult;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 

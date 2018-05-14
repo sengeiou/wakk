@@ -34,6 +34,7 @@ import com.ubtrobot.speech.ipc.SpeechProto;
 import com.ubtrobot.speech.sal.AbstractSpeechService;
 import com.ubtrobot.speech.sal.SpeechFactory;
 import com.ubtrobot.speech.sal.SpeechService;
+import com.ubtrobot.speech.understand.UnderstandResult;
 import com.ubtrobot.transport.message.CallException;
 import com.ubtrobot.transport.message.Request;
 import com.ubtrobot.transport.message.Responder;
@@ -95,6 +96,7 @@ public class SpeechSystemService extends MasterSystemService {
 
     @Call(path = SpeechConstant.CALL_PATH_SYNTHESIZE)
     public void synthesize(final Request request, final Responder responder) {
+        LOGGER.i("SpeechSystemService synthesize");
         final SpeechProto.SynthesizeOption option = ProtoParamParser.parseParam(
                 request,
                 SpeechProto.SynthesizeOption.class,
@@ -208,17 +210,17 @@ public class SpeechSystemService extends MasterSystemService {
         final String question = understandOption.getQuestion();
 
         mCallProcessor.onCall(responder, new CallProcessAdapter.Callable<
-                        Understander.UnderstandResult, UnderstandException>() {
+                        UnderstandResult, UnderstandException>() {
                     @Override
-                    public Promise<Understander.UnderstandResult, UnderstandException>
+                    public Promise<UnderstandResult, UnderstandException>
                     call() throws CallException {
                         return mSpeechService.understand(question,
                                 SpeechConverters.toUnderstandOptionPojo(understandOption));
                     }
                 },
-                new ProtoCallProcessAdapter.DFConverter<Understander.UnderstandResult, UnderstandException>() {
+                new ProtoCallProcessAdapter.DFConverter<UnderstandResult, UnderstandException>() {
                     @Override
-                    public Message convertDone(Understander.UnderstandResult result) {
+                    public Message convertDone(UnderstandResult result) {
                         return SpeechConverters.toUnderstandResultProto(result);
 
                     }

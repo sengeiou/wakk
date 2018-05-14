@@ -17,6 +17,7 @@ import com.ubtrobot.speech.Synthesizer;
 import com.ubtrobot.speech.UnderstandException;
 import com.ubtrobot.speech.UnderstandOption;
 import com.ubtrobot.speech.Understander;
+import com.ubtrobot.speech.understand.UnderstandResult;
 import com.ubtrobot.ulog.FwLoggerFactory;
 import com.ubtrobot.ulog.Logger;
 
@@ -24,7 +25,6 @@ import java.util.List;
 import java.util.Set;
 
 public abstract class AbstractSpeechService implements SpeechService {
-
     private static final Logger LOGGER = FwLoggerFactory.getLogger("AbstractSpeechService");
 
     private static final String TASK_RECEIVER_SYNTHESIZER = "receiver_synthesizer";
@@ -60,6 +60,7 @@ public abstract class AbstractSpeechService implements SpeechService {
                     @Override
                     public SynthesizeException
                     createInterruptedException(Set<String> interrupters) {
+                        LOGGER.d("createInterruptedException");
                         return new SynthesizeException.Factory().interrupted(
                                 "Interrupted by " + interrupters);
                     }
@@ -153,8 +154,13 @@ public abstract class AbstractSpeechService implements SpeechService {
     }
 
     @Override
+<<<<<<< HEAD
     public Promise<Understander.UnderstandResult, UnderstandException> understand(final String question, UnderstandOption option) {
         AsyncTask<Understander.UnderstandResult, UnderstandException> task = createUnderstandTask(question, option);
+=======
+    public Promise<UnderstandResult, UnderstandException, Void> understand(final String question, UnderstandOption option) {
+        CancelableAsyncTask<UnderstandResult, UnderstandException, Void> task = createUnderstandTask(question, option);
+>>>>>>> 更新speech Nlp格式统一代码
 
         if (task == null) {
             throw new IllegalStateException("createUnderstandTask return null.");
@@ -164,8 +170,12 @@ public abstract class AbstractSpeechService implements SpeechService {
         return task.promise();
     }
 
+<<<<<<< HEAD
     protected abstract AsyncTask<Understander.UnderstandResult, UnderstandException>
     createUnderstandTask(String question, UnderstandOption option);
+=======
+    protected abstract CancelableAsyncTask<UnderstandResult, UnderstandException, Void> createUnderstandTask(String question, UnderstandOption option);
+>>>>>>> 更新speech Nlp格式统一代码
 
     @Override
     public Promise<List<Speaker>, AccessServiceException> getSpeakerList() {

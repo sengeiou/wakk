@@ -16,6 +16,7 @@ import com.ubtrobot.master.context.MasterContext;
 import com.ubtrobot.speech.ipc.SpeechConstant;
 import com.ubtrobot.speech.ipc.SpeechConverters;
 import com.ubtrobot.speech.ipc.SpeechProto;
+import com.ubtrobot.speech.understand.UnderstandResult;
 import com.ubtrobot.transport.message.CallException;
 import com.ubtrobot.ulog.FwLoggerFactory;
 import com.ubtrobot.ulog.Logger;
@@ -148,12 +149,11 @@ public class SpeechManager {
         return recognize(RecognizeOption.DEFAULT);
     }
 
-    public Promise<Understander.UnderstandResult, UnderstandException>
-    understand(String question, UnderstandOption option) {
+    public Promise<UnderstandResult, UnderstandException> understand(String question, UnderstandOption option) {
         return mUnderstander.understand(question, option);
     }
 
-    public Promise<Understander.UnderstandResult, UnderstandException> understand(String question) {
+    public Promise<UnderstandResult, UnderstandException> understand(String question) {
         return understand(question, UnderstandOption.DEFAULT);
     }
 

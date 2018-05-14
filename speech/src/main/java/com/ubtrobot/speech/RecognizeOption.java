@@ -33,7 +33,7 @@ public class RecognizeOption {
         private void checkMode(int mode) {
             if (mode != MODE_UNKNOWN && mode != MODE_SINGLE && mode != MODE_CONTINUOUS) {
                 throw new IllegalArgumentException("Invalid mode value, verify for " +
-                        "RecognizeOption.MODE__MODE_SINGLE or RecognizeOption.MODE_CONTINUOUS");
+                        "MODE_UNKNOWNRecognizeOption.MODE_UNKNOWN,RecognizeOption.MODE__MODE_SINGLE or RecognizeOption.MODE_CONTINUOUS");
             }
         }
 

@@ -8,6 +8,7 @@ import com.ubtrobot.master.adapter.ProtoCallAdapter;
 import com.ubtrobot.speech.ipc.SpeechConstant;
 import com.ubtrobot.speech.ipc.SpeechConverters;
 import com.ubtrobot.speech.ipc.SpeechProto;
+import com.ubtrobot.speech.understand.UnderstandResult;
 import com.ubtrobot.transport.message.CallException;
 import com.ubtrobot.ulog.FwLoggerFactory;
 import com.ubtrobot.ulog.Logger;
@@ -51,12 +52,12 @@ public class Understander {
                 });
     }
 
-    public static class UnderstandResult {
+    public static class UnderstandResultbak {
 
         private String question;
         private String answer;
 
-        private UnderstandResult(String question, String answer) {
+        private UnderstandResultbak(String question, String answer) {
             this.question = question;
             this.answer = answer;
         }
@@ -83,12 +84,12 @@ public class Understander {
 
             private void checkNotNull(String arg) {
                 if (null == arg) {
-                    throw new IllegalArgumentException("UnderstandResult.Builder refuse null argument");
+                    throw new IllegalArgumentException("UnderstandResultbak.Builder refuse null argument");
                 }
             }
 
-            public UnderstandResult build() {
-                return new UnderstandResult(question, answer);
+            public UnderstandResultbak build() {
+                return new UnderstandResultbak(question, answer);
             }
         }
     }

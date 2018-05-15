@@ -3,6 +3,8 @@ package com.ubtrobot.speech.understand;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.ubtrobot.speech.RecognizeOption;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -20,7 +22,19 @@ public class UnderstandResult implements Parcelable {
     private Fulfillment fulfillment;
     private String inputText;
 
-    private UnderstandResult() {
+    protected UnderstandResult() {
+
+    }
+
+    protected UnderstandResult(Builder builder) {
+        this.sessionId = builder.sessionId;
+        this.source = builder.source;
+        this.language = builder.language;
+        this.actionIncomplete = builder.actionIncomplete;
+        this.intent = builder.intent;
+        this.contexts = builder.contexts;
+        this.fulfillment = builder.fulfillment;
+        this.inputText = builder.inputText;
     }
 
     public UnderstandResult(Parcel in) {
@@ -45,7 +59,7 @@ public class UnderstandResult implements Parcelable {
     }
 
     @SuppressWarnings("unchecked")
-    private void readFromParcel(Parcel in) {
+    public void readFromParcel(Parcel in) {
         sessionId = in.readString();
         source = in.readString();
         language = in.readString();
@@ -105,6 +119,8 @@ public class UnderstandResult implements Parcelable {
      * 意图类
      */
     public static class Intent implements Parcelable {
+
+        public static final Intent NULL = new Intent.Builder().build();
 
         private String name;
         private String displayName;
@@ -177,10 +193,20 @@ public class UnderstandResult implements Parcelable {
 
         public final static class Builder {
 
-            private String name;
-            private String displayName;
+            private String name = "";
+            private String displayName = "";
             private JSONObject parameters = new JSONObject();
             private float score;
+
+            public Builder() {
+            }
+
+            public Builder(Intent intent) {
+                name = intent.name;
+                displayName = intent.displayName;
+                parameters = intent.parameters;
+                score = intent.score;
+            }
 
             public Builder setName(String name) {
                 this.name = name;
@@ -329,8 +355,6 @@ public class UnderstandResult implements Parcelable {
 
         private String speech;
         private List<Message> messages;
-        //老版的时候出现这个字段
-        private Message legacyMessage;
         private Status status;
 
         private Fulfillment() {
@@ -349,7 +373,6 @@ public class UnderstandResult implements Parcelable {
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeString(speech);
             dest.writeList(messages);
-            dest.writeParcelable(legacyMessage, flags);
             dest.writeParcelable(status, flags);
         }
 
@@ -357,7 +380,6 @@ public class UnderstandResult implements Parcelable {
         private void readFromParcel(Parcel in) {
             speech = in.readString();
             messages = in.readArrayList(Message.class.getClassLoader());
-            legacyMessage = in.readParcelable(Message.class.getClassLoader());
             status = in.readParcelable(Status.class.getClassLoader());
         }
 
@@ -390,7 +412,6 @@ public class UnderstandResult implements Parcelable {
 
             private String speech;
             private List<Message> messages = new ArrayList<>();
-            private Message legacyMessage;
             private Status status;
 
             public Builder setSpeech(String speech) {
@@ -408,16 +429,10 @@ public class UnderstandResult implements Parcelable {
                 return this;
             }
 
-            public Builder setLegacyMessage(Message legacyMessage) {
-                this.legacyMessage = legacyMessage;
-                return this;
-            }
-
             public Fulfillment build() {
                 Fulfillment fulfillment = new Fulfillment();
                 fulfillment.speech = speech;
                 fulfillment.messages = messages;
-                fulfillment.legacyMessage = legacyMessage;
                 fulfillment.status = status;
                 return fulfillment;
             }
@@ -600,6 +615,7 @@ public class UnderstandResult implements Parcelable {
         public static class Builder {
             public static final String TYPE_ORIGINAL = "original";
             public static final String TYPE_TEXT = "text";
+            public static final String TYPE_USERDEFINE = "userDefine";
             private String type;
             private String platform;
             private JSONObject parameters = new JSONObject();

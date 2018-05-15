@@ -1,10 +1,8 @@
 package com.ubtrobot.speech;
 
 import android.content.Context;
-import android.media.Image;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
-import android.text.InputFilter;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -19,9 +17,9 @@ import com.ubtrobot.nlp.http.Param;
 import com.ubtrobot.nlp.http.RetrofitWrapper;
 import com.ubtrobot.retrofit.adapter.urest.URestCall;
 import com.ubtrobot.speech.understand.AbstractConverter;
-import com.ubtrobot.speech.understand.Converter1;
-import com.ubtrobot.speech.understand.Converter2;
+import com.ubtrobot.speech.understand.EmotibotConverter;
 import com.ubtrobot.speech.understand.UnderstandResult;
+import com.ubtrobot.speech.understand.XmlParseHelper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -34,6 +32,8 @@ import retrofit2.Response;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -63,8 +63,8 @@ public class ExampleInstrumentedTest {
                 + "            }";
 
         JSONObject object = new JSONObject(json);
-        JSONArray param = object.optJSONObject("param").optJSONArray("entities_root>>city");
-        Log.i("test", "value:" + param.getString(0));
+        Object param = object.optJSONObject("param").opt("entities_root>>city");
+        Log.i("test", "value:" + (param instanceof JSONArray));
 
     }
 
@@ -222,141 +222,42 @@ public class ExampleInstrumentedTest {
 
     @Test
     public void nluEmotibot() throws Exception {
+        XmlParseHelper xmlParseHelper = new XmlParseHelper();
+        Context appContext = InstrumentationRegistry.getTargetContext();
+
+        try {
+            InputStream slots = appContext
+                    .getAssets().open("slots.xml");
+            xmlParseHelper.setInputSource(slots);
+            xmlParseHelper.parse();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         Gson gson = new Gson();
         EmotibotService nlpHttpService = RetrofitWrapper.get().createEmotibotService(
                 EmotibotService.class);
         Call<JsonObject> understand = nlpHttpService.understand(
-                "c8f64283751155611dfc7842aeaacca9", "b0f1ecccdc04", "讲个故事吗", "chat", "深圳市");
+                "c8f64283751155611dfc7842aeaacca9",
+                "b0f1ecccdc04",
+                "带我去洗手间",
+                "chat",
+                "深圳市");
         Response<JsonObject> execute = understand.execute();
-/*        String string ="{\n"
-                + "    \"return\": 0,\n"
-                + "    \"return_message\": \"\",\n"
-                + "    \"status\": 0,\n"
-                + "    \"data\": [\n"
-                + "        {\n"
-                + "            \"type\": \"customdata\",\n"
-                + "            \"cmd\": \"flight\",\n"
-                + "            \"value\": \"\",\n"
-                + "            \"data\": {\n"
-                + "                \"type\": \"flight\",\n"
-                + "                \"category\": \"优必选\",\n"
-                + "                \"from\": \"北京\",\n"
-                + "                \"to\": \"上海\"\n"
-                + "            }\n"
-                + "        }\n"
-                + "    ],\n"
-                + "    \"emotion\": [\n"
-                + "        {\n"
-                + "            \"type\": \"text\",\n"
-                + "            \"value\": \"中性\",\n"
-                + "            \"score\": \"78.000000\",\n"
-                + "            \"category\": null,\n"
-                + "            \"data\": []\n"
-                + "        }\n"
-                + "    ],\n"
-                + "    \"intent\": [\n"
-                + "        {\n"
-                + "            \"type\": \"text\",\n"
-                + "            \"value\": \"flight\",\n"
-                + "            \"score\": 90,\n"
-                + "            \"category\": \"userDefine\",\n"
-                + "            \"data\": {\n"
-                + "                \"param\": {\n"
-                + "                    \"entities_root>>city\": [\n"
-                + "                        \"上海\"\n"
-                + "                    ]\n"
-                + "                }\n"
-                + "            }\n"
-                + "        }\n"
-                + "    ]\n"
-                + "}";*/
-        String string = "{\n"
-                + "    \"return\": 0,\n"
-                + "    \"return_message\": \"\",\n"
-                + "    \"status\": 1,\n"
-                + "    \"data\": [\n"
-                + "        {\n"
-                + "            \"type\": \"text\",\n"
-                + "            \"cmd\": \"\",\n"
-                + "            \"value\": \"{intent:\\\"navigation\\\", appid:10, "
-                + "reply:\\\"海水的压力\\\", id:1}\",\n"
-                + "            \"data\": []\n"
-                + "        }\n"
-                + "    ],\n"
-                + "    \"emotion\": [\n"
-                + "        {\n"
-                + "            \"type\": \"text\",\n"
-                + "            \"value\": \"中性\",\n"
-                + "            \"score\": \"71.000000\",\n"
-                + "            \"category\": null,\n"
-                + "            \"data\": []\n"
-                + "        }\n"
-                + "    ],\n"
-                + "    \"intent\": []\n"
-                + "}";
+        String string = "";
+
         string = execute.body().toString();
         Log.i("test", "response:" + string);
 
         JSONObject root = new JSONObject(string);
         AbstractConverter converter = null;
-        int strategy = getStrategy(root);
-        Log.i("test", "strategy:" + strategy);
-        switch (strategy) {
-            case AbstractConverter.STRATEGY_1:
-                converter = new Converter1(root, "zhujian");
-                break;
-            case AbstractConverter.STRATEGY_2:
-                converter = new Converter2(root, "zhujian");
-                break;
-            case AbstractConverter.STRATEGY_3:
-                break;
-            case AbstractConverter.STRATEGY_4:
-                break;
-            case AbstractConverter.STRATEGY_5:
-                break;
-            default:
-                break;
-        }
+        converter = new EmotibotConverter(root,
+                xmlParseHelper.getMapper());
 
         if (null != converter) {
             UnderstandResult convert = converter.convert();
             Log.i("test", "response:" + gson.toJson(convert));
         }
-    }
-
-    private int getStrategy(JSONObject root) {
-        JSONArray intents = root.optJSONArray("intent");
-        if (null != intents && intents.length() != 0) {
-            //是否包含关键intent
-            if (isContainKeyIntent(intents)) {
-                return AbstractConverter.STRATEGY_1;
-            }
-
-            JSONArray data = root.optJSONArray("data");
-            if (null != data && data.length() != 0) {
-                JSONObject object = data.optJSONObject(0);
-                String value = object.optString("value");
-                if (!isJsonObject(value)) {
-                    return AbstractConverter.STRATEGY_2;
-                }
-                return AbstractConverter.STRATEGY_3;
-            }
-        } else {
-            //问答定制普通文字格式
-            //appid#page作为intent.name；intent.socre = 1；intent.parameter 为{} value的jsonfulfillment,
-            // 如果不是json就为fallbackIntent
-            JSONArray data = root.optJSONArray("data");
-            if (null != data && data.length() != 0) {
-                JSONObject object = data.optJSONObject(0);
-                String value = object.optString("value");
-                if (!isJsonObject(value)) {
-                    return AbstractConverter.STRATEGY_4;
-                }
-                return AbstractConverter.STRATEGY_5;
-            }
-        }
-
-        return -1;
     }
 
     private UnderstandResult.Intent getIntent(JSONObject root) {

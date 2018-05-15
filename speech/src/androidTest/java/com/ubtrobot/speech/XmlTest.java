@@ -31,7 +31,7 @@ public class XmlTest {
 
         try {
             InputStream slots = appContext
-                    .getAssets().open("slots.txt");
+                    .getAssets().open("slots.xml");
             xmlParseHelper.setInputSource(slots);
             xmlParseHelper.parse();
         } catch (IOException e) {
@@ -46,7 +46,7 @@ public class XmlTest {
 
         try {
             InputStream slots = appContext
-                    .getAssets().open("slots.txt");
+                    .getAssets().open("slots.xml");
             xmlParseHelper.parse(slots);
         } catch (IOException e) {
             e.printStackTrace();

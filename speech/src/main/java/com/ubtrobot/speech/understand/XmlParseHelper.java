@@ -63,6 +63,10 @@ public class XmlParseHelper {
         }
     }
 
+    public Map<String, Map<String, Intent>> getMapper() {
+        return mapper;
+    }
+
     public void setInputSource(InputStream inputStream) {
         setInput(inputStream);
     }
@@ -109,6 +113,7 @@ public class XmlParseHelper {
             }
             LOGGER.i("parse success!!!");
         } catch (XmlPullParserException e) {
+            LOGGER.i("parse xml error");
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();

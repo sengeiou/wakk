@@ -1,0 +1,28 @@
+project(':commons') {
+    artifactoryPublish.dependsOn('jarFramework')
+    publishing {
+        publications {
+            jarFramework(MavenPublication) {
+                groupId = rootProject.ext.groupId
+                artifactId = "commons"
+                version = rootProject.ext.versions.commonsVersion
+
+                rootProject.ext.isSnapshot = version.toUpperCase().endsWith("-SNAPSHOT")
+
+                artifact("$buildDir/libs/commons.jar")
+                pom.withXml {
+                    def dependenciesNode = asNode().appendNode('dependencies')
+
+                    def dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.ubtrobot.master')
+                    dependencyNode.appendNode('artifactId', 'protobuf-param')
+                    dependencyNode.appendNode('version', rootProject.ext.deps.masterProtobufParam)
+                }
+            }
+        }
+    }
+
+    artifactoryPublish {
+        publications(publishing.publications.jarFramework)
+    }
+}

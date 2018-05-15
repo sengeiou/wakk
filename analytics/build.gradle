@@ -34,3 +34,20 @@ dependencies {
     androidTestImplementation deps.espressoCore
     androidTestImplementation deps.runner
 }
+
+task jarFramework(
+        type: Jar,
+        dependsOn: ['assembleRelease']) {
+    archiveName = "analytics.jar"
+
+    exclude('**/R.class')
+    exclude('**/R$*.class')
+    exclude('**/BuildConfig.class')
+    exclude('**/BuildConfig$*.class')
+    exclude('android/')
+
+    exclude('com/ubtrobot/analytics/ipc/provider')
+    exclude('com/ubtrobot/analytics/sal/')
+
+    from 'build/intermediates/classes/release'
+}

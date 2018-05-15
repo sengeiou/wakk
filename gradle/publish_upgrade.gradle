@@ -1,0 +1,115 @@
+project(':upgrade') {
+    artifactoryPublish.dependsOn('jarFramework')
+    publishing {
+        publications {
+            jarFramework(MavenPublication) {
+                groupId = rootProject.ext.groupId
+                artifactId = "upgrade"
+                version = rootProject.ext.versions.upgradeVersion
+
+                rootProject.ext.isSnapshot = version.toUpperCase().endsWith("-SNAPSHOT")
+
+                artifact("$buildDir/libs/upgrade.jar")
+                pom.withXml {
+                    def dependenciesNode = asNode().appendNode('dependencies')
+
+                    def dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.ubtrobot.framework')
+                    dependencyNode.appendNode('artifactId', 'commons')
+                    dependencyNode.appendNode('version', rootProject.ext.versions.commonsVersion)
+                }
+            }
+
+            aarSal(MavenPublication) {
+                groupId = rootProject.ext.groupId
+                artifactId = "upgrade-sal"
+                version = rootProject.ext.versions.upgradeVersion
+
+                rootProject.ext.isSnapshot = version.toUpperCase().endsWith("-SNAPSHOT")
+
+                artifact("$buildDir/outputs/aar/upgrade-release.aar")
+                pom.withXml {
+                    def dependenciesNode = asNode().appendNode('dependencies')
+
+                    def dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.ubtrobot.framework')
+                    dependencyNode.appendNode('artifactId', 'commons')
+                    dependencyNode.appendNode('version', rootProject.ext.versions.commonsVersion)
+                }
+            }
+        }
+    }
+
+    artifactoryPublish {
+        publications(publishing.publications.jarFramework, publishing.publications.aarSal)
+    }
+}
+
+project(':service-impl:upgrade') {
+    artifactoryPublish.dependsOn('assembleRelease')
+    publishing {
+        publications {
+            aarSalImpl(MavenPublication) {
+                groupId = rootProject.ext.groupId
+                artifactId = "upgrade-sal-platform-impl"
+                version = rootProject.ext.versions.upgradeSalImplVersion
+
+                rootProject.ext.isSnapshot = version.toUpperCase().endsWith("-SNAPSHOT")
+
+                artifact("$buildDir/outputs/aar/upgrade-release.aar")
+                pom.withXml {
+                    def dependenciesNode = asNode().appendNode('dependencies')
+
+                    def dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.ubtrobot.framework')
+                    dependencyNode.appendNode('artifactId', 'upgrade-sal')
+                    dependencyNode.appendNode('version', rootProject.ext.versions.upgradeVersion)
+
+                    dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.squareup.retrofit2')
+                    dependencyNode.appendNode('artifactId', 'retrofit')
+                    dependencyNode.appendNode('version', "${rootProject.ext.depVersions.retrofit}")
+
+                    dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.squareup.retrofit2')
+                    dependencyNode.appendNode('artifactId', 'converter-gson')
+                    dependencyNode.appendNode('version', "${rootProject.ext.depVersions.gsonConverter}")
+
+                    dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.ubtrobot.http.rest')
+                    dependencyNode.appendNode('artifactId', 'retrofit-urest-adapter')
+                    dependencyNode.appendNode('version', "${rootProject.ext.depVersions.uRestAdapter}")
+
+                    dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.ubtrobot.http.rest')
+                    dependencyNode.appendNode('artifactId', 'okhttp-sign-interceptor')
+                    dependencyNode.appendNode('version', "${rootProject.ext.depVersions.signInterceptor}")
+
+                    dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.ubtrobot.http.rest')
+                    dependencyNode.appendNode('artifactId', 'okhttp-auth-interceptor')
+                    dependencyNode.appendNode('version', "${rootProject.ext.depVersions.authInterceptor}")
+
+                    dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.liulishuo.okdownload')
+                    dependencyNode.appendNode('artifactId', 'okdownload')
+                    dependencyNode.appendNode('version', "${rootProject.ext.depVersions.okDownload}")
+
+                    dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.liulishuo.okdownload')
+                    dependencyNode.appendNode('artifactId', 'sqlite')
+                    dependencyNode.appendNode('version', "${rootProject.ext.depVersions.okDownloadSqlite}")
+
+                    dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.liulishuo.okdownload')
+                    dependencyNode.appendNode('artifactId', 'okhttp')
+                    dependencyNode.appendNode('version', "${rootProject.ext.depVersions.okDownloadOkHttp}")
+                }
+            }
+        }
+    }
+
+    artifactoryPublish {
+        publications(publishing.publications.aarSalImpl)
+    }
+}

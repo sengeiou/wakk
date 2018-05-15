@@ -52,3 +52,18 @@ dependencies {
     androidTestImplementation deps.espressoCore
     androidTestImplementation deps.runner
 }
+
+task jarFramework(
+        type: Jar,
+        dependsOn: ['assembleRelease']) {
+    archiveName = "commons.jar"
+
+    exclude('**/R.class')
+    exclude('**/R$*.class')
+    exclude('**/BuildConfig.class')
+    exclude('**/BuildConfig$*.class')
+    exclude('android/')
+    exclude('com/ubtrobot/commons/')
+
+    from 'build/intermediates/classes/release'
+}

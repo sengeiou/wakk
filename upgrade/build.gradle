@@ -52,3 +52,21 @@ dependencies {
     androidTestImplementation deps.espressoCore
     androidTestImplementation deps.runner
 }
+
+task jarFramework(
+        type: Jar,
+        dependsOn: ['assembleRelease']) {
+    archiveName = "upgrade.jar"
+
+    exclude('**/R.class')
+    exclude('**/R$*.class')
+    exclude('**/BuildConfig.class')
+    exclude('**/BuildConfig$*.class')
+    exclude('android/')
+
+    exclude('com/ubtrobot/commons/')
+    exclude('com/ubtrobot/upgrade/ipc/master')
+    exclude('com/ubtrobot/upgrade/sal/')
+
+    from 'build/intermediates/classes/release'
+}

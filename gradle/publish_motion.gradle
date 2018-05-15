@@ -1,0 +1,46 @@
+project(':motion') {
+    artifactoryPublish.dependsOn('jarFramework')
+    publishing {
+        publications {
+            jarFramework(MavenPublication) {
+                groupId = rootProject.ext.groupId
+                artifactId = "motion"
+                version = rootProject.ext.versions.motionVersion
+
+                rootProject.ext.isSnapshot = version.toUpperCase().endsWith("-SNAPSHOT")
+
+                artifact("$buildDir/libs/motion.jar")
+                pom.withXml {
+                    def dependenciesNode = asNode().appendNode('dependencies')
+
+                    def dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.ubtrobot.framework')
+                    dependencyNode.appendNode('artifactId', 'commons')
+                    dependencyNode.appendNode('version', rootProject.ext.versions.commonsVersion)
+                }
+            }
+
+            aarSal(MavenPublication) {
+                groupId = rootProject.ext.groupId
+                artifactId = "motion-sal"
+                version = rootProject.ext.versions.motionVersion
+
+                rootProject.ext.isSnapshot = version.toUpperCase().endsWith("-SNAPSHOT")
+
+                artifact("$buildDir/outputs/aar/motion-release.aar")
+                pom.withXml {
+                    def dependenciesNode = asNode().appendNode('dependencies')
+
+                    def dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.ubtrobot.framework')
+                    dependencyNode.appendNode('artifactId', 'commons')
+                    dependencyNode.appendNode('version', rootProject.ext.versions.commonsVersion)
+                }
+            }
+        }
+    }
+
+    artifactoryPublish {
+        publications(publishing.publications.jarFramework, publishing.publications.aarSal)
+    }
+}

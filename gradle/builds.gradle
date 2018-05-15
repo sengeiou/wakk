@@ -31,16 +31,33 @@ allprojects {
     configurations.all {
         resolutionStrategy.cacheChangingModulesFor 60, 'seconds'
     }
+
+    apply plugin: 'com.jfrog.artifactory'
+    apply plugin: 'maven-publish'
 }
 
 ext {
     versions = [
+            commonsVersion         : '0.5.0-SNAPSHOT',
+            analyticsVersion       : '0.5.0-SNAPSHOT',
+            analyticsSalImplVersion: '0.5.0-SNAPSHOT',
+            emotionVersion         : '0.5.0-SNAPSHOT',
+            lightVersion           : '0.5.0-SNAPSHOT',
+            motionVersion          : '0.5.0-SNAPSHOT',
+            navigationVersion      : '0.5.0-SNAPSHOT',
+            speechVersion          : '0.5.0-SNAPSHOT',
+            upgradeVersion         : '0.5.0-SNAPSHOT',
+            upgradeSalImplVersion  : '0.5.0-SNAPSHOT',
+            wakeupVersion          : '0.5.0-SNAPSHOT',
+
             sampleVersionCode      : 1,
             sampleVersionName      : '0.0.1',
 
             serviceMocksVersionCode: 1,
             serviceMocksVersionName: '0.0.1'
     ]
+
+    groupId = 'com.ubtrobot.framework'
 
     sdk = [
             compileSdkVersion: 26,
@@ -49,6 +66,19 @@ ext {
     ]
 
     protoc = 'com.google.protobuf:protoc:3.0.0'
+
+    depVersions = [
+            masterProtobufParam: '0.5.0-SNAPSHOT',
+            okHttp             : '3.10.0',
+            retrofit           : '2.4.0',
+            gsonConverter      : '2.4.0',
+            uRestAdapter       : '0.1.3',
+            signInterceptor    : '0.1.0',
+            authInterceptor    : '0.1.0',
+            okDownload         : '1.0.2',
+            okDownloadSqlite   : '1.0.2',
+            okDownloadOkHttp   : '1.0.2',
+    ]
 
     deps = [
             appcompat          : 'com.android.support:appcompat-v7:27.0.2',
@@ -62,17 +92,49 @@ ext {
             // Master ProtoBuf Param，会传递依赖：
             //   - Master 对应版本（与 Param 版本号一致）
             //   - ulog v0.0.2
-            masterProtobufParam: 'com.ubtrobot.master:protobuf-param:0.5.0-SNAPSHOT',
+            masterProtobufParam: "com.ubtrobot.master:protobuf-param:${depVersions.masterProtobufParam}",
 
             // service-impl dependencies（注：非 service-impl 下模块不要引用）
-            okHttp             : 'com.squareup.okhttp3:okhttp:3.10.0',
-            retrofit           : 'com.squareup.retrofit2:retrofit:2.4.0',
-            gsonConverter      : 'com.squareup.retrofit2:converter-gson:2.4.0',
-            uRestAdapter       : 'com.ubtrobot.http.rest:retrofit-urest-adapter:0.1.3',
-            signInterceptor    : 'com.ubtrobot.http.rest:okhttp-sign-interceptor:0.1.0',
-            authInterceptor    : 'com.ubtrobot.http.rest:okhttp-auth-interceptor:0.1.0',
-            okDownload         : 'com.liulishuo.okdownload:okdownload:1.0.1',
-            okDownloadSqlite   : 'com.liulishuo.okdownload:sqlite:1.0.1',
-            okDownloadOkHttp   : 'com.liulishuo.okdownload:okhttp:1.0.1',
+            okHttp             : "com.squareup.okhttp3:okhttp:${depVersions.okHttp}",
+            retrofit           : "com.squareup.retrofit2:retrofit:${depVersions.retrofit}",
+            gsonConverter      : "com.squareup.retrofit2:converter-gson:${depVersions.gsonConverter}",
+            uRestAdapter       : "com.ubtrobot.http.rest:retrofit-urest-adapter:${depVersions.uRestAdapter}",
+            signInterceptor    : "com.ubtrobot.http.rest:okhttp-sign-interceptor:${depVersions.signInterceptor}",
+            authInterceptor    : "com.ubtrobot.http.rest:okhttp-auth-interceptor:${depVersions.authInterceptor}",
+            okDownload         : "com.liulishuo.okdownload:okdownload:${depVersions.okDownload}",
+            okDownloadSqlite   : "com.liulishuo.okdownload:sqlite:${depVersions.okDownloadSqlite}",
+            okDownloadOkHttp   : "com.liulishuo.okdownload:okhttp:${depVersions.okDownloadOkHttp}",
     ]
+}
+
+artifactoryPublish.skip = true
+
+apply from: 'gradle/publish_commons.gradle'
+apply from: 'gradle/publish_analytics.gradle'
+apply from: 'gradle/publish_emotion.gradle'
+apply from: 'gradle/publish_light.gradle'
+apply from: 'gradle/publish_motion.gradle'
+apply from: 'gradle/publish_navigation.gradle'
+apply from: 'gradle/publish_speech.gradle'
+apply from: 'gradle/publish_upgrade.gradle'
+apply from: 'gradle/publish_wakeup.gradle'
+
+artifactory {
+    contextUrl = artifactory_url
+
+    publish {
+        repository {
+            username = artifactory_username
+            password = artifactory_password
+            repoKey = rootProject.ext.isSnapshot ? artifactory_rose_snapshot : artifactory_rose_release
+        }
+
+        defaults {
+            publishArtifacts = true
+        }
+    }
+
+    resolve {
+        repoKey = 'jcenter'
+    }
 }

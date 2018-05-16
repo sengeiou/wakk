@@ -17,6 +17,11 @@ project(':commons') {
                     dependencyNode.appendNode('groupId', 'com.ubtrobot.master')
                     dependencyNode.appendNode('artifactId', 'protobuf-param')
                     dependencyNode.appendNode('version', rootProject.ext.depVersions.masterProtobufParam)
+
+                    dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.ubtrobot.async')
+                    dependencyNode.appendNode('artifactId', 'async')
+                    dependencyNode.appendNode('version', rootProject.ext.depVersions.async)
                 }
             }
         }

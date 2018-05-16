@@ -1,0 +1,72 @@
+project(':product:cruzr') {
+    publishing {
+        publications {
+            jarFramework(MavenPublication) {
+                groupId = rootProject.ext.groupId
+                artifactId = "product-cruzr"
+                version = rootProject.ext.versions.productCruzrVersion
+
+                rootProject.ext.isSnapshot = version.toUpperCase().endsWith("-SNAPSHOT")
+
+                artifact("$buildDir/../../libs/empty.jar")
+                pom.withXml {
+                    def dependenciesNode = asNode().appendNode('dependencies')
+
+                    def dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.ubtrobot.framework')
+                    dependencyNode.appendNode('artifactId', 'initialization')
+                    dependencyNode.appendNode('version', rootProject.ext.versions.initializationVersion)
+
+                    dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.ubtrobot.framework')
+                    dependencyNode.appendNode('artifactId', 'commons')
+                    dependencyNode.appendNode('version', rootProject.ext.versions.commonsVersion)
+
+                    dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.ubtrobot.framework')
+                    dependencyNode.appendNode('artifactId', 'analytics')
+                    dependencyNode.appendNode('version', rootProject.ext.versions.analyticsVersion)
+
+                    dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.ubtrobot.framework')
+                    dependencyNode.appendNode('artifactId', 'emotion')
+                    dependencyNode.appendNode('version', rootProject.ext.versions.emotionVersion)
+
+                    dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.ubtrobot.framework')
+                    dependencyNode.appendNode('artifactId', 'light')
+                    dependencyNode.appendNode('version', rootProject.ext.versions.lightVersion)
+
+                    dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.ubtrobot.framework')
+                    dependencyNode.appendNode('artifactId', 'motion')
+                    dependencyNode.appendNode('version', rootProject.ext.versions.motionVersion)
+
+                    dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.ubtrobot.framework')
+                    dependencyNode.appendNode('artifactId', 'navigation')
+                    dependencyNode.appendNode('version', rootProject.ext.versions.navigationVersion)
+
+                    dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.ubtrobot.framework')
+                    dependencyNode.appendNode('artifactId', 'speech')
+                    dependencyNode.appendNode('version', rootProject.ext.versions.speechVersion)
+
+                    dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.ubtrobot.framework')
+                    dependencyNode.appendNode('artifactId', 'upgrade')
+                    dependencyNode.appendNode('version', rootProject.ext.versions.upgradeVersion)
+
+                    dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.ubtrobot.framework')
+                    dependencyNode.appendNode('artifactId', 'wakeup')
+                    dependencyNode.appendNode('version', rootProject.ext.versions.wakeupVersion)
+                }
+            }
+        }
+    }
+
+    artifactoryPublish {
+        publications(publishing.publications.jarFramework)
+    }
+}

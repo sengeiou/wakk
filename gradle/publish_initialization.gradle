@@ -1,0 +1,20 @@
+project(':initialization') {
+    artifactoryPublish.dependsOn('jarFramework')
+    publishing {
+        publications {
+            jarFramework(MavenPublication) {
+                groupId = rootProject.ext.groupId
+                artifactId = "initialization"
+                version = rootProject.ext.versions.initializationVersion
+
+                rootProject.ext.isSnapshot = version.toUpperCase().endsWith("-SNAPSHOT")
+
+                artifact("$buildDir/libs/initialization.jar")
+            }
+        }
+    }
+
+    artifactoryPublish {
+        publications(publishing.publications.jarFramework)
+    }
+}

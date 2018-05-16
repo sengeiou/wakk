@@ -13,6 +13,7 @@ import com.ubtrobot.speech.SynthesizeOption;
 import com.ubtrobot.speech.Synthesizer;
 import com.ubtrobot.speech.UnderstandException;
 import com.ubtrobot.speech.UnderstandOption;
+import com.ubtrobot.speech.understand.LegacyUnderstandResult;
 import com.ubtrobot.speech.understand.UnderstandResult;
 
 import java.util.List;
@@ -29,7 +30,7 @@ public interface SpeechService {
 
     boolean isRecognizing();
 
-    Promise<UnderstandResult, UnderstandException> understand(String question, UnderstandOption option);
+    Promise<LegacyUnderstandResult, UnderstandException> understand(String question, UnderstandOption option);
 
     Promise<List<Speaker>, AccessServiceException> getSpeakerList();
 

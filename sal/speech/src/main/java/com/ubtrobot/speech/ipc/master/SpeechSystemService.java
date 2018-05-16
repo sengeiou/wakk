@@ -34,6 +34,7 @@ import com.ubtrobot.speech.ipc.SpeechProto;
 import com.ubtrobot.speech.sal.AbstractSpeechService;
 import com.ubtrobot.speech.sal.SpeechFactory;
 import com.ubtrobot.speech.sal.SpeechService;
+import com.ubtrobot.speech.understand.LegacyUnderstandResult;
 import com.ubtrobot.speech.understand.UnderstandResult;
 import com.ubtrobot.transport.message.CallException;
 import com.ubtrobot.transport.message.Request;
@@ -80,12 +81,14 @@ public class SpeechSystemService extends MasterSystemService {
     @Override
     protected List<CompetingItemDetail> getCompetingItems() {
         List<CompetingItemDetail> list = new LinkedList<>();
-        list.add(new CompetingItemDetail.Builder(SpeechConstant.SERVICE_NAME, SpeechConstant.COMPETING_ITEM_SYNTHESIZER)
+        list.add(new CompetingItemDetail.Builder(SpeechConstant.SERVICE_NAME,
+                SpeechConstant.COMPETING_ITEM_SYNTHESIZER)
                 .setDescription("the synthesize competing item")
                 .addCallPath(SpeechConstant.CALL_PATH_SYNTHESIZE)
                 .build());
 
-        list.add(new CompetingItemDetail.Builder(SpeechConstant.SERVICE_NAME, SpeechConstant.COMPETING_ITEM_RECOGNIZER)
+        list.add(new CompetingItemDetail.Builder(SpeechConstant.SERVICE_NAME,
+                SpeechConstant.COMPETING_ITEM_RECOGNIZER)
                 .setDescription("the recognize competing item")
                 .addCallPath(SpeechConstant.CALL_PATH_RECOGNIZE)
                 .build());
@@ -113,7 +116,8 @@ public class SpeechSystemService extends MasterSystemService {
                 new CompetingCallDelegate.SessionProgressiveCallable<
                         Void, SynthesizeException, Synthesizer.SynthesizingProgress>() {
                     @Override
-                    public ProgressivePromise<Void, SynthesizeException, Synthesizer.SynthesizingProgress>
+                    public ProgressivePromise<Void, SynthesizeException, Synthesizer
+                            .SynthesizingProgress>
                     call() throws CallException {
                         return mSpeechService.synthesize(
                                 option.getSentence(),
@@ -165,15 +169,18 @@ public class SpeechSystemService extends MasterSystemService {
                 SpeechConstant.COMPETING_ITEM_RECOGNIZER,
                 responder,
                 new CompetingCallDelegate.SessionProgressiveCallable<
-                        Recognizer.RecognizeResult, RecognizeException, Recognizer.RecognizingProgress>() {
+                        Recognizer.RecognizeResult, RecognizeException, Recognizer
+                        .RecognizingProgress>() {
                     @Override
-                    public ProgressivePromise<Recognizer.RecognizeResult, RecognizeException, Recognizer.RecognizingProgress>
+                    public ProgressivePromise<Recognizer.RecognizeResult, RecognizeException,
+                            Recognizer.RecognizingProgress>
                     call() throws CallException {
                         return mSpeechService.recognize(option);
                     }
                 },
                 new ProtoCompetingCallDelegate.DFPConverter<
-                        Recognizer.RecognizeResult, RecognizeException, Recognizer.RecognizingProgress>() {
+                        Recognizer.RecognizeResult, RecognizeException, Recognizer
+                        .RecognizingProgress>() {
                     @Override
                     public Message convertDone(Recognizer.RecognizeResult done) {
                         return SpeechConverters.toRecognizeResultProto(done);
@@ -200,6 +207,7 @@ public class SpeechSystemService extends MasterSystemService {
 
     @Call(path = SpeechConstant.CALL_PATH_UNDERSTAND)
     public void understand(Request request, final Responder responder) {
+        LOGGER.i("call ervice understand receive began");
         final SpeechProto.UnderstandOption understandOption = ProtoParamParser.parseParam(request,
                 SpeechProto.UnderstandOption.class, responder);
         if (understandOption == null) {
@@ -210,17 +218,18 @@ public class SpeechSystemService extends MasterSystemService {
         final String question = understandOption.getQuestion();
 
         mCallProcessor.onCall(responder, new CallProcessAdapter.Callable<
-                        UnderstandResult, UnderstandException>() {
+                        LegacyUnderstandResult, UnderstandException>() {
                     @Override
-                    public Promise<UnderstandResult, UnderstandException>
+                    public Promise<LegacyUnderstandResult, UnderstandException>
                     call() throws CallException {
                         return mSpeechService.understand(question,
                                 SpeechConverters.toUnderstandOptionPojo(understandOption));
                     }
                 },
-                new ProtoCallProcessAdapter.DFConverter<UnderstandResult, UnderstandException>() {
+                new ProtoCallProcessAdapter.DFConverter<LegacyUnderstandResult,
+                        UnderstandException>() {
                     @Override
-                    public Message convertDone(UnderstandResult result) {
+                    public Message convertDone(LegacyUnderstandResult result) {
                         return SpeechConverters.toUnderstandResultProto(result);
 
                     }
@@ -255,22 +264,25 @@ public class SpeechSystemService extends MasterSystemService {
 
     @Call(path = SpeechConstant.CALL_PATH_GET_CONFIG)
     public void getConfiguration(Request request, Responder responder) {
-        mCallProcessor.onCall(responder, new CallProcessAdapter.Callable<Configuration, AccessServiceException, Void>() {
-            @Override
-            public Promise<Configuration, AccessServiceException, Void> call() throws CallException {
-                return mSpeechService.getConfiguration();
-            }
-        }, new ProtoCallProcessAdapter.DFConverter<Configuration, AccessServiceException>() {
-            @Override
-            public Message convertDone(Configuration configuration) {
-                return SpeechConverters.toConfigurationProto(configuration);
-            }
+        mCallProcessor.onCall(responder,
+                new CallProcessAdapter.Callable<Configuration, AccessServiceException>() {
+                    @Override
+                    public Promise<Configuration, AccessServiceException> call()
+                            throws CallException {
+                        return mSpeechService.getConfiguration();
+                    }
+                },
+                new ProtoCallProcessAdapter.DFConverter<Configuration, AccessServiceException>() {
+                    @Override
+                    public Message convertDone(Configuration configuration) {
+                        return SpeechConverters.toConfigurationProto(configuration);
+                    }
 
-            @Override
-            public CallException convertFail(AccessServiceException fail) {
-                return new CallException(fail.getCode(), fail.getMessage());
-            }
-        });
+                    @Override
+                    public CallException convertFail(AccessServiceException fail) {
+                        return new CallException(fail.getCode(), fail.getMessage());
+                    }
+                });
     }
 
     @Call(path = SpeechConstant.CALL_PATH_SET_CONFIG)
@@ -282,17 +294,19 @@ public class SpeechSystemService extends MasterSystemService {
             return;
         }
 
-        mCallProcessor.onCall(responder, new CallProcessAdapter.Callable<Void, AccessServiceException, Void>() {
-            @Override
-            public Promise<Void, AccessServiceException, Void> call() throws CallException {
-                return mSpeechService.setConfiguration(SpeechConverters.toConfigurationPojo(configuration));
-            }
-        }, new ProtoCallProcessAdapter.FConverter<AccessServiceException>() {
-            @Override
-            public CallException convertFail(AccessServiceException fail) {
-                return new CallException(fail.getCode(), fail.getMessage());
-            }
-        });
+        mCallProcessor.onCall(responder,
+                new CallProcessAdapter.Callable<Void, AccessServiceException>() {
+                    @Override
+                    public Promise<Void, AccessServiceException> call() throws CallException {
+                        return mSpeechService.setConfiguration(
+                                SpeechConverters.toConfigurationPojo(configuration));
+                    }
+                }, new ProtoCallProcessAdapter.FConverter<AccessServiceException>() {
+                    @Override
+                    public CallException convertFail(AccessServiceException fail) {
+                        return new CallException(fail.getCode(), fail.getMessage());
+                    }
+                });
     }
 
     @Override

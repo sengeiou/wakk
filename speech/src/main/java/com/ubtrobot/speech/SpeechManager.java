@@ -4,6 +4,7 @@ package com.ubtrobot.speech;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.master.adapter.ProtoCallAdapter;
 import com.ubtrobot.master.competition.ActivateException;
@@ -72,12 +73,12 @@ public class SpeechManager {
         return mSpeakerList.all();
     }
 
-    public Promise<Void, SynthesizeException, Synthesizer.SynthesizingProgress> synthesize(
+    public ProgressivePromise<Void, SynthesizeException, Synthesizer.SynthesizingProgress> synthesize(
             final String sentence, final SynthesizeOption option) {
-        return synthesizerSession().execute(mSynthesizer, new CompetitionSessionExt.SessionCallable<
+        return synthesizerSession().execute(mSynthesizer, new CompetitionSessionExt.SessionProgressiveCallable<
                 Void, SynthesizeException, Synthesizer.SynthesizingProgress, Synthesizer>() {
             @Override
-            public Promise<Void, SynthesizeException, Synthesizer.SynthesizingProgress>
+            public ProgressivePromise<Void, SynthesizeException, Synthesizer.SynthesizingProgress>
             call(CompetitionSession session, Synthesizer competing) {
                 return mSynthesizer.synthesize(session, sentence, option);
             }
@@ -89,7 +90,7 @@ public class SpeechManager {
         });
     }
 
-    public Promise<Void, SynthesizeException, Synthesizer.SynthesizingProgress> synthesize(
+    public ProgressivePromise<Void, SynthesizeException, Synthesizer.SynthesizingProgress> synthesize(
             final String sentence) {
         return synthesize(sentence, SynthesizeOption.DEFAULT);
     }
@@ -118,12 +119,12 @@ public class SpeechManager {
         return mRecognizer;
     }
 
-    public Promise<Recognizer.RecognizeResult, RecognizeException, Recognizer.RecognizingProgress> recognize(
+    public ProgressivePromise<Recognizer.RecognizeResult, RecognizeException, Recognizer.RecognizingProgress> recognize(
             final RecognizeOption option) {
-        return recognizerSession().execute(mRecognizer, new CompetitionSessionExt.SessionCallable<
+        return recognizerSession().execute(mRecognizer, new CompetitionSessionExt.SessionProgressiveCallable<
                 Recognizer.RecognizeResult, RecognizeException, Recognizer.RecognizingProgress, Recognizer>() {
             @Override
-            public Promise<Recognizer.RecognizeResult, RecognizeException, Recognizer.RecognizingProgress>
+            public ProgressivePromise<Recognizer.RecognizeResult, RecognizeException, Recognizer.RecognizingProgress>
             call(CompetitionSession session, Recognizer competing) {
                 return mRecognizer.recognize(session, option);
             }
@@ -135,15 +136,18 @@ public class SpeechManager {
         });
     }
 
-    public Promise<Recognizer.RecognizeResult, RecognizeException, Recognizer.RecognizingProgress> recognize() {
+    public ProgressivePromise<
+            Recognizer.RecognizeResult, RecognizeException, Recognizer.RecognizingProgress>
+    recognize() {
         return recognize(RecognizeOption.DEFAULT);
     }
 
-    public Promise<Understander.UnderstandResult, UnderstandException, Void> understand(String question, UnderstandOption option) {
+    public Promise<Understander.UnderstandResult, UnderstandException>
+    understand(String question, UnderstandOption option) {
         return mUnderstander.understand(question, option);
     }
 
-    public Promise<Understander.UnderstandResult, UnderstandException, Void> understand(String question) {
+    public Promise<Understander.UnderstandResult, UnderstandException> understand(String question) {
         return understand(question, UnderstandOption.DEFAULT);
     }
 }

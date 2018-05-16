@@ -18,11 +18,11 @@ public class UpgradeDetector {
         mUpgradeService = upgradeService;
     }
 
-    public Promise<FirmwarePackageGroup, DetectException, Void> detect() {
+    public Promise<FirmwarePackageGroup, DetectException> detect() {
         return detect(new DetectOption.Builder(true).build());
     }
 
-    public Promise<FirmwarePackageGroup, DetectException, Void> detect(DetectOption option) {
+    public Promise<FirmwarePackageGroup, DetectException> detect(DetectOption option) {
         if (option == null) {
             throw new IllegalArgumentException("Argument option is null.");
         }

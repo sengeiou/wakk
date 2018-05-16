@@ -3,6 +3,8 @@ package com.ubtrobot.master.competition;
 import com.ubtrobot.async.DoneCallback;
 import com.ubtrobot.async.FailCallback;
 import com.ubtrobot.async.InterruptibleAsyncTask;
+import com.ubtrobot.async.InterruptibleProgressiveAsyncTask;
+import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
 
 import java.util.Collection;
@@ -18,10 +20,10 @@ public class InterruptibleTaskHelper {
 
     private final HashMap<String, TaskEnv<?, ?, ?>> mTasks = new HashMap<>();
 
-    public <D, F, P> Promise<D, F, P> start(
+    public <D, F, P> ProgressivePromise<D, F, P> start(
             Collection<String> receivers,
             String name,
-            InterruptibleAsyncTask<D, F, P> task,
+            InterruptibleProgressiveAsyncTask<D, F, P> task,
             InterruptedExceptionCreator<F> creator) {
         synchronized (mTasks) {
             Set<String> receiverSet = Collections.unmodifiableSet(new HashSet<>(receivers));
@@ -69,18 +71,35 @@ public class InterruptibleTaskHelper {
         }
     }
 
-    private static String reciverSeq(Collection<String> receivers) {
+    private static String receiverSeq(Collection<String> receivers) {
         LinkedList<String> receiverList = new LinkedList<>(receivers);
         Collections.sort(receiverList);
         return receiverList.toString();
     }
 
-    public <D, F, P> Promise<D, F, P> start(
+    public <D, F, P> ProgressivePromise<D, F, P> start(
             String receiver,
             String name,
-            InterruptibleAsyncTask<D, F, P> task,
+            InterruptibleProgressiveAsyncTask<D, F, P> task,
             InterruptedExceptionCreator<F> creator) {
         return start(Collections.singleton(receiver), name, task, creator);
+    }
+
+    public <D, F> Promise<D, F> start(
+            Collection<String> receivers,
+            String name,
+            InterruptibleAsyncTask<D, F> task,
+            InterruptedExceptionCreator<F> creator) {
+        return start(receivers, name, (InterruptibleProgressiveAsyncTask<D, F, Void>) task, creator);
+    }
+
+    public <D, F> Promise<D, F> start(
+            String receiver,
+            String name,
+            InterruptibleAsyncTask<D, F> task,
+            InterruptedExceptionCreator<F> creator) {
+        return start(Collections.singleton(receiver), name,
+                (InterruptibleProgressiveAsyncTask<D, F, Void>) task, creator);
     }
 
     public boolean isRunning(String receiver, String name) {
@@ -97,7 +116,7 @@ public class InterruptibleTaskHelper {
 
     public boolean isAllRunning(Collection<String> receivers, String name) {
         synchronized (mTasks) {
-            String receiverSeq = reciverSeq(receivers);
+            String receiverSeq = receiverSeq(receivers);
             TaskEnv<?, ?, ?> taskEnv = mTasks.get(receiverSeq);
             return taskEnv != null && taskEnv.name.equals(name);
         }
@@ -106,10 +125,10 @@ public class InterruptibleTaskHelper {
     @SuppressWarnings("unchecked")
     public <D> boolean resolve(Collection<String> receivers, String name, D done) {
         synchronized (mTasks) {
-            String receiverSeq = reciverSeq(receivers);
+            String receiverSeq = receiverSeq(receivers);
             TaskEnv<?, ?, ?> taskEnv = mTasks.get(receiverSeq);
             if (taskEnv != null && taskEnv.name.equals(name)) {
-                boolean ret = taskEnv.task.isPending();
+                boolean ret = taskEnv.task.promise().isPending();
                 ((TaskEnv<D, ?, ?>) taskEnv).task.resolve(done);
                 return ret;
             }
@@ -125,10 +144,10 @@ public class InterruptibleTaskHelper {
     @SuppressWarnings("unchecked")
     public <F> boolean reject(Collection<String> receivers, String name, F fail) {
         synchronized (mTasks) {
-            String receiverSeq = reciverSeq(receivers);
+            String receiverSeq = receiverSeq(receivers);
             TaskEnv<?, ?, ?> taskEnv = mTasks.get(receiverSeq);
             if (taskEnv != null && taskEnv.name.equals(name)) {
-                boolean ret = taskEnv.task.isPending();
+                boolean ret = taskEnv.task.promise().isPending();
                 ((TaskEnv<?, F, ?>) taskEnv).task.reject(fail);
                 return ret;
             }
@@ -142,13 +161,13 @@ public class InterruptibleTaskHelper {
     }
 
     @SuppressWarnings("unchecked")
-    public <P> boolean notify(Collection<String> receivers, String name, P progress) {
+    public <P> boolean report(Collection<String> receivers, String name, P progress) {
         synchronized (mTasks) {
-            String receiverSeq = reciverSeq(receivers);
+            String receiverSeq = receiverSeq(receivers);
             TaskEnv<?, ?, ?> taskEnv = mTasks.get(receiverSeq);
             if (taskEnv != null && taskEnv.name.equals(name)) {
-                boolean ret = taskEnv.task.isPending();
-                ((TaskEnv<?, ?, P>) taskEnv).task.notify(progress);
+                boolean ret = taskEnv.task.promise().isPending();
+                ((TaskEnv<?, ?, P>) taskEnv).task.report(progress);
                 return ret;
             }
 
@@ -156,8 +175,8 @@ public class InterruptibleTaskHelper {
         }
     }
 
-    public <P> boolean notify(String receiver, String name, P progress) {
-        return notify(Collections.singleton(receiver), name, progress);
+    public <P> boolean report(String receiver, String name, P progress) {
+        return report(Collections.singleton(receiver), name, progress);
     }
 
     private static class TaskEnv<D, F, P> {
@@ -165,20 +184,20 @@ public class InterruptibleTaskHelper {
         Set<String> receivers;
         String receiverSeq;
         String name;
-        InterruptibleAsyncTask<D, F, P> task;
+        InterruptibleProgressiveAsyncTask<D, F, P> task;
         InterruptedExceptionCreator<F> creator;
         long id = System.nanoTime();
 
         public TaskEnv(
                 Set<String> receivers,
                 String name,
-                InterruptibleAsyncTask<D, F, P> task,
+                InterruptibleProgressiveAsyncTask<D, F, P> task,
                 InterruptedExceptionCreator<F> creator) {
             this.receivers = receivers;
             this.name = name;
             this.task = task;
             this.creator = creator;
-            receiverSeq = reciverSeq(receivers);
+            receiverSeq = receiverSeq(receivers);
         }
 
         void interrupt(Set<String> interrupters) {

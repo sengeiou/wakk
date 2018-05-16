@@ -1,5 +1,6 @@
 package com.ubtrobot.motion.sal;
 
+import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.exception.AccessServiceException;
 import com.ubtrobot.motion.Joint;
@@ -11,23 +12,23 @@ import java.util.List;
 
 public interface MotionService {
 
-    Promise<List<JointDevice>, AccessServiceException, Void> getJointList();
+    Promise<List<JointDevice>, AccessServiceException> getJointList();
 
     boolean isJointRotating(String jointId);
 
     float getJointAngle(String jointId);
 
-    Promise<Void, JointException, Joint.RotatingProgress>
+    ProgressivePromise<Void, JointException, Joint.RotatingProgress>
     jointRotateBy(String jointId, float angle, float speed);
 
-    Promise<Void, JointException, Joint.RotatingProgress>
+    ProgressivePromise<Void, JointException, Joint.RotatingProgress>
     jointRotateBy(String jointId, float angle, long timeMillis);
 
-    Promise<Void, JointException, Joint.RotatingProgress>
+    ProgressivePromise<Void, JointException, Joint.RotatingProgress>
     jointRotateTo(String jointId, float angle, float speed);
 
-    Promise<Void, JointException, Joint.RotatingProgress>
+    ProgressivePromise<Void, JointException, Joint.RotatingProgress>
     jointRotateTo(String jointId, float angle, long timeMillis);
 
-    Promise<LocomotorDevice, AccessServiceException, Void> getLocomotor();
+    Promise<LocomotorDevice, AccessServiceException> getLocomotor();
 }

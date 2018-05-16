@@ -3,7 +3,7 @@ package com.ubtrobot.upgrade.sal;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.ubtrobot.async.Deferred;
+import com.ubtrobot.async.DefaultPromise;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.upgrade.AbstractFirmwareDownloader;
 import com.ubtrobot.upgrade.DownloadException;
@@ -18,25 +18,25 @@ public abstract class AbstractFirmwareDownloadService extends AbstractFirmwareDo
     }
 
     @Override
-    public Promise<Void, DownloadOperationException, Void> ready(FirmwarePackageGroup packageGroup) {
+    public Promise<Void, DownloadOperationException> ready(FirmwarePackageGroup packageGroup) {
         if (packageGroup.getPackageCount() == 0) {
             throw new IllegalArgumentException("Illegal package group which has no firmware package.");
         }
 
-        Deferred<Void, DownloadOperationException, Void> deferred = new Deferred<>(getHandler());
+        DefaultPromise<Void, DownloadOperationException> promise = new DefaultPromise<>(getHandler());
         synchronized (this) {
             if (isIdle()) {
                 doReady(packageGroup);
 
-                deferred.resolve(null);
+                promise.resolve(null);
                 notifyStateChange(STATE_READY, null);
             } else {
-                deferred.reject(new DownloadOperationException.Factory().illegalOperation(
+                promise.reject(new DownloadOperationException.Factory().illegalOperation(
                         "Should not ready when not idle."));
             }
         }
 
-        return deferred.promise();
+        return promise;
     }
 
     protected abstract void doReady(FirmwarePackageGroup packageGroup);
@@ -52,59 +52,59 @@ public abstract class AbstractFirmwareDownloadService extends AbstractFirmwareDo
     protected abstract FirmwarePackageGroup doGetPackageGroup();
 
     @Override
-    public Promise<Void, DownloadOperationException, Void> start() {
-        Deferred<Void, DownloadOperationException, Void> deferred = new Deferred<>(getHandler());
+    public Promise<Void, DownloadOperationException> start() {
+        DefaultPromise<Void, DownloadOperationException> promise = new DefaultPromise<>(getHandler());
 
         synchronized (this) {
             if (isDownloading()) {
-                deferred.resolve(null);
+                promise.resolve(null);
             } else if (isReady() || isError()) {
                 doStart();
 
-                deferred.resolve(null);
+                promise.resolve(null);
                 notifyStateChange(STATE_DOWNLOADING, null);
             } else {
-                deferred.reject(new DownloadOperationException.Factory().illegalOperation(
+                promise.reject(new DownloadOperationException.Factory().illegalOperation(
                         "Should not start when idle or complete."));
             }
         }
 
-        return deferred.promise();
+        return promise;
     }
 
     protected abstract void doStart();
 
     @Override
-    public Promise<Void, DownloadOperationException, Void> stop() {
-        Deferred<Void, DownloadOperationException, Void> deferred = new Deferred<>(getHandler());
+    public Promise<Void, DownloadOperationException> stop() {
+        DefaultPromise<Void, DownloadOperationException> promise = new DefaultPromise<>(getHandler());
 
         synchronized (this) {
             if (isReady()) {
-                deferred.resolve(null);
+                promise.resolve(null);
             } else if (isDownloading()) {
                 doStop();
 
-                deferred.resolve(null);
+                promise.resolve(null);
                 notifyStateChange(STATE_READY, null);
             } else {
-                deferred.reject(new DownloadOperationException.Factory().illegalOperation(
+                promise.reject(new DownloadOperationException.Factory().illegalOperation(
                         "Should not stop when idle, complete or error."));
             }
         }
 
-        return deferred.promise();
+        return promise;
     }
 
     protected abstract void doStop();
 
     @Override
-    public Promise<Void, DownloadOperationException, Void> clear() {
-        Deferred<Void, DownloadOperationException, Void> deferred = new Deferred<>(getHandler());
+    public Promise<Void, DownloadOperationException> clear() {
+        DefaultPromise<Void, DownloadOperationException> promise = new DefaultPromise<>(getHandler());
 
         synchronized (this) {
             if (isIdle()) {
-                deferred.resolve(null);
-                return deferred.promise();
+                promise.resolve(null);
+                return promise;
             }
 
             if (isDownloading()) {
@@ -112,11 +112,11 @@ public abstract class AbstractFirmwareDownloadService extends AbstractFirmwareDo
             }
             doClear();
 
-            deferred.resolve(null);
+            promise.resolve(null);
             notifyStateChange(STATE_IDLE, null);
         }
 
-        return deferred.promise();
+        return promise;
     }
 
     protected abstract void doClear();

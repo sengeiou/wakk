@@ -213,7 +213,7 @@ public class FirmwareDownloaderProxy extends AbstractFirmwareDownloader {
     }
 
     @Override
-    public Promise<Void, DownloadOperationException, Void> ready(FirmwarePackageGroup packageGroup) {
+    public Promise<Void, DownloadOperationException> ready(FirmwarePackageGroup packageGroup) {
         return mUpgradeService.call(
                 UpgradeConstants.CALL_PATH_READY_FIRMWARE_PACKAGE_DOWNLOAD,
                 UpgradeConverters.toFirmwarePackageGroupProto(packageGroup),
@@ -235,7 +235,7 @@ public class FirmwareDownloaderProxy extends AbstractFirmwareDownloader {
     }
 
     @Override
-    public Promise<Void, DownloadOperationException, Void> start() {
+    public Promise<Void, DownloadOperationException> start() {
         return mUpgradeService.call(
                 UpgradeConstants.CALL_PATH_START_FIRMWARE_PACKAGE_DOWNLOAD,
                 new DownloadConverter()
@@ -243,7 +243,7 @@ public class FirmwareDownloaderProxy extends AbstractFirmwareDownloader {
     }
 
     @Override
-    public Promise<Void, DownloadOperationException, Void> stop() {
+    public Promise<Void, DownloadOperationException> stop() {
         return mUpgradeService.call(
                 UpgradeConstants.CALL_PATH_STOP_FIRMWARE_PACKAGE_DOWNLOAD,
                 new DownloadConverter()
@@ -251,7 +251,7 @@ public class FirmwareDownloaderProxy extends AbstractFirmwareDownloader {
     }
 
     @Override
-    public Promise<Void, DownloadOperationException, Void> clear() {
+    public Promise<Void, DownloadOperationException> clear() {
         return mUpgradeService.call(
                 UpgradeConstants.CALL_PATH_CLEAR_FIRMWARE_PACKAGE_DOWNLOAD,
                 new DownloadConverter()

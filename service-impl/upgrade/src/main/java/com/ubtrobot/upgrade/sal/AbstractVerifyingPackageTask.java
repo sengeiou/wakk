@@ -12,7 +12,7 @@ import com.ubtrobot.upgrade.UpgradeException;
 import java.io.IOException;
 
 public abstract class AbstractVerifyingPackageTask extends
-        AsyncTask<Void, UpgradeException, Void> {
+        AsyncTask<Void, UpgradeException> {
 
     private static final Logger LOGGER = FwLoggerFactory.getLogger("AbstractVerifyingPackageTask");
 

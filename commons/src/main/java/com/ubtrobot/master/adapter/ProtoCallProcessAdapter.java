@@ -18,7 +18,7 @@ public class ProtoCallProcessAdapter {
 
     public <D, F, P> void onCall(
             final Responder responder,
-            final CallProcessAdapter.Callable<D, F, P> callable,
+            final CallProcessAdapter.ProgressiveCallable<D, F, P> callable,
             final DFPConverter<D, F, P> converter) {
         mCallProcessAdapter.onCall(
                 responder,
@@ -54,19 +54,38 @@ public class ProtoCallProcessAdapter {
 
     public <F> void onCall(
             final Responder responder,
-            final CallProcessAdapter.Callable<Void, F, Void> callable,
+            final CallProcessAdapter.Callable<Void, F> callable,
             final FConverter<F> converter) {
-        onCall(responder, callable, (DFPConverter<Void, F, Void>) converter);
+        onCall(responder, callable, (DFConverter<Void, F>) converter);
     }
 
     public <D, F> void onCall(
             final Responder responder,
-            final CallProcessAdapter.Callable<D, F, Void> callable,
+            final CallProcessAdapter.Callable<D, F> callable,
             final DFConverter<D, F> converter) {
-        onCall(responder, callable, (DFPConverter<D, F, Void>) converter);
+        mCallProcessAdapter.onCall(
+                responder,
+                callable,
+                new CallProcessAdapter.DFConverter<D, F>() {
+                    @Override
+                    public Param convertDone(D done) {
+                        Message message = converter.convertDone(done);
+                        if (message == null) {
+                            return null;
+                        }
+
+                        return ProtoParam.create(converter.convertDone(done));
+                    }
+
+                    @Override
+                    public CallException convertFail(F e) {
+                        return converter.convertFail(e);
+                    }
+                }
+        );
     }
 
-    public static abstract class FConverter<F> extends DFConverter<Void, F> {
+    public static abstract class FConverter<F> implements DFConverter<Void, F> {
 
         @Override
         public Message convertDone(Void done) {
@@ -74,19 +93,14 @@ public class ProtoCallProcessAdapter {
         }
     }
 
-    public static abstract class DFConverter<D, F> implements DFPConverter<D, F, Void> {
-
-        @Override
-        public Message convertProgress(Void progress) {
-            return null;
-        }
-    }
-
-    public interface DFPConverter<D, F, P> {
+    public interface DFConverter<D, F> {
 
         Message convertDone(D done);
 
         CallException convertFail(F fail);
+    }
+
+    public interface DFPConverter<D, F, P> extends DFConverter<D, F> {
 
         Message convertProgress(P progress);
     }

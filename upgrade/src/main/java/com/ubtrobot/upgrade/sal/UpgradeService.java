@@ -1,5 +1,6 @@
 package com.ubtrobot.upgrade.sal;
 
+import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.upgrade.DetectException;
 import com.ubtrobot.upgrade.DetectOption;
@@ -14,8 +15,8 @@ public interface UpgradeService {
 
     List<Firmware> getFirmwareList();
 
-    Promise<FirmwarePackageGroup, DetectException, Void> detect(DetectOption option);
+    Promise<FirmwarePackageGroup, DetectException> detect(DetectOption option);
 
-    Promise<Void, UpgradeException, UpgradeProgress>
+    ProgressivePromise<Void, UpgradeException, UpgradeProgress>
     upgrade(FirmwarePackageGroup packageGroup);
 }

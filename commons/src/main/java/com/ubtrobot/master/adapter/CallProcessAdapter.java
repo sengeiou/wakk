@@ -5,6 +5,7 @@ import android.os.Handler;
 import com.ubtrobot.async.DoneCallback;
 import com.ubtrobot.async.FailCallback;
 import com.ubtrobot.async.ProgressCallback;
+import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.transport.message.CallCancelListener;
 import com.ubtrobot.transport.message.CallException;
@@ -22,14 +23,14 @@ public class CallProcessAdapter {
 
     public <D, F, P> void onCall(
             final Responder responder,
-            final Callable<D, F, P> callable,
+            final ProgressiveCallable<D, F, P> callable,
             final DFPConverter<D, F, P> converter) {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
                 try {
-                    final Promise<D, F, P> promise = callable.call(
-                    ).progress(new ProgressCallback<P>() {
+                    ProgressivePromise<D, F, P> promise = callable.call();
+                    promise.progress(new ProgressCallback<P>() {
                         @Override
                         public void onProgress(P progress) {
                             Param param = converter.convertProgress(progress);
@@ -37,25 +38,9 @@ public class CallProcessAdapter {
                                 responder.respondStickily(param);
                             }
                         }
-                    }).done(new DoneCallback<D>() {
-                        @Override
-                        public void onDone(D done) {
-                            responder.respondSuccess(converter.convertDone(done));
-                        }
-                    }).fail(new FailCallback<F>() {
-                        @Override
-                        public void onFail(F fail) {
-                            CallException ce = converter.convertFail(fail);
-                            responder.respondFailure(ce.getCode(), ce.getMessage());
-                        }
                     });
 
-                    responder.setCallCancelListener(new CallCancelListener() {
-                        @Override
-                        public void onCancel(Request request) {
-                            promise.cancel();
-                        }
-                    });
+                    onCall(responder, promise, converter);
                 } catch (CallException e) {
                     responder.respondFailure(e.getCode(), e.getMessage());
                 }
@@ -63,26 +48,66 @@ public class CallProcessAdapter {
         });
     }
 
+    private <D, F> void onCall(
+            final Responder responder,
+            final Promise<D, F> promise,
+            final DFConverter<D, F> converter) {
+        promise.done(new DoneCallback<D>() {
+            @Override
+            public void onDone(D done) {
+                responder.respondSuccess(converter.convertDone(done));
+            }
+        }).fail(new FailCallback<F>() {
+            @Override
+            public void onFail(F fail) {
+                CallException ce = converter.convertFail(fail);
+                responder.respondFailure(ce.getCode(), ce.getMessage());
+            }
+        });
+
+        responder.setCallCancelListener(new CallCancelListener() {
+            @Override
+            public void onCancel(Request request) {
+                promise.cancel();
+            }
+        });
+    }
+
     public <D, F> void onCall(
             final Responder responder,
-            final Callable<D, F, Void> callable,
+            final Callable<D, F> callable,
             final DFConverter<D, F> converter) {
-        onCall(responder, callable, (DFPConverter<D, F, Void>) converter);
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Promise<D, F> promise = callable.call();
+                    onCall(responder, promise, converter);
+                } catch (CallException e) {
+                    responder.respondFailure(e.getCode(), e.getMessage());
+                }
+            }
+        });
     }
 
     public <F> void onCall(
             final Responder responder,
-            final Callable<Void, F, Void> callable,
+            final Callable<Void, F> callable,
             final FConverter<F> converter) {
-        onCall(responder, callable, (DFPConverter<Void, F, Void>) converter);
+        onCall(responder, callable, (DFConverter<Void, F>) converter);
     }
 
-    public interface Callable<D, F, P> {
+    public interface Callable<D, F> {
 
-        Promise<D, F, P> call() throws CallException;
+        Promise<D, F> call() throws CallException;
     }
 
-    public static abstract class FConverter<F> extends DFConverter<Void, F> {
+    public interface ProgressiveCallable<D, F, P> {
+
+        ProgressivePromise<D, F, P> call() throws CallException;
+    }
+
+    public static abstract class FConverter<F> implements DFConverter<Void, F> {
 
         @Override
         public Param convertDone(Void done) {
@@ -90,19 +115,14 @@ public class CallProcessAdapter {
         }
     }
 
-    public static abstract class DFConverter<D, F> implements DFPConverter<D, F, Void> {
-
-        @Override
-        public Param convertProgress(Void progress) {
-            return null;
-        }
-    }
-
-    public interface DFPConverter<D, F, P> {
+    public interface DFConverter<D, F> {
 
         Param convertDone(D done);
 
         CallException convertFail(F fail);
+    }
+
+    public interface DFPConverter<D, F, P> extends DFConverter<D, F> {
 
         Param convertProgress(P progress);
     }

@@ -3,6 +3,7 @@ package com.ubtrobot.upgrade;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.master.adapter.ProtoCallAdapter;
 import com.ubtrobot.master.context.MasterContext;
@@ -57,7 +58,7 @@ public class UpgradeManager {
      *
      * @return 升级回调
      */
-    public Promise<FirmwarePackageGroup, DetectException, Void> detectUpgrade() {
+    public Promise<FirmwarePackageGroup, DetectException> detectUpgrade() {
         return mDetector.detect();
     }
 
@@ -67,7 +68,7 @@ public class UpgradeManager {
      * @param option 检测选项
      * @return 升级回调
      */
-    public Promise<FirmwarePackageGroup, DetectException, Void> detectUpgrade(DetectOption option) {
+    public Promise<FirmwarePackageGroup, DetectException> detectUpgrade(DetectOption option) {
         return mDetector.detect(option);
     }
 
@@ -86,7 +87,7 @@ public class UpgradeManager {
      * @param packageGroup 固件包组
      * @return 升级回调
      */
-    public Promise<Void, UpgradeException, UpgradeProgress>
+    public ProgressivePromise<Void, UpgradeException, UpgradeProgress>
     upgrade(FirmwarePackageGroup packageGroup) {
         return mUpgrader.upgrade(packageGroup);
     }

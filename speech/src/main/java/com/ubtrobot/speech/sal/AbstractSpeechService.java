@@ -1,8 +1,8 @@
 package com.ubtrobot.speech.sal;
 
 import com.ubtrobot.async.AsyncTask;
-import com.ubtrobot.async.CancelableAsyncTask;
-import com.ubtrobot.async.InterruptibleAsyncTask;
+import com.ubtrobot.async.InterruptibleProgressiveAsyncTask;
+import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.exception.AccessServiceException;
 import com.ubtrobot.master.competition.InterruptibleTaskHelper;
@@ -39,11 +39,11 @@ public abstract class AbstractSpeechService implements SpeechService {
     }
 
     @Override
-    public Promise<Void, SynthesizeException, Synthesizer.SynthesizingProgress>
+    public ProgressivePromise<Void, SynthesizeException, Synthesizer.SynthesizingProgress>
     synthesize(final String sentence, final SynthesizeOption option) {
         return mInterruptibleTaskHelper.start(
                 TASK_RECEIVER_SYNTHESIZER, TASK_NAME_SYNTHESIZE,
-                new InterruptibleAsyncTask<
+                new InterruptibleProgressiveAsyncTask<
                         Void, SynthesizeException, Synthesizer.SynthesizingProgress>() {
                     @Override
                     protected void onCancel() {
@@ -71,7 +71,7 @@ public abstract class AbstractSpeechService implements SpeechService {
     protected abstract void stopSynthesizing();
 
     public void notifySynthesizingProgress(Synthesizer.SynthesizingProgress progress) {
-        mInterruptibleTaskHelper.notify(TASK_RECEIVER_SYNTHESIZER, TASK_NAME_SYNTHESIZE, progress);
+        mInterruptibleTaskHelper.report(TASK_RECEIVER_SYNTHESIZER, TASK_NAME_SYNTHESIZE, progress);
     }
 
     public void resolveSynthesizing() {
@@ -97,13 +97,11 @@ public abstract class AbstractSpeechService implements SpeechService {
     }
 
     @Override
-    public Promise<Recognizer.RecognizeResult, RecognizeException, Recognizer.RecognizingProgress> recognize(
+    public ProgressivePromise<Recognizer.RecognizeResult, RecognizeException, Recognizer.RecognizingProgress> recognize(
             final RecognizeOption option) {
         return mInterruptibleTaskHelper.start(TASK_RECEIVER_RECOGNIZER, TASK_NAME_RECOGNIZE,
-                new InterruptibleAsyncTask<
-                        Recognizer.RecognizeResult,
-                        RecognizeException,
-                        Recognizer.RecognizingProgress>() {
+                new InterruptibleProgressiveAsyncTask<
+                        Recognizer.RecognizeResult, RecognizeException, Recognizer.RecognizingProgress>() {
                     @Override
                     protected void onCancel() {
                         stopRecognizing();
@@ -133,7 +131,7 @@ public abstract class AbstractSpeechService implements SpeechService {
     }
 
     public void notifyRecognizingProgress(Recognizer.RecognizingProgress progress) {
-        mInterruptibleTaskHelper.notify(TASK_RECEIVER_RECOGNIZER, TASK_NAME_RECOGNIZE, progress);
+        mInterruptibleTaskHelper.report(TASK_RECEIVER_RECOGNIZER, TASK_NAME_RECOGNIZE, progress);
     }
 
     public void resolveRecognizing(Recognizer.RecognizeResult done) {
@@ -154,8 +152,8 @@ public abstract class AbstractSpeechService implements SpeechService {
     }
 
     @Override
-    public Promise<Understander.UnderstandResult, UnderstandException, Void> understand(final String question, UnderstandOption option) {
-        CancelableAsyncTask<Understander.UnderstandResult, UnderstandException, Void> task = createUnderstandTask(question, option);
+    public Promise<Understander.UnderstandResult, UnderstandException> understand(final String question, UnderstandOption option) {
+        AsyncTask<Understander.UnderstandResult, UnderstandException> task = createUnderstandTask(question, option);
 
         if (task == null) {
             throw new IllegalStateException("createUnderstandTask return null.");
@@ -165,11 +163,12 @@ public abstract class AbstractSpeechService implements SpeechService {
         return task.promise();
     }
 
-    protected abstract CancelableAsyncTask<Understander.UnderstandResult, UnderstandException, Void> createUnderstandTask(String question, UnderstandOption option);
+    protected abstract AsyncTask<Understander.UnderstandResult, UnderstandException>
+    createUnderstandTask(String question, UnderstandOption option);
 
     @Override
-    public Promise<List<Speaker>, AccessServiceException, Void> getSpeakerList() {
-        AsyncTask<List<Speaker>, AccessServiceException, Void> task = createGetSpeakerListTask();
+    public Promise<List<Speaker>, AccessServiceException> getSpeakerList() {
+        AsyncTask<List<Speaker>, AccessServiceException> task = createGetSpeakerListTask();
 
         if (task == null) {
             throw new IllegalStateException("createGetSpeakerListTask return null.");
@@ -179,5 +178,5 @@ public abstract class AbstractSpeechService implements SpeechService {
         return task.promise();
     }
 
-    protected abstract AsyncTask<List<Speaker>, AccessServiceException, Void> createGetSpeakerListTask();
+    protected abstract AsyncTask<List<Speaker>, AccessServiceException> createGetSpeakerListTask();
 }

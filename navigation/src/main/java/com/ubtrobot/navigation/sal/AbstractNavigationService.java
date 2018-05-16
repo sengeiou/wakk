@@ -4,6 +4,8 @@ import android.util.Pair;
 
 import com.ubtrobot.async.AsyncTask;
 import com.ubtrobot.async.InterruptibleAsyncTask;
+import com.ubtrobot.async.InterruptibleProgressiveAsyncTask;
+import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.master.competition.InterruptibleTaskHelper;
 import com.ubtrobot.navigation.LocateException;
@@ -31,9 +33,9 @@ public abstract class AbstractNavigationService implements NavigationService {
     }
 
     @Override
-    public Promise<Pair<List<NavMap>, String>, NavMapException, Void>
+    public Promise<Pair<List<NavMap>, String>, NavMapException>
     getNavMapList() {
-        AsyncTask<Pair<List<NavMap>, String>, NavMapException, Void> task =
+        AsyncTask<Pair<List<NavMap>, String>, NavMapException> task =
                 createGetNavMapListTask();
         if (task == null) {
             throw new IllegalStateException("createGetNavMapListTask return null.");
@@ -43,12 +45,12 @@ public abstract class AbstractNavigationService implements NavigationService {
         return task.promise();
     }
 
-    protected abstract AsyncTask<Pair<List<NavMap>, String>, NavMapException, Void>
+    protected abstract AsyncTask<Pair<List<NavMap>, String>, NavMapException>
     createGetNavMapListTask();
 
     @Override
-    public Promise<NavMap, NavMapException, Void> addNavMap(NavMap navMap) {
-        AsyncTask<NavMap, NavMapException, Void> task = createAddNavMapTask(navMap);
+    public Promise<NavMap, NavMapException> addNavMap(NavMap navMap) {
+        AsyncTask<NavMap, NavMapException> task = createAddNavMapTask(navMap);
         if (task == null) {
             throw new IllegalStateException("createAddNavMapTask return null.");
         }
@@ -57,11 +59,11 @@ public abstract class AbstractNavigationService implements NavigationService {
         return task.promise();
     }
 
-    protected abstract AsyncTask<NavMap, NavMapException, Void> createAddNavMapTask(NavMap navMap);
+    protected abstract AsyncTask<NavMap, NavMapException> createAddNavMapTask(NavMap navMap);
 
     @Override
-    public Promise<NavMap, NavMapException, Void> selectNavMap(String navMapId) {
-        AsyncTask<NavMap, NavMapException, Void> task = createSelectNavMapTask(navMapId);
+    public Promise<NavMap, NavMapException> selectNavMap(String navMapId) {
+        AsyncTask<NavMap, NavMapException> task = createSelectNavMapTask(navMapId);
         if (task == null) {
             throw new IllegalStateException("createSelectNavMapTask return null.");
         }
@@ -70,11 +72,11 @@ public abstract class AbstractNavigationService implements NavigationService {
         return task.promise();
     }
 
-    protected abstract AsyncTask<NavMap, NavMapException, Void> createSelectNavMapTask(String navMapId);
+    protected abstract AsyncTask<NavMap, NavMapException> createSelectNavMapTask(String navMapId);
 
     @Override
-    public Promise<NavMap, NavMapException, Void> modifyNavMap(NavMap navMap) {
-        AsyncTask<NavMap, NavMapException, Void> task = createModifyNavMapTask(navMap);
+    public Promise<NavMap, NavMapException> modifyNavMap(NavMap navMap) {
+        AsyncTask<NavMap, NavMapException> task = createModifyNavMapTask(navMap);
         if (task == null) {
             throw new IllegalStateException("createModifyNavMapTask return null.");
         }
@@ -83,11 +85,11 @@ public abstract class AbstractNavigationService implements NavigationService {
         return task.promise();
     }
 
-    protected abstract AsyncTask<NavMap, NavMapException, Void> createModifyNavMapTask(NavMap navMap);
+    protected abstract AsyncTask<NavMap, NavMapException> createModifyNavMapTask(NavMap navMap);
 
     @Override
-    public Promise<NavMap, NavMapException, Void> removeNavMap(String navMapId) {
-        AsyncTask<NavMap, NavMapException, Void> task = createRemoveNavMapTask(navMapId);
+    public Promise<NavMap, NavMapException> removeNavMap(String navMapId) {
+        AsyncTask<NavMap, NavMapException> task = createRemoveNavMapTask(navMapId);
         if (task == null) {
             throw new IllegalStateException("createRemoveNavMapTask return null.");
         }
@@ -96,15 +98,15 @@ public abstract class AbstractNavigationService implements NavigationService {
         return task.promise();
     }
 
-    protected abstract AsyncTask<NavMap, NavMapException, Void> createRemoveNavMapTask(String navMapId);
+    protected abstract AsyncTask<NavMap, NavMapException> createRemoveNavMapTask(String navMapId);
 
     @Override
-    public Promise<Location, LocateException, Void>
+    public Promise<Location, LocateException>
     locateSelf(final LocateOption option) {
         return mInterruptibleTaskHelper.start(
                 TASK_RECEIVER_NAVIGATOR,
                 TASK_NAME_LOCATE_SELF,
-                new InterruptibleAsyncTask<Location, LocateException, Void>() {
+                new InterruptibleAsyncTask<Location, LocateException>() {
                     @Override
                     protected void onStart() {
                         doStartLocatingSelf(option);
@@ -147,12 +149,12 @@ public abstract class AbstractNavigationService implements NavigationService {
     }
 
     @Override
-    public Promise<Void, NavigateException, Navigator.NavigatingProgress>
+    public ProgressivePromise<Void, NavigateException, Navigator.NavigatingProgress>
     navigate(final Location destination, final NavigateOption option) {
         return mInterruptibleTaskHelper.start(
                 TASK_RECEIVER_NAVIGATOR,
                 TASK_NAME_NAVIGATE,
-                new InterruptibleAsyncTask<Void, NavigateException, Navigator.NavigatingProgress>() {
+                new InterruptibleProgressiveAsyncTask<Void, NavigateException, Navigator.NavigatingProgress>() {
                     @Override
                     protected void onStart() {
                         doStartNavigating(destination, option);
@@ -184,7 +186,7 @@ public abstract class AbstractNavigationService implements NavigationService {
             throw new IllegalArgumentException("Argument progress is null.");
         }
 
-        mInterruptibleTaskHelper.notify(TASK_RECEIVER_NAVIGATOR, TASK_NAME_NAVIGATE, progress);
+        mInterruptibleTaskHelper.report(TASK_RECEIVER_NAVIGATOR, TASK_NAME_NAVIGATE, progress);
     }
 
     public void resolveNavigating() {

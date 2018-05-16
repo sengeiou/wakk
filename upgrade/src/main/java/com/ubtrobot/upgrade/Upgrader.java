@@ -1,6 +1,6 @@
 package com.ubtrobot.upgrade;
 
-import com.ubtrobot.async.Promise;
+import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.master.adapter.ProtoCallAdapter;
 import com.ubtrobot.transport.message.CallException;
 import com.ubtrobot.upgrade.ipc.UpgradeConstants;
@@ -15,7 +15,7 @@ public class Upgrader {
         mUpgradeService = upgradeService;
     }
 
-    public Promise<Void, UpgradeException, UpgradeProgress>
+    public ProgressivePromise<Void, UpgradeException, UpgradeProgress>
     upgrade(FirmwarePackageGroup packageGroup) {
         if (packageGroup == null) {
             throw new IllegalArgumentException("Argument packageGroup or option is null.");

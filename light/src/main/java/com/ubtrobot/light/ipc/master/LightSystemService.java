@@ -92,9 +92,9 @@ public class LightSystemService extends MasterSystemService {
     public void onGetLightList(Request request, Responder responder) {
         mCallProcessor.onCall(
                 responder,
-                new CallProcessAdapter.Callable<List<LightDevice>, AccessServiceException, Void>() {
+                new CallProcessAdapter.Callable<List<LightDevice>, AccessServiceException>() {
                     @Override
-                    public Promise<List<LightDevice>, AccessServiceException, Void>
+                    public Promise<List<LightDevice>, AccessServiceException>
                     call() throws CallException {
                         return mService.getLightList();
                     }
@@ -125,9 +125,9 @@ public class LightSystemService extends MasterSystemService {
                 request,
                 LightConstants.COMPETING_ITEM_PREFIX_LIGHT + lightColor.getLightId(),
                 responder,
-                new CompetingCallDelegate.SessionCallable<Void, LightException, Void>() {
+                new CompetingCallDelegate.SessionCallable<Void, LightException>() {
                     @Override
-                    public Promise<Void, LightException, Void> call() throws CallException {
+                    public Promise<Void, LightException> call() throws CallException {
                         return mService.turnOn(lightColor.getLightId(), lightColor.getColor());
                     }
                 },
@@ -163,9 +163,9 @@ public class LightSystemService extends MasterSystemService {
                 request,
                 LightConstants.COMPETING_ITEM_PREFIX_LIGHT + lightColor.getLightId(),
                 responder,
-                new CompetingCallDelegate.SessionCallable<Void, LightException, Void>() {
+                new CompetingCallDelegate.SessionCallable<Void, LightException>() {
                     @Override
-                    public Promise<Void, LightException, Void> call() throws CallException {
+                    public Promise<Void, LightException> call() throws CallException {
                         return mService.changeColor(lightColor.getLightId(), lightColor.getColor());
                     }
                 },
@@ -200,9 +200,9 @@ public class LightSystemService extends MasterSystemService {
                 request,
                 LightConstants.COMPETING_ITEM_PREFIX_LIGHT + lightId,
                 responder,
-                new CompetingCallDelegate.SessionCallable<Void, LightException, Void>() {
+                new CompetingCallDelegate.SessionCallable<Void, LightException>() {
                     @Override
-                    public Promise<Void, LightException, Void> call() throws CallException {
+                    public Promise<Void, LightException> call() throws CallException {
                         return mService.turnOff(lightId);
                     }
                 },
@@ -219,9 +219,9 @@ public class LightSystemService extends MasterSystemService {
     public void onGetEffectList(Request request, Responder responder) {
         mCallProcessor.onCall(
                 responder,
-                new CallProcessAdapter.Callable<List<LightingEffect>, AccessServiceException, Void>() {
+                new CallProcessAdapter.Callable<List<LightingEffect>, AccessServiceException>() {
                     @Override
-                    public Promise<List<LightingEffect>, AccessServiceException, Void> call() {
+                    public Promise<List<LightingEffect>, AccessServiceException> call() {
                         return mService.getEffectList();
                     }
                 },
@@ -258,9 +258,9 @@ public class LightSystemService extends MasterSystemService {
                 request,
                 competingItemIds,
                 responder,
-                new CompetingCallDelegate.SessionCallable<Void, DisplayException, Void>() {
+                new CompetingCallDelegate.SessionCallable<Void, DisplayException>() {
                     @Override
-                    public Promise<Void, DisplayException, Void> call() throws CallException {
+                    public Promise<Void, DisplayException> call() throws CallException {
                         return mService.display(option.getLightIdList(), option.getEffectId(),
                                 LightConverters.toDisplayOptionPojo(option));
                     }

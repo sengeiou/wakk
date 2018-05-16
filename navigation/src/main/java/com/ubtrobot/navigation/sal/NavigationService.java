@@ -2,6 +2,7 @@ package com.ubtrobot.navigation.sal;
 
 import android.util.Pair;
 
+import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.navigation.LocateException;
 import com.ubtrobot.navigation.LocateOption;
@@ -19,18 +20,18 @@ import java.util.List;
  */
 public interface NavigationService {
 
-    Promise<Pair<List<NavMap>, String>, NavMapException, Void> getNavMapList();
+    Promise<Pair<List<NavMap>, String>, NavMapException> getNavMapList();
 
-    Promise<NavMap, NavMapException, Void> addNavMap(NavMap navMap);
+    Promise<NavMap, NavMapException> addNavMap(NavMap navMap);
 
-    Promise<NavMap, NavMapException, Void> selectNavMap(String navMapId);
+    Promise<NavMap, NavMapException> selectNavMap(String navMapId);
 
-    Promise<NavMap, NavMapException, Void> modifyNavMap(NavMap navMap);
+    Promise<NavMap, NavMapException> modifyNavMap(NavMap navMap);
 
-    Promise<NavMap, NavMapException, Void> removeNavMap(String navMapId);
+    Promise<NavMap, NavMapException> removeNavMap(String navMapId);
 
-    Promise<Location, LocateException, Void> locateSelf(LocateOption option);
+    Promise<Location, LocateException> locateSelf(LocateOption option);
 
-    Promise<Void, NavigateException, Navigator.NavigatingProgress>
+    ProgressivePromise<Void, NavigateException, Navigator.NavigatingProgress>
     navigate(Location destination, NavigateOption option);
 }

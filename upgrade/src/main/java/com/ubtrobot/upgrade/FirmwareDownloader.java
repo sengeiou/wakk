@@ -91,7 +91,7 @@ public interface FirmwareDownloader {
      * @param packageGroup 固件包组
      * @return 异步结果
      */
-    Promise<Void, DownloadOperationException, Void> ready(FirmwarePackageGroup packageGroup);
+    Promise<Void, DownloadOperationException> ready(FirmwarePackageGroup packageGroup);
 
     /**
      * 获取在下载的固件包组
@@ -105,21 +105,21 @@ public interface FirmwareDownloader {
      *
      * @return 异步结果
      */
-    Promise<Void, DownloadOperationException, Void> start();
+    Promise<Void, DownloadOperationException> start();
 
     /**
      * 停止下载
      *
      * @return 异步结果
      */
-    Promise<Void, DownloadOperationException, Void> stop();
+    Promise<Void, DownloadOperationException> stop();
 
     /**
      * 清除下载
      *
      * @return 异步结果
      */
-    Promise<Void, DownloadOperationException, Void> clear();
+    Promise<Void, DownloadOperationException> clear();
 
     /**
      * 注册状态监听器

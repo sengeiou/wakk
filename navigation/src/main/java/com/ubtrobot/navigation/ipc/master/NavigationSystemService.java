@@ -6,6 +6,7 @@ import android.text.TextUtils;
 import android.util.Pair;
 
 import com.google.protobuf.Message;
+import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.master.adapter.CallProcessAdapter;
 import com.ubtrobot.master.adapter.ProtoCallProcessAdapter;
@@ -21,7 +22,6 @@ import com.ubtrobot.navigation.Location;
 import com.ubtrobot.navigation.NavMap;
 import com.ubtrobot.navigation.NavMapException;
 import com.ubtrobot.navigation.NavigateException;
-import com.ubtrobot.navigation.NavigateOption;
 import com.ubtrobot.navigation.Navigator;
 import com.ubtrobot.navigation.ipc.NavigationConstants;
 import com.ubtrobot.navigation.ipc.NavigationConverters;
@@ -76,9 +76,9 @@ public class NavigationSystemService extends MasterSystemService {
     public void onGetNavMapList(Request request, final Responder responder) {
         mCallProcessor.onCall(
                 responder,
-                new CallProcessAdapter.Callable<Pair<List<NavMap>, String>, NavMapException, Void>() {
+                new CallProcessAdapter.Callable<Pair<List<NavMap>, String>, NavMapException>() {
                     @Override
-                    public Promise<Pair<List<NavMap>, String>, NavMapException, Void>
+                    public Promise<Pair<List<NavMap>, String>, NavMapException>
                     call() throws CallException {
                         return mService.getNavMapList();
                     }
@@ -107,9 +107,9 @@ public class NavigationSystemService extends MasterSystemService {
 
         mCallProcessor.onCall(
                 responder,
-                new CallProcessAdapter.Callable<NavMap, NavMapException, Void>() {
+                new CallProcessAdapter.Callable<NavMap, NavMapException>() {
                     @Override
-                    public Promise<NavMap, NavMapException, Void> call() throws CallException {
+                    public Promise<NavMap, NavMapException> call() throws CallException {
                         return mService.addNavMap(NavigationConverters.toNavMapPojo(navMap));
                     }
                 },
@@ -126,9 +126,9 @@ public class NavigationSystemService extends MasterSystemService {
 
         mCallProcessor.onCall(
                 responder,
-                new CallProcessAdapter.Callable<NavMap, NavMapException, Void>() {
+                new CallProcessAdapter.Callable<NavMap, NavMapException>() {
                     @Override
-                    public Promise<NavMap, NavMapException, Void> call() throws CallException {
+                    public Promise<NavMap, NavMapException> call() throws CallException {
                         return mService.selectNavMap(navMapId);
                     }
                 },
@@ -146,9 +146,9 @@ public class NavigationSystemService extends MasterSystemService {
 
         mCallProcessor.onCall(
                 responder,
-                new CallProcessAdapter.Callable<NavMap, NavMapException, Void>() {
+                new CallProcessAdapter.Callable<NavMap, NavMapException>() {
                     @Override
-                    public Promise<NavMap, NavMapException, Void> call() throws CallException {
+                    public Promise<NavMap, NavMapException> call() throws CallException {
                         return mService.modifyNavMap(NavigationConverters.toNavMapPojo(navMap));
                     }
                 },
@@ -165,9 +165,9 @@ public class NavigationSystemService extends MasterSystemService {
 
         mCallProcessor.onCall(
                 responder,
-                new CallProcessAdapter.Callable<NavMap, NavMapException, Void>() {
+                new CallProcessAdapter.Callable<NavMap, NavMapException>() {
                     @Override
-                    public Promise<NavMap, NavMapException, Void> call() throws CallException {
+                    public Promise<NavMap, NavMapException> call() throws CallException {
                         return mService.removeNavMap(navMapId);
                     }
                 },
@@ -187,9 +187,9 @@ public class NavigationSystemService extends MasterSystemService {
                 request,
                 NavigationConstants.COMPETING_ITEM_NAVIGATOR,
                 responder,
-                new CompetingCallDelegate.SessionCallable<Location, LocateException, Void>() {
+                new CompetingCallDelegate.SessionCallable<Location, LocateException>() {
                     @Override
-                    public Promise<Location, LocateException, Void> call() throws CallException {
+                    public Promise<Location, LocateException> call() throws CallException {
                         return mService.locateSelf(NavigationConverters.
                                 toLocateOptionPojo(locateOption));
                     }
@@ -220,10 +220,10 @@ public class NavigationSystemService extends MasterSystemService {
                 request,
                 NavigationConstants.COMPETING_ITEM_NAVIGATOR,
                 responder,
-                new CompetingCallDelegate.SessionCallable<
+                new CompetingCallDelegate.SessionProgressiveCallable<
                         Void, NavigateException, Navigator.NavigatingProgress>() {
                     @Override
-                    public Promise<Void, NavigateException, Navigator.NavigatingProgress>
+                    public ProgressivePromise<Void, NavigateException, Navigator.NavigatingProgress>
                     call() throws CallException {
                         return mService.navigate(
                                 NavigationConverters.toLocationPojo(navigateOption.getDestination()),
@@ -256,7 +256,7 @@ public class NavigationSystemService extends MasterSystemService {
         mCompetingCallDelegate.onCompetitionSessionInactive(sessionInfo);
     }
 
-    private static class NavMapConverter extends ProtoCallProcessAdapter.
+    private static class NavMapConverter implements ProtoCallProcessAdapter.
             DFConverter<NavMap, NavMapException> {
 
         @Override

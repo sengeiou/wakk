@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.google.protobuf.Message;
+import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.master.adapter.CallProcessAdapter;
 import com.ubtrobot.master.adapter.ProtoCallProcessAdapter;
@@ -85,9 +86,9 @@ public class UpgradeSystemService extends MasterSystemService {
 
         mCallProcessor.onCall(
                 responder,
-                new CallProcessAdapter.Callable<FirmwarePackageGroup, DetectException, Void>() {
+                new CallProcessAdapter.Callable<FirmwarePackageGroup, DetectException>() {
                     @Override
-                    public Promise<FirmwarePackageGroup, DetectException, Void>
+                    public Promise<FirmwarePackageGroup, DetectException>
                     call() {
                         return mUpgradeService.detect(UpgradeConverters.toDetectOptionPojo(option));
                     }
@@ -137,9 +138,9 @@ public class UpgradeSystemService extends MasterSystemService {
 
         mCallProcessor.onCall(
                 responder,
-                new CallProcessAdapter.Callable<Void, DownloadOperationException, Void>() {
+                new CallProcessAdapter.Callable<Void, DownloadOperationException>() {
                     @Override
-                    public Promise<Void, DownloadOperationException, Void> call() throws CallException {
+                    public Promise<Void, DownloadOperationException> call() throws CallException {
                         return mDownloadService.ready(UpgradeConverters.
                                 toFirmwarePackageGroupPojo(packageGroup));
                     }
@@ -152,9 +153,9 @@ public class UpgradeSystemService extends MasterSystemService {
     public void onStartFirmwarePackageDownload(Request request, Responder responder) {
         mCallProcessor.onCall(
                 responder,
-                new CallProcessAdapter.Callable<Void, DownloadOperationException, Void>() {
+                new CallProcessAdapter.Callable<Void, DownloadOperationException>() {
                     @Override
-                    public Promise<Void, DownloadOperationException, Void> call() throws CallException {
+                    public Promise<Void, DownloadOperationException> call() throws CallException {
                         return mDownloadService.start();
                     }
                 },
@@ -166,9 +167,9 @@ public class UpgradeSystemService extends MasterSystemService {
     public void onStopFirmwarePackageDownload(Request request, Responder responder) {
         mCallProcessor.onCall(
                 responder,
-                new CallProcessAdapter.Callable<Void, DownloadOperationException, Void>() {
+                new CallProcessAdapter.Callable<Void, DownloadOperationException>() {
                     @Override
-                    public Promise<Void, DownloadOperationException, Void> call() throws CallException {
+                    public Promise<Void, DownloadOperationException> call() throws CallException {
                         return mDownloadService.stop();
                     }
                 },
@@ -180,9 +181,9 @@ public class UpgradeSystemService extends MasterSystemService {
     public void onClearFirmwarePackageDownload(Request request, Responder responder) {
         mCallProcessor.onCall(
                 responder,
-                new CallProcessAdapter.Callable<Void, DownloadOperationException, Void>() {
+                new CallProcessAdapter.Callable<Void, DownloadOperationException>() {
                     @Override
-                    public Promise<Void, DownloadOperationException, Void> call() throws CallException {
+                    public Promise<Void, DownloadOperationException> call() throws CallException {
                         return mDownloadService.clear();
                     }
                 },
@@ -200,9 +201,9 @@ public class UpgradeSystemService extends MasterSystemService {
 
         mCallProcessor.onCall(
                 responder,
-                new CallProcessAdapter.Callable<Void, UpgradeException, UpgradeProgress>() {
+                new CallProcessAdapter.ProgressiveCallable<Void, UpgradeException, UpgradeProgress>() {
                     @Override
-                    public Promise<Void, UpgradeException, UpgradeProgress>
+                    public ProgressivePromise<Void, UpgradeException, UpgradeProgress>
                     call() throws CallException {
                         return mUpgradeService.upgrade(UpgradeConverters.
                                 toFirmwarePackageGroupPojo(packageGroup));

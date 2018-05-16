@@ -34,7 +34,7 @@ public class Expresser implements Competing {
                 EmotionConstants.COMPETING_ITEM_EXPRESSER));
     }
 
-    public Promise<Void, ExpressException, Void>
+    public Promise<Void, ExpressException>
     express(CompetitionSession session, String emotionId, ExpressOption option) {
         checkSession(session);
 
@@ -70,12 +70,12 @@ public class Expresser implements Competing {
     }
 
 
-    public Promise<Void, ExpressException, Void>
+    public Promise<Void, ExpressException>
     express(CompetitionSession session, String emotionId) {
         return express(session, emotionId, ExpressOption.DEFAULT);
     }
 
-    public Promise<Void, ExpressException, Void> dismiss(CompetitionSession session) {
+    public Promise<Void, ExpressException> dismiss(CompetitionSession session) {
         checkSession(session);
 
         ProtoCallAdapter emotionService = new ProtoCallAdapter(

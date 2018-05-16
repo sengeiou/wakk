@@ -2,7 +2,7 @@ package com.ubtrobot.upgrade.sal;
 
 import android.text.TextUtils;
 
-import com.ubtrobot.async.CancelableAsyncTask;
+import com.ubtrobot.async.AsyncTask;
 import com.ubtrobot.http.rest.UCodes;
 import com.ubtrobot.http.rest.URestException;
 import com.ubtrobot.okhttp.interceptor.sign.AuthorizationInterceptor;
@@ -81,9 +81,9 @@ public abstract class AbstractPlatformUpgradeService extends AbstractUpgradeServ
     protected abstract String firmwarePackageGroupName();
 
     @Override
-    protected CancelableAsyncTask<FirmwarePackageGroup, DetectException, Void>
+    protected AsyncTask<FirmwarePackageGroup, DetectException>
     createDetectingFromRemoteSourceTask(long timeoutMills) {
-        return new CancelableAsyncTask<FirmwarePackageGroup, DetectException, Void>() {
+        return new AsyncTask<FirmwarePackageGroup, DetectException>() {
 
             private URestCall<List<DTPackage>> mRestCall;
 
@@ -95,10 +95,6 @@ public abstract class AbstractPlatformUpgradeService extends AbstractUpgradeServ
 
             @Override
             protected synchronized void onStart() {
-                if (isCanceled()) {
-                    return;
-                }
-
                 StringBuilder packageNames = new StringBuilder();
                 StringBuilder versions = new StringBuilder();
 
@@ -194,7 +190,7 @@ public abstract class AbstractPlatformUpgradeService extends AbstractUpgradeServ
     }
 
     @Override
-    protected CancelableAsyncTask<FirmwarePackageGroup, DetectException, Void>
+    protected AsyncTask<FirmwarePackageGroup, DetectException>
     createDetectingFromLocalSourceTask(String sourcePath, long timeoutMills) {
         return null;
     }

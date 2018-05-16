@@ -25,39 +25,14 @@ public class ProtoCompetingCallDelegate {
             final Request request,
             Collection<String> competingItemIds,
             final Responder responder,
-            final CompetingCallDelegate.SessionCallable<D, F, P> callable,
+            final CompetingCallDelegate.SessionProgressiveCallable<D, F, P> callable,
             final DFPConverter<D, F, P> converter) {
         mCallDelegate.onCall(
                 request,
                 competingItemIds,
                 responder,
                 callable,
-                new CompetingCallDelegate.DFPConverter<D, F, P>() {
-                    @Override
-                    public Param convertDone(D done) {
-                        Message message = converter.convertDone(done);
-                        if (message == null) {
-                            return null;
-                        }
-
-                        return ProtoParam.create(message);
-                    }
-
-                    @Override
-                    public CallException convertFail(F fail) {
-                        return converter.convertFail(fail);
-                    }
-
-                    @Override
-                    public Param convertProgress(P progress) {
-                        Message message = converter.convertProgress(progress);
-                        if (message == null) {
-                            return null;
-                        }
-
-                        return ProtoParam.create(message);
-                    }
-                }
+                new DFPConverterAdapter<>(converter)
         );
     }
 
@@ -65,25 +40,31 @@ public class ProtoCompetingCallDelegate {
             final Request request,
             Collection<String> competingItemIds,
             final Responder responder,
-            final CompetingCallDelegate.SessionCallable<D, F, Void> callable,
+            final CompetingCallDelegate.SessionCallable<D, F> callable,
             final DFConverter<D, F> converter) {
-        onCall(request, competingItemIds, responder, callable, (DFPConverter<D, F, Void>) converter);
+        mCallDelegate.onCall(
+                request,
+                competingItemIds,
+                responder,
+                callable,
+                new DFConverterAdapter<>(converter)
+        );
     }
 
     public <F> void onCall(
             final Request request,
             Collection<String> competingItemIds,
             final Responder responder,
-            final CompetingCallDelegate.SessionCallable<Void, F, Void> callable,
+            final CompetingCallDelegate.SessionCallable<Void, F> callable,
             final FConverter<F> converter) {
-        onCall(request, competingItemIds, responder, callable, (DFPConverter<Void, F, Void>) converter);
+        onCall(request, competingItemIds, responder, callable, (DFConverter<Void, F>) converter);
     }
 
     public <D, F, P> void onCall(
             final Request request,
             String competingItemId,
             final Responder responder,
-            final CompetingCallDelegate.SessionCallable<D, F, P> callable,
+            final CompetingCallDelegate.SessionProgressiveCallable<D, F, P> callable,
             final DFPConverter<D, F, P> converter) {
         onCall(request, Collections.singleton(competingItemId), responder, callable, converter);
     }
@@ -92,46 +73,83 @@ public class ProtoCompetingCallDelegate {
             final Request request,
             String competingItemId,
             final Responder responder,
-            final CompetingCallDelegate.SessionCallable<D, F, Void> callable,
+            final CompetingCallDelegate.SessionCallable<D, F> callable,
             final DFConverter<D, F> converter) {
-        onCall(request, competingItemId, responder, callable, (DFPConverter<D, F, Void>) converter);
+        onCall(request, Collections.singleton(competingItemId), responder, callable, converter);
     }
 
     public <F> void onCall(
             final Request request,
             String competingItemId,
             final Responder responder,
-            final CompetingCallDelegate.SessionCallable<Void, F, Void> callable,
+            final CompetingCallDelegate.SessionCallable<Void, F> callable,
             final FConverter<F> converter) {
-        onCall(request, competingItemId, responder, callable, (DFPConverter<Void, F, Void>) converter);
+        onCall(request, competingItemId, responder, callable, (DFConverter<Void, F>) converter);
     }
 
     public void onCompetitionSessionInactive(final CompetitionSessionInfo sessionInfo) {
         mCallDelegate.onCompetitionSessionInactive(sessionInfo);
     }
 
-    public interface DFPConverter<D, F, P> {
-
-        Message convertDone(D done);
-
-        CallException convertFail(F fail);
+    public interface DFPConverter<D, F, P> extends DFConverter<D, F> {
 
         Message convertProgress(P progress);
     }
 
-    public static abstract class DFConverter<D, F> implements DFPConverter<D, F, Void> {
+    public interface DFConverter<D, F> {
 
-        @Override
-        public Message convertProgress(Void progress) {
-            return null;
-        }
+        Message convertDone(D done);
+
+        CallException convertFail(F fail);
     }
 
-    public static abstract class FConverter<F> extends DFConverter<Void, F> {
+    public static abstract class FConverter<F> implements DFConverter<Void, F> {
 
         @Override
         public Message convertDone(Void done) {
             return null;
+        }
+    }
+
+    private static class DFConverterAdapter<D, F> implements CompetingCallDelegate.DFConverter<D, F> {
+
+        DFConverter<D, F> mConverter;
+
+        public DFConverterAdapter(DFConverter<D, F> converter) {
+            mConverter = converter;
+        }
+
+        @Override
+        public Param convertDone(D done) {
+            Message message = mConverter.convertDone(done);
+            if (message == null) {
+                return null;
+            }
+
+            return ProtoParam.create(message);
+        }
+
+        @Override
+        public CallException convertFail(F fail) {
+            return mConverter.convertFail(fail);
+        }
+    }
+
+    private static class DFPConverterAdapter<D, F, P> extends DFConverterAdapter<D, F>
+            implements CompetingCallDelegate.DFPConverter<D, F, P> {
+
+        public DFPConverterAdapter(DFPConverter<D, F, P> converter) {
+            super(converter);
+        }
+
+        @Override
+        public Param convertProgress(P progress) {
+            Message message = ((DFPConverter<D, F, P>) mConverter).convertProgress(progress);
+            if (message == null) {
+                return null;
+            }
+
+            return ProtoParam.create(message);
         }
     }
 }

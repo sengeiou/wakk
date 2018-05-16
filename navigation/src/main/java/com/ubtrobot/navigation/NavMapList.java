@@ -61,7 +61,7 @@ public class NavMapList {
         throw new NavMapNotFoundException();
     }
 
-    public Promise<NavMap, NavMapException, Void> add(NavMap map) {
+    public Promise<NavMap, NavMapException> add(NavMap map) {
         return mNavigationService.call(
                 NavigationConstants.CALL_PATH_ADD_NAV_MAP,
                 NavigationConverters.toNavMapProto(map),
@@ -74,7 +74,7 @@ public class NavMapList {
         return get(mNavMapList.get().second);
     }
 
-    public Promise<NavMap, NavMapException, Void> select(String mapId) {
+    public Promise<NavMap, NavMapException> select(String mapId) {
         return mNavigationService.call(
                 NavigationConstants.CALL_PATH_SELECT_NAV_MAP,
                 StringValue.newBuilder().setValue(mapId).build(),
@@ -82,7 +82,7 @@ public class NavMapList {
         );
     }
 
-    public Promise<NavMap, NavMapException, Void> modify(NavMap map) {
+    public Promise<NavMap, NavMapException> modify(NavMap map) {
         return mNavigationService.call(
                 NavigationConstants.CALL_PATH_MODIFY_NAV_MAP,
                 NavigationConverters.toNavMapProto(map),
@@ -90,7 +90,7 @@ public class NavMapList {
         );
     }
 
-    public Promise<NavMap, NavMapException, Void> remove(String mapId) {
+    public Promise<NavMap, NavMapException> remove(String mapId) {
         return mNavigationService.call(
                 NavigationConstants.CALL_PATH_REMOVE_NAV_MAP,
                 StringValue.newBuilder().setValue(mapId).build(),

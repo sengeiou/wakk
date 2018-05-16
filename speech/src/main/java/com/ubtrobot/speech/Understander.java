@@ -3,7 +3,6 @@ package com.ubtrobot.speech;
 import android.os.Handler;
 import android.text.TextUtils;
 
-import com.google.protobuf.Message;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.master.adapter.ProtoCallAdapter;
 import com.ubtrobot.speech.ipc.SpeechConstant;
@@ -25,7 +24,7 @@ public class Understander {
         this.mHandler = mHandler;
     }
 
-    public Promise<UnderstandResult, UnderstandException, Void> understand(String question, UnderstandOption option) {
+    public Promise<UnderstandResult, UnderstandException> understand(String question, UnderstandOption option) {
         if (TextUtils.isEmpty(question)) {
             throw new IllegalArgumentException("Question to be understand must not be null.");
         }

@@ -3,6 +3,7 @@ package com.ubtrobot.navigation;
 import android.os.Handler;
 
 import com.google.protobuf.Message;
+import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.master.adapter.ProtoCallAdapter;
 import com.ubtrobot.master.competition.Competing;
@@ -32,11 +33,11 @@ public class Navigator implements Competing {
         ));
     }
 
-    public Promise<Location, LocateException, Void> locateSelf(CompetitionSession session) {
+    public Promise<Location, LocateException> locateSelf(CompetitionSession session) {
         return locateSelf(session, new LocateOption.Builder().build());
     }
 
-    public Promise<Location, LocateException, Void>
+    public Promise<Location, LocateException>
     locateSelf(CompetitionSession session, LocateOption option) {
         checkSession(session);
 
@@ -81,12 +82,12 @@ public class Navigator implements Competing {
         }
     }
 
-    public Promise<Void, NavigateException, NavigatingProgress>
+    public ProgressivePromise<Void, NavigateException, NavigatingProgress>
     navigate(CompetitionSession session, Location destination) {
         return navigate(session, destination, new NavigateOption.Builder().build());
     }
 
-    public Promise<Void, NavigateException, NavigatingProgress>
+    public ProgressivePromise<Void, NavigateException, NavigatingProgress>
     navigate(CompetitionSession session, Location destination, NavigateOption option) {
         checkSession(session);
 

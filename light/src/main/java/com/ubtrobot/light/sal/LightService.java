@@ -12,20 +12,20 @@ import java.util.List;
 
 public interface LightService {
 
-    Promise<List<LightDevice>, AccessServiceException, Void> getLightList();
+    Promise<List<LightDevice>, AccessServiceException> getLightList();
 
-    Promise<Void, LightException, Void> turnOn(String lightId, final int argb);
+    Promise<Void, LightException> turnOn(String lightId, final int argb);
 
     boolean isOn(String lightId);
 
-    Promise<Void, LightException, Void> changeColor(String lightId, int argb);
+    Promise<Void, LightException> changeColor(String lightId, int argb);
 
     int getColor(String lightId);
 
-    Promise<Void, LightException, Void> turnOff(String lightId);
+    Promise<Void, LightException> turnOff(String lightId);
 
-    Promise<List<LightingEffect>, AccessServiceException, Void> getEffectList();
+    Promise<List<LightingEffect>, AccessServiceException> getEffectList();
 
-    Promise<Void, DisplayException, Void> display(
+    Promise<Void, DisplayException> display(
             List<String> lightIds, String effectId, DisplayOption option);
 }

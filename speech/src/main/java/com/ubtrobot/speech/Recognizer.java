@@ -4,7 +4,7 @@ import android.os.Handler;
 import android.text.TextUtils;
 
 import com.google.protobuf.BoolValue;
-import com.ubtrobot.async.Promise;
+import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.master.adapter.ProtoCallAdapter;
 import com.ubtrobot.master.competition.Competing;
 import com.ubtrobot.master.competition.CompetingItem;
@@ -38,7 +38,7 @@ public class Recognizer implements Competing {
                 (SpeechConstant.SERVICE_NAME, SpeechConstant.COMPETING_ITEM_RECOGNIZER));
     }
 
-    public Promise<RecognizeResult, RecognizeException, RecognizingProgress> recognize(
+    public ProgressivePromise<RecognizeResult, RecognizeException, RecognizingProgress> recognize(
             CompetitionSession session, RecognizeOption option) {
         checkSession(session);
         ProtoCallAdapter recognizeService = new ProtoCallAdapter(

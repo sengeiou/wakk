@@ -1,7 +1,8 @@
 package com.ubtrobot.motion.sal;
 
 import com.ubtrobot.async.AsyncTask;
-import com.ubtrobot.async.InterruptibleAsyncTask;
+import com.ubtrobot.async.InterruptibleProgressiveAsyncTask;
+import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.exception.AccessServiceException;
 import com.ubtrobot.master.competition.InterruptibleTaskHelper;
@@ -25,8 +26,8 @@ public abstract class AbstractMotionService implements MotionService {
     }
 
     @Override
-    public Promise<List<JointDevice>, AccessServiceException, Void> getJointList() {
-        AsyncTask<List<JointDevice>, AccessServiceException, Void> task = createGetJointListTask();
+    public Promise<List<JointDevice>, AccessServiceException> getJointList() {
+        AsyncTask<List<JointDevice>, AccessServiceException> task = createGetJointListTask();
         if (task == null) {
             throw new IllegalStateException("createGetJointListTask returns null.");
         }
@@ -35,7 +36,7 @@ public abstract class AbstractMotionService implements MotionService {
         return task.promise();
     }
 
-    protected abstract AsyncTask<List<JointDevice>, AccessServiceException, Void>
+    protected abstract AsyncTask<List<JointDevice>, AccessServiceException>
     createGetJointListTask();
 
     @Override
@@ -53,7 +54,7 @@ public abstract class AbstractMotionService implements MotionService {
     protected abstract float doGetJointAngle(String jointId);
 
     @Override
-    public Promise<Void, JointException, Joint.RotatingProgress>
+    public ProgressivePromise<Void, JointException, Joint.RotatingProgress>
     jointRotateBy(String jointId, final float angle, final float speed) {
         return jointRotate(new JointInterruptibleAsyncTask(jointId) {
             @Override
@@ -63,7 +64,7 @@ public abstract class AbstractMotionService implements MotionService {
         });
     }
 
-    private Promise<Void, JointException, Joint.RotatingProgress>
+    private ProgressivePromise<Void, JointException, Joint.RotatingProgress>
     jointRotate(JointInterruptibleAsyncTask task) {
         return mInterruptibleTaskHelper.start(
                 TASK_RECEIVER_JOINT_PREFIX + task.jointId,
@@ -85,7 +86,7 @@ public abstract class AbstractMotionService implements MotionService {
     protected abstract void jointStopRotating(String jointId);
 
     @Override
-    public Promise<Void, JointException, Joint.RotatingProgress>
+    public ProgressivePromise<Void, JointException, Joint.RotatingProgress>
     jointRotateBy(String jointId, final float angle, final long timeMillis) {
         return jointRotate(new JointInterruptibleAsyncTask(jointId) {
             @Override
@@ -98,7 +99,7 @@ public abstract class AbstractMotionService implements MotionService {
     protected abstract void jointStartRotatingBy(String jointId, float angle, long timeMillis);
 
     @Override
-    public Promise<Void, JointException, Joint.RotatingProgress>
+    public ProgressivePromise<Void, JointException, Joint.RotatingProgress>
     jointRotateTo(String jointId, final float angle, final float speed) {
         return jointRotate(new JointInterruptibleAsyncTask(jointId) {
             @Override
@@ -111,7 +112,7 @@ public abstract class AbstractMotionService implements MotionService {
     protected abstract void jointStartRotatingTo(String jointId, float angle, float speed);
 
     @Override
-    public Promise<Void, JointException, Joint.RotatingProgress>
+    public ProgressivePromise<Void, JointException, Joint.RotatingProgress>
     jointRotateTo(String jointId, final float angle, final long timeMillis) {
         return jointRotate(new JointInterruptibleAsyncTask(jointId) {
             @Override
@@ -124,8 +125,8 @@ public abstract class AbstractMotionService implements MotionService {
     protected abstract void jointStartRotatingTo(String jointId, float angle, long timeMillis);
 
     @Override
-    public Promise<LocomotorDevice, AccessServiceException, Void> getLocomotor() {
-        AsyncTask<LocomotorDevice, AccessServiceException, Void> task = createGetLocomotorTask();
+    public Promise<LocomotorDevice, AccessServiceException> getLocomotor() {
+        AsyncTask<LocomotorDevice, AccessServiceException> task = createGetLocomotorTask();
         if (task == null) {
             throw new IllegalStateException("createGetLocomotorTask returns null.");
         }
@@ -134,11 +135,11 @@ public abstract class AbstractMotionService implements MotionService {
         return task.promise();
     }
 
-    protected abstract AsyncTask<LocomotorDevice, AccessServiceException, Void>
+    protected abstract AsyncTask<LocomotorDevice, AccessServiceException>
     createGetLocomotorTask();
 
     private abstract class JointInterruptibleAsyncTask
-            extends InterruptibleAsyncTask<Void, JointException, Joint.RotatingProgress> {
+            extends InterruptibleProgressiveAsyncTask<Void, JointException, Joint.RotatingProgress> {
 
         final String jointId;
 

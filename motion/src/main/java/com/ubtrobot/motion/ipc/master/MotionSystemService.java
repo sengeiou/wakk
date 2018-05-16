@@ -6,6 +6,7 @@ import android.os.Handler;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.FloatValue;
 import com.google.protobuf.Message;
+import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.exception.AccessServiceException;
 import com.ubtrobot.master.adapter.CallProcessAdapter;
@@ -63,9 +64,9 @@ public class MotionSystemService extends MasterSystemService {
     public void onGetJointList(Request request, Responder responder) {
         mCallProcessor.onCall(
                 responder,
-                new CallProcessAdapter.Callable<List<JointDevice>, AccessServiceException, Void>() {
+                new CallProcessAdapter.Callable<List<JointDevice>, AccessServiceException>() {
                     @Override
-                    public Promise<List<JointDevice>, AccessServiceException, Void>
+                    public Promise<List<JointDevice>, AccessServiceException>
                     call() throws CallException {
                         return mService.getJointList();
                     }
@@ -132,10 +133,10 @@ public class MotionSystemService extends MasterSystemService {
                 request,
                 MotionConstants.COMPETING_ITEM_PREFIX_JOINT + option.getJointId(),
                 responder,
-                new CompetingCallDelegate.SessionCallable<
+                new CompetingCallDelegate.SessionProgressiveCallable<
                         Void, JointException, Joint.RotatingProgress>() {
                     @Override
-                    public Promise<Void, JointException, Joint.RotatingProgress>
+                    public ProgressivePromise<Void, JointException, Joint.RotatingProgress>
                     call() throws CallException {
                         try {
                             if (option.getRelatively()) {
@@ -187,9 +188,9 @@ public class MotionSystemService extends MasterSystemService {
     public void onGetLocomotor(final Request request, final Responder responder) {
         mCallProcessor.onCall(
                 responder,
-                new CallProcessAdapter.Callable<LocomotorDevice, AccessServiceException, Void>() {
+                new CallProcessAdapter.Callable<LocomotorDevice, AccessServiceException>() {
                     @Override
-                    public Promise<LocomotorDevice, AccessServiceException, Void>
+                    public Promise<LocomotorDevice, AccessServiceException>
                     call() throws CallException {
                         return mService.getLocomotor();
                     }

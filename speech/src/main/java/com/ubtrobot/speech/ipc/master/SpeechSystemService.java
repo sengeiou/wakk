@@ -6,6 +6,7 @@ import android.os.Looper;
 
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Message;
+import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.exception.AccessServiceException;
 import com.ubtrobot.master.adapter.CallProcessAdapter;
@@ -106,10 +107,10 @@ public class SpeechSystemService extends MasterSystemService {
 
         mCompetingCallDelegate.onCall(request,
                 SpeechConstant.COMPETING_ITEM_SYNTHESIZER, responder,
-                new CompetingCallDelegate.SessionCallable<
+                new CompetingCallDelegate.SessionProgressiveCallable<
                         Void, SynthesizeException, Synthesizer.SynthesizingProgress>() {
                     @Override
-                    public Promise<Void, SynthesizeException, Synthesizer.SynthesizingProgress>
+                    public ProgressivePromise<Void, SynthesizeException, Synthesizer.SynthesizingProgress>
                     call() throws CallException {
                         return mSpeechService.synthesize(
                                 option.getSentence(),
@@ -160,10 +161,10 @@ public class SpeechSystemService extends MasterSystemService {
                 request,
                 SpeechConstant.COMPETING_ITEM_RECOGNIZER,
                 responder,
-                new CompetingCallDelegate.SessionCallable<
+                new CompetingCallDelegate.SessionProgressiveCallable<
                         Recognizer.RecognizeResult, RecognizeException, Recognizer.RecognizingProgress>() {
                     @Override
-                    public Promise<Recognizer.RecognizeResult, RecognizeException, Recognizer.RecognizingProgress>
+                    public ProgressivePromise<Recognizer.RecognizeResult, RecognizeException, Recognizer.RecognizingProgress>
                     call() throws CallException {
                         return mSpeechService.recognize(option);
                     }
@@ -206,9 +207,9 @@ public class SpeechSystemService extends MasterSystemService {
         final String question = understandOption.getQuestion();
 
         mCallProcessor.onCall(responder, new CallProcessAdapter.Callable<
-                        Understander.UnderstandResult, UnderstandException, Void>() {
+                        Understander.UnderstandResult, UnderstandException>() {
                     @Override
-                    public Promise<Understander.UnderstandResult, UnderstandException, Void>
+                    public Promise<Understander.UnderstandResult, UnderstandException>
                     call() throws CallException {
                         return mSpeechService.understand(question,
                                 SpeechConverters.toUnderstandOptionPojo(understandOption));
@@ -231,9 +232,9 @@ public class SpeechSystemService extends MasterSystemService {
     @Call(path = SpeechConstant.CALL_PATH_SPEAKER_LIST)
     public void getSpeakerList(Request request, Responder responder) {
         mCallProcessor.onCall(responder, new CallProcessAdapter.Callable<
-                List<Speaker>, AccessServiceException, Void>() {
+                List<Speaker>, AccessServiceException>() {
             @Override
-            public Promise<List<Speaker>, AccessServiceException, Void> call() throws CallException {
+            public Promise<List<Speaker>, AccessServiceException> call() throws CallException {
                 return mSpeechService.getSpeakerList();
             }
         }, new ProtoCallProcessAdapter.DFConverter<List<Speaker>, AccessServiceException>() {

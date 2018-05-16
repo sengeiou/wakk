@@ -4,7 +4,7 @@ import android.os.Handler;
 
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Message;
-import com.ubtrobot.async.Promise;
+import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.master.adapter.ProtoCallAdapter;
 import com.ubtrobot.master.competition.Competing;
 import com.ubtrobot.master.competition.CompetingItem;
@@ -38,7 +38,7 @@ public class Synthesizer implements Competing {
                 (SpeechConstant.SERVICE_NAME, SpeechConstant.COMPETING_ITEM_SYNTHESIZER));
     }
 
-    public Promise<Void, SynthesizeException, SynthesizingProgress> synthesize(
+    public ProgressivePromise<Void, SynthesizeException, SynthesizingProgress> synthesize(
             CompetitionSession session, String sentence, final SynthesizeOption option) {
         checkSession(session);
 

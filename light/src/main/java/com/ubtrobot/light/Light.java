@@ -54,7 +54,7 @@ public class Light implements Competing {
         return mDevice;
     }
 
-    public Promise<Void, LightException, Void> turnOn(CompetitionSession session, int argb) {
+    public Promise<Void, LightException> turnOn(CompetitionSession session, int argb) {
         checkSession(session);
         checkColor(argb);
         mLightList.get(getId());
@@ -102,7 +102,7 @@ public class Light implements Competing {
         }
     }
 
-    public Promise<Void, LightException, Void> changeColor(CompetitionSession session, int argb) {
+    public Promise<Void, LightException> changeColor(CompetitionSession session, int argb) {
         checkSession(session);
         checkColor(argb);
         mLightList.get(getId());
@@ -134,7 +134,7 @@ public class Light implements Competing {
         }
     }
 
-    public Promise<Void, LightException, Void> turnOff(CompetitionSession session) {
+    public Promise<Void, LightException> turnOff(CompetitionSession session) {
         checkSession(session);
         mLightList.get(getId());
 

@@ -4,7 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.RecoverySystem;
 
-import com.ubtrobot.async.AsyncTask;
+import com.ubtrobot.async.ProgressiveAsyncTask;
 import com.ubtrobot.ulog.FwLoggerFactory;
 import com.ubtrobot.ulog.Logger;
 import com.ubtrobot.upgrade.FirmwarePackage;
@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.util.concurrent.Executor;
 
 public class AndroidInstallingPackageTask
-        extends AsyncTask<Void, UpgradeException, UpgradeProgress> {
+        extends ProgressiveAsyncTask<Void, UpgradeException, UpgradeProgress> {
 
     private static final Logger LOGGER = FwLoggerFactory.getLogger("AndroidInstallingPackageTask");
 

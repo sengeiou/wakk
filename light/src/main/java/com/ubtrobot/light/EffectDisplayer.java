@@ -28,7 +28,7 @@ public class EffectDisplayer {
         mHandler = handler;
     }
 
-    public Promise<Void, DisplayException, Void> display(
+    public Promise<Void, DisplayException> display(
             CompetitionSession session,
             List<String> lightIds,
             String effectId,
@@ -53,7 +53,7 @@ public class EffectDisplayer {
         return doDisplay(session, lightIds, effectId, option == null ? DEFAULT_OPTION : option);
     }
 
-    private Promise<Void, DisplayException, Void> doDisplay(
+    private Promise<Void, DisplayException> doDisplay(
             CompetitionSession session,
             List<String> lightIds,
             String effectId,
@@ -82,14 +82,14 @@ public class EffectDisplayer {
         }
     }
 
-    public Promise<Void, DisplayException, Void> display(
+    public Promise<Void, DisplayException> display(
             CompetitionSession session,
             List<String> lightIds,
             String effectId) {
         return display(session, lightIds, effectId, DEFAULT_OPTION);
     }
 
-    public Promise<Void, DisplayException, Void> display(
+    public Promise<Void, DisplayException> display(
             CompetitionSession session,
             String lightId,
             String effectId,
@@ -97,7 +97,7 @@ public class EffectDisplayer {
         return display(session, Collections.singletonList(lightId), effectId, option);
     }
 
-    public Promise<Void, DisplayException, Void> display(
+    public Promise<Void, DisplayException> display(
             CompetitionSession session,
             String lightId,
             String effectId) {

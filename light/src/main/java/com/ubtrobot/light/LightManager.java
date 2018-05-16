@@ -59,15 +59,15 @@ public class LightManager {
         return mLightList.get(lightId);
     }
 
-    public Promise<Void, LightException, Void>
+    public Promise<Void, LightException>
     turnOn(String lightId, final int argb) {
         Pair<LightCluster, CompetitionSessionExt<LightCluster>> pair = lightSession(lightId);
         return pair.second.execute(
                 pair.first,
                 new CompetitionSessionExt.SessionCallable<
-                        Void, LightException, Void, LightCluster>() {
+                        Void, LightException, LightCluster>() {
                     @Override
-                    public Promise<Void, LightException, Void>
+                    public Promise<Void, LightException>
                     call(CompetitionSession session, LightCluster lightCluster) {
                         return lightCluster.lights.get(0).turnOn(session, argb);
                     }
@@ -119,14 +119,14 @@ public class LightManager {
         return getLight(lightId).isTurnOn();
     }
 
-    public Promise<Void, LightException, Void> changeColor(String lightId, final int argb) {
+    public Promise<Void, LightException> changeColor(String lightId, final int argb) {
         Pair<LightCluster, CompetitionSessionExt<LightCluster>> pair = lightSession(lightId);
         return pair.second.execute(
                 pair.first,
                 new CompetitionSessionExt.SessionCallable<
-                        Void, LightException, Void, LightCluster>() {
+                        Void, LightException, LightCluster>() {
                     @Override
-                    public Promise<Void, LightException, Void>
+                    public Promise<Void, LightException>
                     call(CompetitionSession session, LightCluster lightCluster) {
                         return lightCluster.lights.get(0).changeColor(session, argb);
                     }
@@ -152,7 +152,7 @@ public class LightManager {
         return mEffectList.get(effectId);
     }
 
-    public Promise<Void, DisplayException, Void> display(
+    public Promise<Void, DisplayException> display(
             List<String> lightIds,
             final String effectId,
             final DisplayOption option) {
@@ -165,9 +165,9 @@ public class LightManager {
         return pair.second.execute(
                 pair.first,
                 new CompetitionSessionExt.SessionCallable<
-                        Void, DisplayException, Void, LightCluster>() {
+                        Void, DisplayException, LightCluster>() {
                     @Override
-                    public Promise<Void, DisplayException, Void>
+                    public Promise<Void, DisplayException>
                     call(CompetitionSession session, LightCluster competing) {
                         return mEffectDisplayer.display(session, normalIds, effectId, option);
                     }
@@ -197,13 +197,13 @@ public class LightManager {
         return normalIds;
     }
 
-    public Promise<Void, DisplayException, Void> display(
+    public Promise<Void, DisplayException> display(
             List<String> lightIds,
             String effectId) {
         return display(lightIds, effectId, DEFAULT_OPTION);
     }
 
-    public Promise<Void, DisplayException, Void> display(
+    public Promise<Void, DisplayException> display(
             String lightId,
             String effectId,
             DisplayOption option) {
@@ -214,20 +214,20 @@ public class LightManager {
         return mEffectDisplayer;
     }
 
-    public Promise<Void, DisplayException, Void> display(
+    public Promise<Void, DisplayException> display(
             String lightId,
             String effectId) {
         return display(Collections.singletonList(lightId), effectId, DEFAULT_OPTION);
     }
 
-    public Promise<Void, LightException, Void> turnOff(String lightId) {
+    public Promise<Void, LightException> turnOff(String lightId) {
         Pair<LightCluster, CompetitionSessionExt<LightCluster>> pair = lightSession(lightId);
         return pair.second.execute(
                 pair.first,
                 new CompetitionSessionExt.SessionCallable<
-                        Void, LightException, Void, LightCluster>() {
+                        Void, LightException, LightCluster>() {
                     @Override
-                    public Promise<Void, LightException, Void>
+                    public Promise<Void, LightException>
                     call(CompetitionSession session, LightCluster lightCluster) {
                         return lightCluster.lights.get(0).turnOff(session);
                     }

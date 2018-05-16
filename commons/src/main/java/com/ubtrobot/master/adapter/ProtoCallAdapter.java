@@ -3,6 +3,7 @@ package com.ubtrobot.master.adapter;
 import android.os.Handler;
 
 import com.google.protobuf.Message;
+import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.master.call.ConvenientCallable;
 import com.ubtrobot.master.param.ProtoParam;
@@ -46,12 +47,12 @@ public class ProtoCallAdapter {
         }
     }
 
-    public <D, M extends Message, F extends Exception> Promise<D, F, Void>
+    public <D, M extends Message, F extends Exception> Promise<D, F>
     call(String path, DFProtoConverter<D, M, F> converter) {
         return call(path, null, converter);
     }
 
-    public <D, M extends Message, F extends Exception> Promise<D, F, Void>
+    public <D, M extends Message, F extends Exception> Promise<D, F>
     call(String path, Message protoParam, final DFProtoConverter<D, M, F> converter) {
         return mCallAdapter.call(
                 path,
@@ -80,18 +81,18 @@ public class ProtoCallAdapter {
         );
     }
 
-    public <F extends Exception> Promise<Void, F, Void>
+    public <F extends Exception> Promise<Void, F>
     call(String path, Message protoParam, CallAdapter.FConverter<F> converter) {
         return mCallAdapter.call(path, protoParam == null ? null : ProtoParam.create(protoParam),
                 converter);
     }
 
-    public <F extends Exception> Promise<Void, F, Void>
+    public <F extends Exception> Promise<Void, F>
     call(String path, CallAdapter.FConverter<F> converter) {
         return mCallAdapter.call(path, null, converter);
     }
 
-    public <D, DM extends Message, F extends Exception, P, PM extends Message> Promise<D, F, P>
+    public <D, DM extends Message, F extends Exception, P, PM extends Message> ProgressivePromise<D, F, P>
     callStickily(String path, Message protoParam, final DFPProtoConverter<D, DM, F, P, PM> converter) {
         return mCallAdapter.callStickily(
                 path,
@@ -131,17 +132,17 @@ public class ProtoCallAdapter {
         );
     }
 
-    public <D, DM extends Message, F extends Exception, P, PM extends Message> Promise<D, F, P>
+    public <D, DM extends Message, F extends Exception, P, PM extends Message> ProgressivePromise<D, F, P>
     callStickily(String path, DFPProtoConverter<D, DM, F, P, PM> converter) {
         return callStickily(path, null, converter);
     }
 
-    public <F extends Exception, P, PM extends Message> Promise<Void, F, P>
+    public <F extends Exception, P, PM extends Message> ProgressivePromise<Void, F, P>
     callStickily(String path, Message protoParam, FPProtoConverter<F, P, PM> converter) {
         return callStickily(path, protoParam, (DFPProtoConverter<Void, Message, F, P, PM>) converter);
     }
 
-    public <F extends Exception, P, PM extends Message> Promise<Void, F, P>
+    public <F extends Exception, P, PM extends Message> ProgressivePromise<Void, F, P>
     callStickily(String path, FPProtoConverter<F, P, PM> converter) {
         return callStickily(path, null, (DFPProtoConverter<Void, Message, F, P, PM>) converter);
     }

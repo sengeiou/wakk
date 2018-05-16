@@ -2,8 +2,9 @@ package com.ubtrobot.master.adapter;
 
 import android.os.Handler;
 
-import com.ubtrobot.async.CancelHandler;
-import com.ubtrobot.async.Deferred;
+import com.ubtrobot.async.AsyncTask;
+import com.ubtrobot.async.ProgressiveAsyncTask;
+import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.master.call.ConvenientCallable;
 import com.ubtrobot.master.call.ConvenientStickyCallable;
@@ -35,109 +36,30 @@ public class CallAdapter {
         return (ConvenientStickyCallable) mCallable;
     }
 
-    public <D, F extends Exception> Promise<D, F, Void>
+    public <D, F extends Exception> Promise<D, F>
     call(String path, DFConverter<D, F> converter) {
         return call(path, null, converter);
     }
 
-    public <D, F extends Exception> Promise<D, F, Void>
-    call(String path, Param param, final DFConverter<D, F> converter) {
-        final Deferred<D, F, Void> deferred = new Deferred<>(mHandler);
-        final Cancelable cancelable = mCallable.call(path, param, new ResponseCallback() {
-            @SuppressWarnings("unchecked")
-            @Override
-            public void onResponse(Request request, Response response) {
-                try {
-                    D done = converter.convertDone(response.getParam());
-                    deferred.resolve(done);
-                } catch (Exception e) {
-                    try {
-                        F fail = (F) e;
-                        deferred.reject(fail);
-                    } catch (ClassCastException cce) {
-                        throw new IllegalStateException(e);
-                    }
-                }
-            }
+    public <D, F extends Exception> Promise<D, F>
+    call(final String path, final Param param, final DFConverter<D, F> converter) {
+        AsyncTask<D, F> task = new AsyncTask<D, F>() {
+
+            Cancelable mCancelable;
 
             @Override
-            public void onFailure(Request request, CallException e) {
-                F fail = converter.convertFail(e);
-                deferred.reject(fail);
-            }
-        });
-
-        deferred.setCancelHandler(new CancelHandler() {
-            @Override
-            public void onCancel() {
-                cancelable.cancel();
-            }
-        });
-        return deferred.promise();
-    }
-
-    @SuppressWarnings("unchecked")
-    public <F extends Exception> Promise<Void, F, Void> call(String path, FConverter<F> converter) {
-        return call(path, null, (DFConverter<Void, F>) converter);
-    }
-
-    @SuppressWarnings("unchecked")
-    public <D, F extends Exception> Promise<D, F, Void>
-    call(String path, Param param, FConverter<F> converter) {
-        return call(path, param, (DFConverter<D, F>) converter);
-    }
-
-    public <D, F extends Exception, P> Promise<D, F, P>
-    callStickily(String path, final DFPConverter<D, F, P> converter) {
-        return callStickily(path, null, converter);
-    }
-
-    public <D, F extends Exception, P> Promise<D, F, P>
-    callStickily(String path, Param param, final DFPConverter<D, F, P> converter) {
-        if (!(mCallable instanceof ConvenientStickyCallable)) {
-            throw new IllegalStateException("The callable is NOT a ConvenientStickyCallable instance.");
-        }
-
-        ConvenientStickyCallable stickyCallable = (ConvenientStickyCallable) mCallable;
-        final Deferred<D, F, P> deferred = new Deferred<>(mHandler);
-
-        final Cancelable[] cancelable = new Cancelable[1];
-        final Semaphore semaphore = new Semaphore(1);
-        acquirePermit(semaphore);
-
-        cancelable[0] = stickyCallable.callStickily(
-                path,
-                param,
-                new StickyResponseCallback() {
+            protected void onStart() {
+                mCancelable = mCallable.call(path, param, new ResponseCallback() {
                     @SuppressWarnings("unchecked")
                     @Override
-                    public void onResponseStickily(Request request, Response response) {
-                        try {
-                            P progress = converter.convertProgress(response.getParam());
-                            deferred.notify(progress);
-                        } catch (Exception e) {
-                            acquirePermit(semaphore);
-                            cancelable[0].cancel();
-
-                            try {
-                                F fail = (F) e;
-                                deferred.reject(fail);
-                            } catch (ClassCastException cce) {
-                                throw new IllegalStateException(e);
-                            }
-                        }
-                    }
-
-                    @SuppressWarnings("unchecked")
-                    @Override
-                    public void onResponseCompletely(Request request, Response response) {
+                    public void onResponse(Request request, Response response) {
                         try {
                             D done = converter.convertDone(response.getParam());
-                            deferred.resolve(done);
+                            resolve(done);
                         } catch (Exception e) {
                             try {
                                 F fail = (F) e;
-                                deferred.reject(fail);
+                                reject(fail);
                             } catch (ClassCastException cce) {
                                 throw new IllegalStateException(e);
                             }
@@ -147,20 +69,103 @@ public class CallAdapter {
                     @Override
                     public void onFailure(Request request, CallException e) {
                         F fail = converter.convertFail(e);
-                        deferred.reject(fail);
+                        reject(fail);
                     }
-                }
-        );
-        semaphore.release();
-
-        deferred.setCancelHandler(new CancelHandler() {
-            @Override
-            public void onCancel() {
-                cancelable[0].cancel();
+                });
             }
-        });
 
-        return deferred.promise();
+            @Override
+            protected void onCancel() {
+                mCancelable.cancel();
+            }
+        };
+
+        return task.promise();
+    }
+
+    @SuppressWarnings("unchecked")
+    public <F extends Exception> Promise<Void, F> call(String path, FConverter<F> converter) {
+        return call(path, null, (DFConverter<Void, F>) converter);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <D, F extends Exception> Promise<D, F>
+    call(String path, Param param, FConverter<F> converter) {
+        return call(path, param, (DFConverter<D, F>) converter);
+    }
+
+    public <D, F extends Exception, P> ProgressivePromise<D, F, P>
+    callStickily(String path, final DFPConverter<D, F, P> converter) {
+        return callStickily(path, null, converter);
+    }
+
+    public <D, F extends Exception, P> ProgressivePromise<D, F, P>
+    callStickily(final String path, final Param param, final DFPConverter<D, F, P> converter) {
+        if (!(mCallable instanceof ConvenientStickyCallable)) {
+            throw new IllegalStateException("The callable is NOT a ConvenientStickyCallable instance.");
+        }
+
+        final ConvenientStickyCallable stickyCallable = (ConvenientStickyCallable) mCallable;
+        ProgressiveAsyncTask<D, F, P> task = new ProgressiveAsyncTask<D, F, P>() {
+
+            Cancelable mCancelable;
+
+            @Override
+            protected void onStart() {
+                mCancelable = stickyCallable.callStickily(
+                        path,
+                        param,
+                        new StickyResponseCallback() {
+                            @SuppressWarnings("unchecked")
+                            @Override
+                            public void onResponseStickily(Request request, Response response) {
+                                try {
+                                    P progress = converter.convertProgress(response.getParam());
+                                    report(progress);
+                                } catch (Exception e) {
+                                    mCancelable.cancel();
+
+                                    try {
+                                        F fail = (F) e;
+                                        reject(fail);
+                                    } catch (ClassCastException cce) {
+                                        throw new IllegalStateException(e);
+                                    }
+                                }
+                            }
+
+                            @SuppressWarnings("unchecked")
+                            @Override
+                            public void onResponseCompletely(Request request, Response response) {
+                                try {
+                                    D done = converter.convertDone(response.getParam());
+                                    resolve(done);
+                                } catch (Exception e) {
+                                    try {
+                                        F fail = (F) e;
+                                        reject(fail);
+                                    } catch (ClassCastException cce) {
+                                        throw new IllegalStateException(e);
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Request request, CallException e) {
+                                F fail = converter.convertFail(e);
+                                reject(fail);
+                            }
+                        }
+                );
+            }
+
+            @Override
+            protected void onCancel() {
+                mCancelable.cancel();
+            }
+        };
+
+        return task.promise();
     }
 
     private void acquirePermit(Semaphore semaphore) {

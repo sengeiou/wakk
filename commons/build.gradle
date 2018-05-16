@@ -47,6 +47,7 @@ dependencies {
     implementation deps.appcompat
 
     api deps.masterProtobufParam
+    api deps.async
 
     testImplementation deps.junit
     androidTestImplementation deps.espressoCore

@@ -3,6 +3,7 @@ package com.ubtrobot.navigation;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.master.adapter.ProtoCallAdapter;
 import com.ubtrobot.master.competition.ActivateException;
@@ -42,7 +43,7 @@ public class NavigationManager {
         return mNavMapList.get(navMapId);
     }
 
-    public Promise<NavMap, NavMapException, Void> addNavMap(NavMap navMap) {
+    public Promise<NavMap, NavMapException> addNavMap(NavMap navMap) {
         return mNavMapList.add(navMap);
     }
 
@@ -50,15 +51,15 @@ public class NavigationManager {
         return mNavMapList.getSelected();
     }
 
-    public Promise<NavMap, NavMapException, Void> selectNavMap(String navMapId) {
+    public Promise<NavMap, NavMapException> selectNavMap(String navMapId) {
         return mNavMapList.select(navMapId);
     }
 
-    public Promise<NavMap, NavMapException, Void> modifyNavMap(NavMap navMap) {
+    public Promise<NavMap, NavMapException> modifyNavMap(NavMap navMap) {
         return mNavMapList.modify(navMap);
     }
 
-    public Promise<NavMap, NavMapException, Void> removeNavMap(String navMapId) {
+    public Promise<NavMap, NavMapException> removeNavMap(String navMapId) {
         return mNavMapList.remove(navMapId);
     }
 
@@ -78,18 +79,18 @@ public class NavigationManager {
         }
     }
 
-    public Promise<Location, LocateException, Void> locateSelf() {
+    public Promise<Location, LocateException> locateSelf() {
         return locateSelf(LocateOption.DEFAULT);
     }
 
-    public Promise<Location, LocateException, Void>
+    public Promise<Location, LocateException>
     locateSelf(final LocateOption option) {
         return navigatorSession().execute(
                 mNavigator,
                 new CompetitionSessionExt.SessionCallable<
-                        Location, LocateException, Void, Navigator>() {
+                        Location, LocateException, Navigator>() {
                     @Override
-                    public Promise<Location, LocateException, Void>
+                    public Promise<Location, LocateException>
                     call(CompetitionSession session, Navigator navigator) {
                         return navigator.locateSelf(session, option);
                     }
@@ -103,19 +104,19 @@ public class NavigationManager {
         );
     }
 
-    public Promise<Void, NavigateException, Navigator.NavigatingProgress>
+    public ProgressivePromise<Void, NavigateException, Navigator.NavigatingProgress>
     navigate(Location destination) {
         return navigate(destination, NavigateOption.DEFAULT);
     }
 
-    public Promise<Void, NavigateException, Navigator.NavigatingProgress>
+    public ProgressivePromise<Void, NavigateException, Navigator.NavigatingProgress>
     navigate(final Location destination, final NavigateOption option) {
         return navigatorSession().execute(
                 mNavigator,
-                new CompetitionSessionExt.SessionCallable<
+                new CompetitionSessionExt.SessionProgressiveCallable<
                         Void, NavigateException, Navigator.NavigatingProgress, Navigator>() {
                     @Override
-                    public Promise<Void, NavigateException, Navigator.NavigatingProgress>
+                    public ProgressivePromise<Void, NavigateException, Navigator.NavigatingProgress>
                     call(CompetitionSession session, Navigator navigator) {
                         return navigator.navigate(session, destination, option);
                     }

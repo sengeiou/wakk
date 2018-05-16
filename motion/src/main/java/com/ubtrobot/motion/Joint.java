@@ -4,7 +4,7 @@ import android.os.Handler;
 
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.FloatValue;
-import com.ubtrobot.async.Promise;
+import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.master.adapter.ProtoCallAdapter;
 import com.ubtrobot.master.competition.Competing;
 import com.ubtrobot.master.competition.CompetingItem;
@@ -87,7 +87,7 @@ public class Joint implements Competing {
      * @param angle   旋转角度。正值顺时针旋转，负值逆时针旋转
      * @return promise。promise.done 通知成功后旋转到的角度
      */
-    public Promise<Void, JointException, RotatingProgress>
+    public ProgressivePromise<Void, JointException, RotatingProgress>
     rotateBy(CompetitionSession session, float angle) {
         return rotateBy(session, angle, mDevice.getDefaultSpeed());
     }
@@ -100,7 +100,7 @@ public class Joint implements Competing {
      * @param speed   旋转速度
      * @return promise。promise.done 通知成功后旋转到的角度
      */
-    public Promise<Void, JointException, RotatingProgress>
+    public ProgressivePromise<Void, JointException, RotatingProgress>
     rotateBy(CompetitionSession session, float angle, float speed) {
         checkSpeed(speed);
 
@@ -113,7 +113,7 @@ public class Joint implements Competing {
         }
     }
 
-    private Promise<Void, JointException, RotatingProgress>
+    private ProgressivePromise<Void, JointException, RotatingProgress>
     rotate(CompetitionSession session, MotionProto.JointRotatingOption option) {
         checkSession(session);
 
@@ -163,7 +163,7 @@ public class Joint implements Competing {
      * @param timeMillis 旋转时间
      * @return promise。promise.done 通知成功后旋转到的角度
      */
-    public Promise<Void, JointException, RotatingProgress>
+    public ProgressivePromise<Void, JointException, RotatingProgress>
     rotateBy(CompetitionSession session, float angle, long timeMillis) {
         checkTimeMillis(timeMillis);
 
@@ -184,7 +184,7 @@ public class Joint implements Competing {
      * @param angle   旋转停留角度
      * @return promise
      */
-    public Promise<Void, JointException, RotatingProgress>
+    public ProgressivePromise<Void, JointException, RotatingProgress>
     rotateTo(CompetitionSession session, float angle) {
         return rotateTo(session, angle, mDevice.getDefaultSpeed());
     }
@@ -197,7 +197,7 @@ public class Joint implements Competing {
      * @param speed   旋转速度
      * @return promise
      */
-    public Promise<Void, JointException, RotatingProgress>
+    public ProgressivePromise<Void, JointException, RotatingProgress>
     rotateTo(CompetitionSession session, float angle, float speed) {
         checkSpeed(speed);
 
@@ -213,7 +213,7 @@ public class Joint implements Competing {
      * @param timeMillis 旋转时间
      * @return promise
      */
-    public Promise<Void, JointException, RotatingProgress>
+    public ProgressivePromise<Void, JointException, RotatingProgress>
     rotateTo(CompetitionSession session, float angle, long timeMillis) {
         checkTimeMillis(timeMillis);
 

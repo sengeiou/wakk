@@ -4,11 +4,12 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.ubtrobot.async.AsyncTask;
-import com.ubtrobot.async.CancelableAsyncTask;
-import com.ubtrobot.async.Deferred;
+import com.ubtrobot.async.DefaultProgressivePromise;
 import com.ubtrobot.async.DoneCallback;
 import com.ubtrobot.async.FailCallback;
 import com.ubtrobot.async.ProgressCallback;
+import com.ubtrobot.async.ProgressiveAsyncTask;
+import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.cache.CachedField;
 import com.ubtrobot.ulog.FwLoggerFactory;
@@ -60,12 +61,12 @@ public abstract class AbstractUpgradeService implements UpgradeService {
     protected abstract List<Firmware> getFirmwareListOrderByUpgradeSequence();
 
     @Override
-    public Promise<FirmwarePackageGroup, DetectException, Void> detect(DetectOption option) {
+    public Promise<FirmwarePackageGroup, DetectException> detect(DetectOption option) {
         if (option == null) {
             throw new IllegalArgumentException("Argument option is null.");
         }
 
-        AsyncTask<FirmwarePackageGroup, DetectException, Void> task;
+        AsyncTask<FirmwarePackageGroup, DetectException> task;
         if (option.isRemoteOrLocalSource()) {
             task = createDetectingFromRemoteSourceTask(option.getTimeout());
 
@@ -84,53 +85,54 @@ public abstract class AbstractUpgradeService implements UpgradeService {
         return task.promise();
     }
 
-    protected abstract CancelableAsyncTask<FirmwarePackageGroup, DetectException, Void>
+    protected abstract AsyncTask<FirmwarePackageGroup, DetectException>
     createDetectingFromRemoteSourceTask(long timeoutMills);
 
-    protected abstract CancelableAsyncTask<FirmwarePackageGroup, DetectException, Void>
+    protected abstract AsyncTask<FirmwarePackageGroup, DetectException>
     createDetectingFromLocalSourceTask(String sourcePath, long timeoutMills);
 
+    @SuppressWarnings("unchecked")
     @Override
-    public Promise<Void, UpgradeException, UpgradeProgress>
-    upgrade(FirmwarePackageGroup packageGroup) {
+    public ProgressivePromise<Void, UpgradeException, UpgradeProgress>
+    upgrade(final FirmwarePackageGroup packageGroup) {
         if (packageGroup == null || packageGroup.getPackageCount() == 0) {
             throw new IllegalArgumentException("Argument packageGroup is null or packageGroup " +
                     "has no firmwarePackage.");
         }
 
-        Deferred<Void, UpgradeException, UpgradeProgress> deferred = new Deferred<>(mHandler);
+        final DefaultProgressivePromise<Void, UpgradeException, UpgradeProgress> promise
+                = new DefaultProgressivePromise<>();
         synchronized (this) {
             if (mUpgrading) {
-                deferred.reject(new UpgradeException.Factory().prohibitReentry("Prohibit reentry. " +
-                        "Already upgrading."));
-                return deferred.promise();
+                promise.reject(new UpgradeException.Factory().prohibitReentry(
+                        "Prohibit reentry. Already upgrading."));
+                return promise;
             }
 
             mUpgrading = true;
-            upgrade(packageGroup, deferred);
-
-            return deferred.promise(
-            ).done(new DoneCallback<Void>() {
-                @Override
-                public void onDone(Void result) {
-                    synchronized (AbstractUpgradeService.this) {
-                        mUpgrading = false;
-                    }
-                }
-            }).fail(new FailCallback<UpgradeException>() {
-                @Override
-                public void onFail(UpgradeException result) {
-                    synchronized (AbstractUpgradeService.this) {
-                        mUpgrading = false;
-                    }
-                }
-            });
+            upgrade(packageGroup, promise);
         }
+
+        return promise.done(new DoneCallback<Void>() {
+            @Override
+            public void onDone(Void result) {
+                synchronized (AbstractUpgradeService.this) {
+                    mUpgrading = false;
+                }
+            }
+        }).fail(new FailCallback<UpgradeException>() {
+            @Override
+            public void onFail(UpgradeException result) {
+                synchronized (AbstractUpgradeService.this) {
+                    mUpgrading = false;
+                }
+            }
+        });
     }
 
     private void upgrade(
             FirmwarePackageGroup packageGroup,
-            Deferred<Void, UpgradeException, UpgradeProgress> deferred) {
+            DefaultProgressivePromise<Void, UpgradeException, UpgradeProgress> deferred) {
         HashMap<String, FirmwarePackage> packageMap = new HashMap<>();
         for (FirmwarePackage firmwarePackage : packageGroup) {
             if (packageMap.put(firmwarePackage.getName(), firmwarePackage) != null) {
@@ -139,8 +141,8 @@ public abstract class AbstractUpgradeService implements UpgradeService {
         }
 
         List<FirmwarePackage> upgradeQueue = new LinkedList<>();
-        LinkedList<AsyncTask<Void, UpgradeException, Void>> verifyingTasks = new LinkedList<>();
-        HashMap<String, AsyncTask<Void, UpgradeException, UpgradeProgress>> installingTasks =
+        LinkedList<AsyncTask<Void, UpgradeException>> verifyingTasks = new LinkedList<>();
+        HashMap<String, ProgressiveAsyncTask<Void, UpgradeException, UpgradeProgress>> installingTasks =
                 new HashMap<>();
 
         for (Firmware firmware : getFirmwareList()) {
@@ -151,7 +153,7 @@ public abstract class AbstractUpgradeService implements UpgradeService {
 
             upgradeQueue.add(firmwarePackage);
 
-            AsyncTask<Void, UpgradeException, Void> verifyingTask =
+            AsyncTask<Void, UpgradeException> verifyingTask =
                     createVerifyingPackageTask(firmwarePackage);
             if (verifyingTask == null) {
                 throw new IllegalStateException("createVerifyingPackageTask returns null.");
@@ -168,7 +170,7 @@ public abstract class AbstractUpgradeService implements UpgradeService {
         upgradeQueue = Collections.unmodifiableList(upgradeQueue);
         int offset = 0;
         for (FirmwarePackage firmwarePackage : upgradeQueue) {
-            AsyncTask<Void, UpgradeException, UpgradeProgress> installingTask =
+            ProgressiveAsyncTask<Void, UpgradeException, UpgradeProgress> installingTask =
                     createInstallingPackageTask(upgradeQueue, offset++);
             if (installingTask == null) {
                 throw new IllegalStateException("createInstallingPackageTask returns null.");
@@ -180,30 +182,30 @@ public abstract class AbstractUpgradeService implements UpgradeService {
         verifyAndInstallPackages(verifyingTasks, upgradeQueue, installingTasks, deferred);
     }
 
-    protected abstract AsyncTask<Void, UpgradeException, Void>
+    protected abstract AsyncTask<Void, UpgradeException>
     createVerifyingPackageTask(FirmwarePackage firmwarePackage);
 
-    protected abstract AsyncTask<Void, UpgradeException, UpgradeProgress>
+    protected abstract ProgressiveAsyncTask<Void, UpgradeException, UpgradeProgress>
     createInstallingPackageTask(List<FirmwarePackage> firmwarePackages, int offset);
 
     private void verifyAndInstallPackages(
-            final List<AsyncTask<Void, UpgradeException, Void>> verifyingTasks,
+            final List<AsyncTask<Void, UpgradeException>> verifyingTasks,
             final List<FirmwarePackage> upgradeQueue,
-            final Map<String, AsyncTask<Void, UpgradeException, UpgradeProgress>> installingTasks,
-            final Deferred<Void, UpgradeException, UpgradeProgress> deferred) {
+            final Map<String, ProgressiveAsyncTask<Void, UpgradeException, UpgradeProgress>> installingTasks,
+            final DefaultProgressivePromise<Void, UpgradeException, UpgradeProgress> deferred) {
         final int[] callbackCount = new int[1];
         final UpgradeException[] ue = new UpgradeException[1];
 
-        deferred.notify(new UpgradeProgress.Builder(UpgradeProgress.STATE_CHECKING_BEGAN).build());
-        for (AsyncTask<Void, UpgradeException, Void> task : verifyingTasks) {
+        deferred.report(new UpgradeProgress.Builder(UpgradeProgress.STATE_CHECKING_BEGAN).build());
+        for (AsyncTask<Void, UpgradeException> task : verifyingTasks) {
             task.promise().done(new DoneCallback<Void>() {
                 @Override
                 public void onDone(Void result) {
                     if (++callbackCount[0] >= verifyingTasks.size()) {
                         if (ue[0] == null) {
-                            deferred.notify(new UpgradeProgress.Builder(
+                            deferred.report(new UpgradeProgress.Builder(
                                     UpgradeProgress.STATE_CHECKING_ENDED).build());
-                            deferred.notify(new UpgradeProgress.Builder(UpgradeProgress.
+                            deferred.report(new UpgradeProgress.Builder(UpgradeProgress.
                                     STATE_UPGRADING_ALL_BEGAN).build());
 
                             installPackages(upgradeQueue, 0, installingTasks, deferred);
@@ -232,23 +234,23 @@ public abstract class AbstractUpgradeService implements UpgradeService {
     private void installPackages(
             final List<FirmwarePackage> upgradeQueue,
             final int offset,
-            final Map<String, AsyncTask<Void, UpgradeException, UpgradeProgress>> installingTasks,
-            final Deferred<Void, UpgradeException, UpgradeProgress> deferred) {
+            final Map<String, ProgressiveAsyncTask<Void, UpgradeException, UpgradeProgress>> installingTasks,
+            final DefaultProgressivePromise<Void, UpgradeException, UpgradeProgress> deferred) {
         if (offset >= upgradeQueue.size()) {
-            deferred.notify(new UpgradeProgress.Builder(UpgradeProgress.STATE_UPGRADING_ALL_ENDED).
+            deferred.report(new UpgradeProgress.Builder(UpgradeProgress.STATE_UPGRADING_ALL_ENDED).
                     build());
             deferred.resolve(null);
             return;
         }
 
         final FirmwarePackage firmwarePackage = upgradeQueue.get(offset);
-        AsyncTask<Void, UpgradeException, UpgradeProgress> task = installingTasks.get(
+        ProgressiveAsyncTask<Void, UpgradeException, UpgradeProgress> task = installingTasks.get(
                 firmwarePackage.getName());
         if (task == null) {
             throw new AssertionError("task != nul");
         }
 
-        deferred.notify(new UpgradeProgress.Builder(UpgradeProgress.STATE_UPGRADING_SINGLE_BEGAN).
+        deferred.report(new UpgradeProgress.Builder(UpgradeProgress.STATE_UPGRADING_SINGLE_BEGAN).
                 setUpgradingFirmware(firmwarePackage.getName()).
                 setUpgradingFirmwareOrder(offset + 1).build());
 
@@ -256,7 +258,7 @@ public abstract class AbstractUpgradeService implements UpgradeService {
         ).progress(new ProgressCallback<UpgradeProgress>() {
             @Override
             public void onProgress(UpgradeProgress progress) {
-                deferred.notify(new UpgradeProgress.Builder(
+                deferred.report(new UpgradeProgress.Builder(
                         UpgradeProgress.STATE_UPGRADING_SINGLE_IN_PROGRESS).
                         setUpgradingFirmware(firmwarePackage.getName()).
                         setUpgradingFirmwareOrder(offset + 1).
@@ -270,7 +272,7 @@ public abstract class AbstractUpgradeService implements UpgradeService {
         }).done(new DoneCallback<Void>() {
             @Override
             public void onDone(Void result) {
-                deferred.notify(new UpgradeProgress.Builder(
+                deferred.report(new UpgradeProgress.Builder(
                         UpgradeProgress.STATE_UPGRADING_SINGLE_ENDED).
                         setUpgradingFirmware(firmwarePackage.getName()).
                         setUpgradingFirmwareOrder(offset + 1).build());

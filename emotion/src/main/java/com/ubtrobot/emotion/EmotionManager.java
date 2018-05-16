@@ -80,13 +80,13 @@ public class EmotionManager {
         }
     }
 
-    public Promise<Void, ExpressException, Void>
+    public Promise<Void, ExpressException>
     express(final String emotionId, final ExpressOption option) {
         return expresserSession().execute(
                 mExpresser,
-                new CompetitionSessionExt.SessionCallable<Void, ExpressException, Void, Expresser>() {
+                new CompetitionSessionExt.SessionCallable<Void, ExpressException, Expresser>() {
                     @Override
-                    public Promise<Void, ExpressException, Void>
+                    public Promise<Void, ExpressException>
                     call(CompetitionSession session, Expresser expresser) {
                         return expresser.express(session, emotionId, option);
                     }
@@ -100,18 +100,18 @@ public class EmotionManager {
         );
     }
 
-    public Promise<Void, ExpressException, Void>
+    public Promise<Void, ExpressException>
     express(String emotionId) {
         return express(emotionId, ExpressOption.DEFAULT);
     }
 
-    public Promise<Void, ExpressException, Void> dismiss() {
+    public Promise<Void, ExpressException> dismiss() {
         return expresserSession().execute(
                 mExpresser,
                 new CompetitionSessionExt.SessionCallable<
-                        Void, ExpressException, Void, Expresser>() {
+                        Void, ExpressException, Expresser>() {
                     @Override
-                    public Promise<Void, ExpressException, Void>
+                    public Promise<Void, ExpressException>
                     call(CompetitionSession session, Expresser expresser) {
                         return expresser.dismiss(session);
                     }

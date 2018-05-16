@@ -70,9 +70,9 @@ public class EmotionSystemService extends MasterSystemService {
     public void onGetEmotionList(Request request, Responder responder) {
         mCallProcessor.onCall(
                 responder,
-                new CallProcessAdapter.Callable<List<Emotion>, AccessServiceException, Void>() {
+                new CallProcessAdapter.Callable<List<Emotion>, AccessServiceException>() {
                     @Override
-                    public Promise<List<Emotion>, AccessServiceException, Void>
+                    public Promise<List<Emotion>, AccessServiceException>
                     call() throws CallException {
                         return mService.getEmotionList();
                     }
@@ -103,9 +103,9 @@ public class EmotionSystemService extends MasterSystemService {
                 request,
                 EmotionConstants.COMPETING_ITEM_EXPRESSER,
                 responder,
-                new CompetingCallDelegate.SessionCallable<Void, ExpressException, Void>() {
+                new CompetingCallDelegate.SessionCallable<Void, ExpressException>() {
                     @Override
-                    public Promise<Void, ExpressException, Void> call() throws CallException {
+                    public Promise<Void, ExpressException> call() throws CallException {
                         return mService.express(option.getEmotionId(),
                                 EmotionConverters.toExpressOptionPojo(option));
                     }
@@ -125,9 +125,9 @@ public class EmotionSystemService extends MasterSystemService {
                 request,
                 EmotionConstants.COMPETING_ITEM_EXPRESSER,
                 responder,
-                new CompetingCallDelegate.SessionCallable<Void, ExpressException, Void>() {
+                new CompetingCallDelegate.SessionCallable<Void, ExpressException>() {
                     @Override
-                    public Promise<Void, ExpressException, Void>
+                    public Promise<Void, ExpressException>
                     call() throws CallException {
                         return mService.dismiss();
                     }

@@ -1,5 +1,6 @@
 package com.ubtrobot.speech.sal;
 
+import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.exception.AccessServiceException;
 import com.ubtrobot.speech.RecognizeException;
@@ -17,17 +18,17 @@ import java.util.List;
 
 public interface SpeechService {
 
-    Promise<Void, SynthesizeException, Synthesizer.SynthesizingProgress> synthesize(
+    ProgressivePromise<Void, SynthesizeException, Synthesizer.SynthesizingProgress> synthesize(
             String sentence, SynthesizeOption option);
 
     boolean isSynthesizing();
 
-    Promise<Recognizer.RecognizeResult, RecognizeException, Recognizer.RecognizingProgress> recognize(
+    ProgressivePromise<Recognizer.RecognizeResult, RecognizeException, Recognizer.RecognizingProgress> recognize(
             RecognizeOption option);
 
     boolean isRecognizing();
 
-    Promise<Understander.UnderstandResult, UnderstandException, Void> understand(String question, UnderstandOption option);
+    Promise<Understander.UnderstandResult, UnderstandException> understand(String question, UnderstandOption option);
 
-    Promise<List<Speaker>, AccessServiceException, Void> getSpeakerList();
+    Promise<List<Speaker>, AccessServiceException> getSpeakerList();
 }

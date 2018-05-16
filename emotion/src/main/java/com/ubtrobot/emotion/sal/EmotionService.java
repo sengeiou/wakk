@@ -10,9 +10,9 @@ import java.util.List;
 
 public interface EmotionService {
 
-    Promise<List<Emotion>, AccessServiceException, Void> getEmotionList();
+    Promise<List<Emotion>, AccessServiceException> getEmotionList();
 
-    Promise<Void, ExpressException, Void> express(String emotionId, ExpressOption option);
+    Promise<Void, ExpressException> express(String emotionId, ExpressOption option);
 
-    Promise<Void, ExpressException, Void> dismiss();
+    Promise<Void, ExpressException> dismiss();
 }

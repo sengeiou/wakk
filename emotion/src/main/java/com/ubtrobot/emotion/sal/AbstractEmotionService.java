@@ -25,8 +25,8 @@ public abstract class AbstractEmotionService implements EmotionService {
     }
 
     @Override
-    public Promise<List<Emotion>, AccessServiceException, Void> getEmotionList() {
-        AsyncTask<List<Emotion>, AccessServiceException, Void> task = createGetEmotionListTask();
+    public Promise<List<Emotion>, AccessServiceException> getEmotionList() {
+        AsyncTask<List<Emotion>, AccessServiceException> task = createGetEmotionListTask();
         if (task == null) {
             throw new IllegalArgumentException("Argument task is null.");
         }
@@ -35,16 +35,16 @@ public abstract class AbstractEmotionService implements EmotionService {
         return task.promise();
     }
 
-    protected abstract AsyncTask<List<Emotion>, AccessServiceException, Void>
+    protected abstract AsyncTask<List<Emotion>, AccessServiceException>
     createGetEmotionListTask();
 
     @Override
-    public Promise<Void, ExpressException, Void>
+    public Promise<Void, ExpressException>
     express(final String emotionId, final ExpressOption option) {
         return mInterruptibleTaskHelper.start(
                 TASK_RECEIVER_EXRESSOR,
                 TASK_NAME_EXPRESS,
-                new InterruptibleAsyncTask<Void, ExpressException, Void>() {
+                new InterruptibleAsyncTask<Void, ExpressException>() {
                     @Override
                     protected void onStart() {
                         doStartExpressing(emotionId, option);
@@ -81,11 +81,11 @@ public abstract class AbstractEmotionService implements EmotionService {
     }
 
     @Override
-    public Promise<Void, ExpressException, Void> dismiss() {
+    public Promise<Void, ExpressException> dismiss() {
         return mInterruptibleTaskHelper.start(
                 TASK_RECEIVER_EXRESSOR,
                 TASK_NAME_DISSMISS,
-                new InterruptibleAsyncTask<Void, ExpressException, Void>() {
+                new InterruptibleAsyncTask<Void, ExpressException>() {
                     @Override
                     protected void onStart() {
                         doStartDismissing();

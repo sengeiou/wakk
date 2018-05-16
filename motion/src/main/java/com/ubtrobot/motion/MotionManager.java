@@ -3,7 +3,7 @@ package com.ubtrobot.motion;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.ubtrobot.async.Promise;
+import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.master.adapter.ProtoCallAdapter;
 import com.ubtrobot.master.competition.ActivateException;
 import com.ubtrobot.master.competition.CompetitionSession;
@@ -84,14 +84,14 @@ public class MotionManager {
      * @param angle   旋转角度。正值顺时针旋转，负值逆时针旋转
      * @return promise。promise.done 通知成功后旋转到的角度
      */
-    public Promise<Void, JointException, Joint.RotatingProgress>
+    public ProgressivePromise<Void, JointException, Joint.RotatingProgress>
     jointRotateBy(String jointId, final float angle) {
         return jointRotate(
                 jointId,
-                new CompetitionSessionExt.SessionCallable<
+                new CompetitionSessionExt.SessionProgressiveCallable<
                         Void, JointException, Joint.RotatingProgress, Joint>() {
                     @Override
-                    public Promise<Void, JointException, Joint.RotatingProgress>
+                    public ProgressivePromise<Void, JointException, Joint.RotatingProgress>
                     call(CompetitionSession session, Joint joint) {
                         return joint.rotateBy(session, angle);
                     }
@@ -99,19 +99,19 @@ public class MotionManager {
         );
     }
 
-    private Promise<Void, JointException, Joint.RotatingProgress> jointRotate(
+    private ProgressivePromise<Void, JointException, Joint.RotatingProgress> jointRotate(
             String jointId,
-            final CompetitionSessionExt.SessionCallable<
+            final CompetitionSessionExt.SessionProgressiveCallable<
                     Void, JointException, Joint.RotatingProgress, Joint> callable) {
         final Joint joint = mJointList.get(jointId);
         final CompetitionSessionExt<Joint> sessionExt = jointSession(joint);
 
         return sessionExt.execute(
                 joint,
-                new CompetitionSessionExt.SessionCallable<
+                new CompetitionSessionExt.SessionProgressiveCallable<
                         Void, JointException, Joint.RotatingProgress, Joint>() {
                     @Override
-                    public Promise<Void, JointException, Joint.RotatingProgress>
+                    public ProgressivePromise<Void, JointException, Joint.RotatingProgress>
                     call(CompetitionSession session, Joint joint) {
                         return callable.call(session, joint);
                     }
@@ -148,14 +148,14 @@ public class MotionManager {
      * @param speed   旋转速度
      * @return promise。promise.done 通知成功后旋转到的角度
      */
-    public Promise<Void, JointException, Joint.RotatingProgress>
+    public ProgressivePromise<Void, JointException, Joint.RotatingProgress>
     jointRotateBy(String jointId, final float angle, final float speed) {
         return jointRotate(
                 jointId,
-                new CompetitionSessionExt.SessionCallable<
+                new CompetitionSessionExt.SessionProgressiveCallable<
                         Void, JointException, Joint.RotatingProgress, Joint>() {
                     @Override
-                    public Promise<Void, JointException, Joint.RotatingProgress>
+                    public ProgressivePromise<Void, JointException, Joint.RotatingProgress>
                     call(CompetitionSession session, Joint joint) {
                         return joint.rotateBy(session, angle, speed);
                     }
@@ -171,14 +171,14 @@ public class MotionManager {
      * @param timeMillis 旋转时间
      * @return promise。promise.done 通知成功后旋转到的角度
      */
-    public Promise<Void, JointException, Joint.RotatingProgress>
+    public ProgressivePromise<Void, JointException, Joint.RotatingProgress>
     jointRotateBy(String jointId, final float angle, final long timeMillis) {
         return jointRotate(
                 jointId,
-                new CompetitionSessionExt.SessionCallable<
+                new CompetitionSessionExt.SessionProgressiveCallable<
                         Void, JointException, Joint.RotatingProgress, Joint>() {
                     @Override
-                    public Promise<Void, JointException, Joint.RotatingProgress>
+                    public ProgressivePromise<Void, JointException, Joint.RotatingProgress>
                     call(CompetitionSession session, Joint joint) {
                         return joint.rotateBy(session, angle, timeMillis);
                     }
@@ -193,14 +193,14 @@ public class MotionManager {
      * @param angle   旋转停留角度
      * @return promise
      */
-    public Promise<Void, JointException, Joint.RotatingProgress>
+    public ProgressivePromise<Void, JointException, Joint.RotatingProgress>
     jointRotateTo(String jointId, final float angle) {
         return jointRotate(
                 jointId,
-                new CompetitionSessionExt.SessionCallable<
+                new CompetitionSessionExt.SessionProgressiveCallable<
                         Void, JointException, Joint.RotatingProgress, Joint>() {
                     @Override
-                    public Promise<Void, JointException, Joint.RotatingProgress>
+                    public ProgressivePromise<Void, JointException, Joint.RotatingProgress>
                     call(CompetitionSession session, Joint joint) {
                         return joint.rotateTo(session, angle);
                     }
@@ -216,14 +216,14 @@ public class MotionManager {
      * @param speed   旋转速度
      * @return promise
      */
-    public Promise<Void, JointException, Joint.RotatingProgress>
+    public ProgressivePromise<Void, JointException, Joint.RotatingProgress>
     jointRotateTo(String jointId, final float angle, final float speed) {
         return jointRotate(
                 jointId,
-                new CompetitionSessionExt.SessionCallable<
+                new CompetitionSessionExt.SessionProgressiveCallable<
                         Void, JointException, Joint.RotatingProgress, Joint>() {
                     @Override
-                    public Promise<Void, JointException, Joint.RotatingProgress>
+                    public ProgressivePromise<Void, JointException, Joint.RotatingProgress>
                     call(CompetitionSession session, Joint joint) {
                         return joint.rotateTo(session, angle, speed);
                     }
@@ -239,14 +239,14 @@ public class MotionManager {
      * @param timeMillis 旋转时间
      * @return promise
      */
-    public Promise<Void, JointException, Joint.RotatingProgress>
+    public ProgressivePromise<Void, JointException, Joint.RotatingProgress>
     jointRotateTo(String jointId, final float angle, final long timeMillis) {
         return jointRotate(
                 jointId,
-                new CompetitionSessionExt.SessionCallable<
+                new CompetitionSessionExt.SessionProgressiveCallable<
                         Void, JointException, Joint.RotatingProgress, Joint>() {
                     @Override
-                    public Promise<Void, JointException, Joint.RotatingProgress>
+                    public ProgressivePromise<Void, JointException, Joint.RotatingProgress>
                     call(CompetitionSession session, Joint joint) {
                         return joint.rotateTo(session, angle, timeMillis);
                     }

@@ -30,8 +30,8 @@ public abstract class AbstractLightService implements LightService {
     }
 
     @Override
-    public Promise<List<LightDevice>, AccessServiceException, Void> getLightList() {
-        AsyncTask<List<LightDevice>, AccessServiceException, Void> task = createGetLightListTask();
+    public Promise<List<LightDevice>, AccessServiceException> getLightList() {
+        AsyncTask<List<LightDevice>, AccessServiceException> task = createGetLightListTask();
         if (task == null) {
             throw new IllegalStateException("createGetLightListTask returns null.");
         }
@@ -40,15 +40,15 @@ public abstract class AbstractLightService implements LightService {
         return task.promise();
     }
 
-    protected abstract AsyncTask<List<LightDevice>, AccessServiceException, Void>
+    protected abstract AsyncTask<List<LightDevice>, AccessServiceException>
     createGetLightListTask();
 
     @Override
-    public Promise<Void, LightException, Void> turnOn(final String lightId, int argb) {
+    public Promise<Void, LightException> turnOn(final String lightId, int argb) {
         return mInterruptibleTaskHelper.start(
                 TASK_RECEIVER_LIGHT_PREFIX + lightId,
                 TASK_NAME_TURN_ON,
-                new InterruptibleAsyncTask<Void, LightException, Void>() {
+                new InterruptibleAsyncTask<Void, LightException>() {
                     @Override
                     protected void onStart() {
                         doStartTurningOn(lightId);
@@ -92,11 +92,11 @@ public abstract class AbstractLightService implements LightService {
     protected abstract boolean doGetIsOn(String light);
 
     @Override
-    public Promise<Void, LightException, Void> changeColor(final String lightId, final int argb) {
+    public Promise<Void, LightException> changeColor(final String lightId, final int argb) {
         return mInterruptibleTaskHelper.start(
                 TASK_RECEIVER_LIGHT_PREFIX + lightId,
                 TASK_NAME_CHANGE_COLOR,
-                new InterruptibleAsyncTask<Void, LightException, Void>() {
+                new InterruptibleAsyncTask<Void, LightException>() {
                     @Override
                     protected void onStart() {
                         doStartChangingColor(lightId, argb);
@@ -142,8 +142,8 @@ public abstract class AbstractLightService implements LightService {
     protected abstract int doGetColor(String lightId);
 
     @Override
-    public Promise<List<LightingEffect>, AccessServiceException, Void> getEffectList() {
-        AsyncTask<List<LightingEffect>, AccessServiceException, Void> task = createGetEffectList();
+    public Promise<List<LightingEffect>, AccessServiceException> getEffectList() {
+        AsyncTask<List<LightingEffect>, AccessServiceException> task = createGetEffectList();
         if (task == null) {
             throw new IllegalStateException("createGetEffectList return null.");
         }
@@ -152,16 +152,16 @@ public abstract class AbstractLightService implements LightService {
         return task.promise();
     }
 
-    protected abstract AsyncTask<List<LightingEffect>, AccessServiceException, Void>
+    protected abstract AsyncTask<List<LightingEffect>, AccessServiceException>
     createGetEffectList();
 
     @Override
-    public Promise<Void, DisplayException, Void>
+    public Promise<Void, DisplayException>
     display(final List<String> lightIds, final String effectId, final DisplayOption option) {
         return mInterruptibleTaskHelper.start(
                 lightsReceivers(lightIds),
                 TASK_NAME_DISPLAY_EFFECT,
-                new InterruptibleAsyncTask<Void, DisplayException, Void>() {
+                new InterruptibleAsyncTask<Void, DisplayException>() {
                     @Override
                     protected void onStart() {
                         startDisplayingEffect(lightIds, effectId, option);
@@ -214,11 +214,11 @@ public abstract class AbstractLightService implements LightService {
     }
 
     @Override
-    public Promise<Void, LightException, Void> turnOff(final String lightId) {
+    public Promise<Void, LightException> turnOff(final String lightId) {
         return mInterruptibleTaskHelper.start(
                 TASK_RECEIVER_LIGHT_PREFIX + lightId,
                 TASK_NAME_TURN_OFF,
-                new InterruptibleAsyncTask<Void, LightException, Void>() {
+                new InterruptibleAsyncTask<Void, LightException>() {
                     @Override
                     protected void onStart() {
                         doStartTurningOff(lightId);

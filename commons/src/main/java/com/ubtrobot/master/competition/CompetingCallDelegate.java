@@ -5,7 +5,9 @@ import android.os.Handler;
 import com.ubtrobot.async.DoneCallback;
 import com.ubtrobot.async.FailCallback;
 import com.ubtrobot.async.ProgressCallback;
+import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
+import com.ubtrobot.exception.AccessServiceCompetingItemException;
 import com.ubtrobot.master.service.MasterService;
 import com.ubtrobot.master.transport.message.CallGlobalCode;
 import com.ubtrobot.transport.message.CallCancelListener;
@@ -35,7 +37,7 @@ public class CompetingCallDelegate {
             final Request request,
             Collection<String> competingItemIds,
             final Responder responder,
-            final SessionCallable<D, F, P> callable,
+            final SessionProgressiveCallable<D, F, P> callable,
             final DFPConverter<D, F, P> converter) {
         if (competingItemIds.isEmpty()) {
             throw new IllegalArgumentException("Argument competingItemIds is empty.");
@@ -49,7 +51,7 @@ public class CompetingCallDelegate {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                final Promise<D, F, P> promise;
+                final ProgressivePromise<D, F, P> promise;
                 try {
                     promise = callable.call();
                 } catch (CallException e) {
@@ -57,36 +59,14 @@ public class CompetingCallDelegate {
                     return;
                 }
 
-                mCallEnvs.put(request.getId(), new CallEnv(promise, responder, sessionInfo));
-                responder.setCallCancelListener(new CallCancelListener() {
-                    @Override
-                    public void onCancel(Request request) {
-                        if (mCallEnvs.remove(request.getId()) != null) {
-                            promise.cancel();
-                        }
-                    }
-                });
-
+                onCall(request, sessionInfo, responder, promise, converter);
                 promise.progress(new ProgressCallback<P>() {
                     @Override
                     public void onProgress(P progress) {
-                        if (mCallEnvs.containsKey(request.getId()) && progress != null) {
-                            responder.respondStickily(converter.convertProgress(progress));
-                        }
-                    }
-                }).done(new DoneCallback<D>() {
-                    @Override
-                    public void onDone(D done) {
-                        if (mCallEnvs.remove(request.getId()) != null) {
-                            responder.respondSuccess(converter.convertDone(done));
-                        }
-                    }
-                }).fail(new FailCallback<F>() {
-                    @Override
-                    public void onFail(F result) {
-                        if (mCallEnvs.remove(request.getId()) != null) {
-                            CallException e = converter.convertFail(result);
-                            responder.respondFailure(e);
+                        synchronized (mCallEnvs) {
+                            if (mCallEnvs.containsKey(request.getId()) && progress != null) {
+                                responder.respondStickily(converter.convertProgress(progress));
+                            }
                         }
                     }
                 });
@@ -105,29 +85,94 @@ public class CompetingCallDelegate {
         }
     }
 
+    private <D, F> void onCall(
+            final Request request,
+            CompetitionSessionInfo sessionInfo,
+            final Responder responder,
+            final Promise<D, F> promise,
+            final DFConverter<D, F> converter) {
+        synchronized (mCallEnvs) {
+            mCallEnvs.put(request.getId(), new CallEnv(promise, responder, sessionInfo));
+
+            responder.setCallCancelListener(new CallCancelListener() {
+                @Override
+                public void onCancel(Request request) {
+                    synchronized (mCallEnvs) {
+                        if (mCallEnvs.remove(request.getId()) != null) {
+                            promise.cancel();
+                        }
+                    }
+                }
+            });
+
+            promise.done(new DoneCallback<D>() {
+                @Override
+                public void onDone(D done) {
+                    synchronized (mCallEnvs) {
+                        if (mCallEnvs.remove(request.getId()) != null) {
+                            responder.respondSuccess(converter.convertDone(done));
+                        }
+                    }
+                }
+            }).fail(new FailCallback<F>() {
+                @Override
+                public void onFail(F result) {
+                    synchronized (mCallEnvs) {
+                        if (mCallEnvs.remove(request.getId()) != null) {
+                            CallException e = converter.convertFail(result);
+                            responder.respondFailure(e);
+                        }
+                    }
+                }
+            });
+        }
+    }
+
     public <D, F> void onCall(
             final Request request,
             Collection<String> competingItemIds,
             final Responder responder,
-            final SessionCallable<D, F, Void> callable,
+            final SessionCallable<D, F> callable,
             final DFConverter<D, F> converter) {
-        onCall(request, competingItemIds, responder, callable, (DFPConverter<D, F, Void>) converter);
+        if (competingItemIds.isEmpty()) {
+            throw new IllegalArgumentException("Argument competingItemIds is empty.");
+        }
+
+        final CompetitionSessionInfo sessionInfo = checkSessionInfo(responder, competingItemIds);
+        if (sessionInfo == null) {
+            return;
+        }
+
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                final Promise<D, F> promise;
+                try {
+                    promise = callable.call();
+                } catch (CallException e) {
+                    responder.respondFailure(e);
+                    return;
+                }
+
+                onCall(request, sessionInfo, responder, promise, converter);
+            }
+        });
     }
 
     public <F> void onCall(
             final Request request,
             Collection<String> competingItemIds,
             final Responder responder,
-            final SessionCallable<Void, F, Void> callable,
+            final SessionCallable<Void, F> callable,
             final FConverter<F> converter) {
-        onCall(request, competingItemIds, responder, callable, (DFPConverter<Void, F, Void>) converter);
+        onCall(request, competingItemIds, responder, callable, (DFConverter<Void, F>) converter);
     }
 
     public <D, F, P> void onCall(
             final Request request,
             String competingItemId,
             final Responder responder,
-            final SessionCallable<D, F, P> callable,
+            final SessionProgressiveCallable<D, F, P> callable,
             final DFPConverter<D, F, P> converter) {
         onCall(request, Collections.singleton(competingItemId), responder, callable, converter);
     }
@@ -136,64 +181,69 @@ public class CompetingCallDelegate {
             final Request request,
             String competingItemId,
             final Responder responder,
-            final SessionCallable<D, F, Void> callable,
+            final SessionCallable<D, F> callable,
             final DFConverter<D, F> converter) {
-        onCall(request, competingItemId, responder, callable, (DFPConverter<D, F, Void>) converter);
+        onCall(request, Collections.singleton(competingItemId), responder, callable, converter);
     }
 
     public <F> void onCall(
             final Request request,
             String competingItemId,
             final Responder responder,
-            final SessionCallable<Void, F, Void> callable,
+            final SessionCallable<Void, F> callable,
             final FConverter<F> converter) {
-        onCall(request, competingItemId, responder, callable, (DFPConverter<Void, F, Void>) converter);
+        onCall(request, competingItemId, responder, callable, (DFConverter<Void, F>) converter);
     }
 
     public void onCompetitionSessionInactive(final CompetitionSessionInfo sessionInfo) {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                Iterator<Map.Entry<String, CallEnv>> iterator = mCallEnvs.entrySet().iterator();
-                while (iterator.hasNext()) {
-                    CallEnv callEnv = iterator.next().getValue();
-                    if (!callEnv.sessionInfo.getSessionId().
-                            equals(sessionInfo.getSessionId())) {
-                        continue;
+                synchronized (mCallEnvs) {
+                    Iterator<Map.Entry<String, CallEnv>> iterator = mCallEnvs.entrySet().iterator();
+                    while (iterator.hasNext()) {
+                        CallEnv callEnv = iterator.next().getValue();
+                        if (!callEnv.sessionInfo.getSessionId().
+                                equals(sessionInfo.getSessionId())) {
+                            continue;
+                        }
+
+                        iterator.remove();
+
+                        callEnv.promise.cancel();
+                        AccessServiceCompetingItemException asce =
+                                new AccessServiceCompetingItemException.Factory().interrupted(
+                                        "Interrupted. Competition session inactive.");
+                        callEnv.responder.respondFailure(asce.getCode(), asce.getMessage());
                     }
-
-                    iterator.remove();
-
-                    callEnv.promise.cancel();
-                    callEnv.responder.respondFailure(1, ""); // TODO
                 }
             }
         });
     }
 
-    public interface SessionCallable<D, F, P> {
+    public interface SessionCallable<D, F> {
 
-        Promise<D, F, P> call() throws CallException;
+        Promise<D, F> call() throws CallException;
     }
 
-    public interface DFPConverter<D, F, P> {
+    public interface SessionProgressiveCallable<D, F, P> extends SessionCallable<D, F> {
 
-        Param convertDone(D done);
+        ProgressivePromise<D, F, P> call() throws CallException;
+    }
 
-        CallException convertFail(F fail);
+    public interface DFPConverter<D, F, P> extends DFConverter<D, F> {
 
         Param convertProgress(P progress);
     }
 
-    public static abstract class DFConverter<D, F> implements DFPConverter<D, F, Void> {
+    public interface DFConverter<D, F> {
 
-        @Override
-        public Param convertProgress(Void progress) {
-            return null;
-        }
+        Param convertDone(D done);
+
+        CallException convertFail(F fail);
     }
 
-    public static abstract class FConverter<F> extends DFConverter<Void, F> {
+    public abstract static class FConverter<F> implements DFConverter<Void, F> {
 
         @Override
         public Param convertDone(Void done) {

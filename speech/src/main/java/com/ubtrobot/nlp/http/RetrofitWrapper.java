@@ -3,7 +3,6 @@ package com.ubtrobot.nlp.http;
 import android.util.Log;
 
 import com.ubtrobot.okhttp.interceptor.sign.AuthorizationInterceptor;
-import com.ubtrobot.okhttp.interceptor.sign.HttpSignInterceptor;
 import com.ubtrobot.retrofit.adapter.urest.URestCallAdapterFactory;
 
 import java.util.concurrent.TimeUnit;

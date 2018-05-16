@@ -17,6 +17,7 @@ import com.ubtrobot.speech.Synthesizer;
 import com.ubtrobot.speech.UnderstandException;
 import com.ubtrobot.speech.UnderstandOption;
 import com.ubtrobot.speech.Understander;
+import com.ubtrobot.speech.understand.LegacyUnderstandResult;
 import com.ubtrobot.speech.understand.UnderstandResult;
 import com.ubtrobot.ulog.FwLoggerFactory;
 import com.ubtrobot.ulog.Logger;
@@ -154,8 +155,8 @@ public abstract class AbstractSpeechService implements SpeechService {
     }
 
     @Override
-    public Promise<Understander.UnderstandResult, UnderstandException> understand(final String question, UnderstandOption option) {
-        AsyncTask<Understander.UnderstandResult, UnderstandException> task = createUnderstandTask(question, option);
+    public Promise<LegacyUnderstandResult, UnderstandException> understand(final String question, UnderstandOption option) {
+        AsyncTask<LegacyUnderstandResult, UnderstandException> task = createUnderstandTask(question, option);
         if (task == null) {
             throw new IllegalStateException("createUnderstandTask return null.");
         }
@@ -164,7 +165,7 @@ public abstract class AbstractSpeechService implements SpeechService {
         return task.promise();
     }
 
-    protected abstract AsyncTask<Understander.UnderstandResult, UnderstandException>
+    protected abstract AsyncTask<LegacyUnderstandResult, UnderstandException>
     createUnderstandTask(String question, UnderstandOption option);
 
     @Override

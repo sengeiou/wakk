@@ -154,14 +154,8 @@ public abstract class AbstractSpeechService implements SpeechService {
     }
 
     @Override
-<<<<<<< HEAD
     public Promise<Understander.UnderstandResult, UnderstandException> understand(final String question, UnderstandOption option) {
         AsyncTask<Understander.UnderstandResult, UnderstandException> task = createUnderstandTask(question, option);
-=======
-    public Promise<UnderstandResult, UnderstandException, Void> understand(final String question, UnderstandOption option) {
-        CancelableAsyncTask<UnderstandResult, UnderstandException, Void> task = createUnderstandTask(question, option);
->>>>>>> 更新speech Nlp格式统一代码
-
         if (task == null) {
             throw new IllegalStateException("createUnderstandTask return null.");
         }
@@ -170,12 +164,8 @@ public abstract class AbstractSpeechService implements SpeechService {
         return task.promise();
     }
 
-<<<<<<< HEAD
     protected abstract AsyncTask<Understander.UnderstandResult, UnderstandException>
     createUnderstandTask(String question, UnderstandOption option);
-=======
-    protected abstract CancelableAsyncTask<UnderstandResult, UnderstandException, Void> createUnderstandTask(String question, UnderstandOption option);
->>>>>>> 更新speech Nlp格式统一代码
 
     @Override
     public Promise<List<Speaker>, AccessServiceException> getSpeakerList() {

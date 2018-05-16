@@ -16,7 +16,7 @@ project(':commons') {
                     def dependencyNode = dependenciesNode.appendNode('dependency')
                     dependencyNode.appendNode('groupId', 'com.ubtrobot.master')
                     dependencyNode.appendNode('artifactId', 'protobuf-param')
-                    dependencyNode.appendNode('version', rootProject.ext.deps.masterProtobufParam)
+                    dependencyNode.appendNode('version', rootProject.ext.depVersions.masterProtobufParam)
                 }
             }
         }

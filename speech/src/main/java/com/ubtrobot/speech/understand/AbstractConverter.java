@@ -30,8 +30,7 @@ public abstract class AbstractConverter {
         mMapper = mapper;
     }
 
-    public LegacyUnderstandResult convert() {
-        LegacyUnderstandResult.Builder builder = new LegacyUnderstandResult.Builder();
+    public LegacyUnderstandResult convert(LegacyUnderstandResult.Builder builder) {
         UnderstandResult.Intent intent = convertIntent();
         UnderstandResult.Fulfillment fulfillment = convertFulfillment();
         List<UnderstandResult.Context> contexts = convertContextList();
@@ -128,30 +127,30 @@ public abstract class AbstractConverter {
         Map<String, Object> mapHolder = new HashMap<>();
         Iterator<String> keys = parameters.keys();
         while (keys.hasNext()) {
-            Log.i("test", "thread:" + Thread.currentThread().getId());
             String key = keys.next();
-            Object value = parameters.opt(key);
-            keys.remove();
             Map<String, Intent> intentMap = mMapper.get(mPlatform);
             if (null == intentMap) {
-                continue;
+                return;
             }
 
             Intent intent = intentMap.get(intentName);
             if (null == intent) {
-                continue;
+                return;
             }
 
             Intent.Param param = intent.getIntentParameterMap().get(key);
             if (null == param) {
                 continue;
             }
+
+            Object value = parameters.opt(key);
             String mapKey = param.getValue();
             String mapType = param.getType();
             if (TextUtils.isEmpty(mapKey)) {
                 continue;
             }
 
+            keys.remove();
             Object mapValue = value;
             if ("list".equals(mapType)) {
                 //转换为[]
@@ -188,16 +187,15 @@ public abstract class AbstractConverter {
         Iterator<String> keys = parameters.keys();
         while (keys.hasNext()) {
             String key = keys.next();
-            Object value = parameters.opt(key);
-            keys.remove();
+
             Map<String, Intent> intentMap = mMapper.get(mPlatform);
             if (null == intentMap) {
-                continue;
+                return;
             }
 
             Intent intent = intentMap.get(intentName);
             if (null == intent) {
-                continue;
+                return;
             }
 
             String mapKey = intent.getFulfillment().get(key);
@@ -205,6 +203,9 @@ public abstract class AbstractConverter {
             if (TextUtils.isEmpty(mapKey)) {
                 continue;
             }
+
+            Object value = parameters.opt(key);
+            keys.remove();
             mapHolder.put(mapKey, value);
         }
 

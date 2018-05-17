@@ -16,8 +16,8 @@
                 <zhujian>tianqi2222222</zhujian>
                 <baidu>/life/tianqi</baidu>
             </displayName>
-<!--            <parameters>
-                <parameter value="city" type="list">
+            <parameters>
+                <parameter type="list" value="city">
                     <zhujian>chengshi</zhujian>
                     <baidu>cshi</baidu>
                 </parameter>
@@ -25,7 +25,7 @@
                     <zhujian>riqi</zhujian>
                     <baidu>day</baidu>
                 </parameter>
-            </parameters>-->
+            </parameters>
         </intent>
         <fullfillment-messages-payload>
             <field-name value="song">
@@ -63,6 +63,93 @@
         <fullfillment-messages-payload>
             <field-name value="destination">
                 <zhujian>point</zhujian>
+                <baidu>music</baidu>
+            </field-name>
+            <field-name value="image">
+                <zhujian>fengmian</zhujian>
+            </field-name>
+            <field-name value="xxx"/>
+        </fullfillment-messages-payload>
+    </understand-result>
+    <understand-result intent-name="airline-details">
+        <intent>
+            <name>
+                <zhujian>航空公司详情</zhujian>
+                <baidu>引路</baidu>
+                <google>lead</google>
+            </name>
+            <displayName value="/move/navigation">
+                <zhujian>moveto</zhujian>
+                <baidu>goto</baidu>
+            </displayName>
+            <parameters>
+            </parameters>
+        </intent>
+        <fullfillment-messages-payload>
+            <field-name value="index">
+                <zhujian>page</zhujian>
+                <baidu>music</baidu>
+            </field-name>
+            <field-name value="image">
+                <zhujian>fengmian</zhujian>
+            </field-name>
+            <field-name value="xxx"/>
+        </fullfillment-messages-payload>
+    </understand-result>
+    <understand-result intent-name="airline-info">
+        <intent>
+            <name>
+                <zhujian>6000#104</zhujian>
+                <baidu>引路</baidu>
+                <google>lead</google>
+            </name>
+            <displayName value="/move/navigation">
+                <zhujian>moveto</zhujian>
+                <baidu>goto</baidu>
+            </displayName>
+            <parameters>
+            </parameters>
+        </intent>
+        <fullfillment-messages-payload>
+            <field-name value="index">
+                <zhujian>page</zhujian>
+                <baidu>music</baidu>
+            </field-name>
+            <field-name value="image">
+                <zhujian>fengmian</zhujian>
+            </field-name>
+            <field-name value="xxx"/>
+        </fullfillment-messages-payload>
+    </understand-result>
+    <understand-result intent-name="flight">
+        <intent>
+            <name>
+                <zhujian>flight</zhujian>
+                <baidu>引路</baidu>
+                <google>lead</google>
+            </name>
+            <displayName value="/move/navigation">
+                <zhujian>moveto</zhujian>
+                <baidu>goto</baidu>
+            </displayName>
+            <parameters>
+                <parameter type="list" value="在什么时间">
+                    <zhujian>atime</zhujian>
+                    <baidu>cshi</baidu>
+                </parameter>
+                <parameter value="到达城市" type = "list">
+                    <zhujian>acity</zhujian>
+                    <baidu>day</baidu>
+                </parameter>
+                <parameter value="出发城市">
+                    <zhujian>bcity</zhujian>
+                    <baidu>day</baidu>
+                </parameter>
+            </parameters>
+        </intent>
+        <fullfillment-messages-payload>
+            <field-name value="在什么时间">
+                <zhujian>atime</zhujian>
                 <baidu>music</baidu>
             </field-name>
             <field-name value="image">

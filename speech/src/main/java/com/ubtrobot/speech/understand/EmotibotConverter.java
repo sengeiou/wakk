@@ -4,6 +4,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 
+import com.ubtrobot.validate.Preconditions;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,10 +24,8 @@ public class EmotibotConverter extends AbstractConverter {
     public static final int STRATEGY_2 = 2;
     //意图引擎
     public static final int STRATEGY_3 = 3;
-    //问答定制生成appid#
+    //问答定制生成appid#   问答定制fallback
     public static final int STRATEGY_4 = 4;
-    //问答定制fallback
-    public static final int STRATEGY_5 = 5;
 
     public static final String PLATFORM = "zhujian";
     private JSONObject mRoot;
@@ -78,6 +78,7 @@ public class EmotibotConverter extends AbstractConverter {
             if (null != data && data.length() != 0) {
                 JSONObject dataOne = data.optJSONObject(0);
                 List<Pair<String, String>> dataSlotParamPairs = getDataSlotParamPairs(dataOne);
+                Pair<String, Object> objectObjectPair = new Pair<>("aaa", null);
                 for (Pair<String, String> p : dataSlotParamPairs) {
                     String first = p.first;
                     String second = p.second;
@@ -515,19 +516,11 @@ public class EmotibotConverter extends AbstractConverter {
     }
 
     private LegacyUnderstandResult.LegacyData convertLegacyDataStrategy1() {
-        return null;
-    }
-
-    private LegacyUnderstandResult.LegacyData convertLegacyDataStrategy2() {
-        return null;
-    }
-
-    private LegacyUnderstandResult.LegacyData convertLegacyDataStrategy3() {
         LegacyUnderstandResult.LegacyData.Builder legacyBuilder =
                 new LegacyUnderstandResult.LegacyData.Builder();
         JSONObject data = getDataJSONObject();
         String value = data.optString("value");
-        legacyBuilder.setDataValue(value);
+        legacyBuilder.setDataValue(data.toString());
 
         if (isJsonObject(value)) {
             try {
@@ -540,6 +533,58 @@ public class EmotibotConverter extends AbstractConverter {
                 Log.e(TAG, "create JSONObject error:" + value);
                 e.printStackTrace();
             }
+        } else {
+            legacyBuilder.setAppId(-1);
+        }
+
+        return legacyBuilder.build();
+    }
+
+    private LegacyUnderstandResult.LegacyData convertLegacyDataStrategy2() {
+        LegacyUnderstandResult.LegacyData.Builder legacyBuilder =
+                new LegacyUnderstandResult.LegacyData.Builder();
+        JSONObject data = getDataJSONObject();
+        String value = data.optString("value");
+        legacyBuilder.setDataValue(data.toString());
+
+        if (isJsonObject(value)) {
+            try {
+                JSONObject valueJSONObject = new JSONObject(value);
+                int appId = valueJSONObject.optInt("appid");
+                legacyBuilder.setAppId(appId);
+                String intent = valueJSONObject.optString("intent");
+                legacyBuilder.setIntentName(intent);
+            } catch (JSONException e) {
+                Log.e(TAG, "create JSONObject error:" + value);
+                e.printStackTrace();
+            }
+        } else {
+            legacyBuilder.setAppId(-1);
+        }
+
+        return legacyBuilder.build();
+    }
+
+    private LegacyUnderstandResult.LegacyData convertLegacyDataStrategy3() {
+        LegacyUnderstandResult.LegacyData.Builder legacyBuilder =
+                new LegacyUnderstandResult.LegacyData.Builder();
+        JSONObject data = getDataJSONObject();
+        String value = data.optString("value");
+        legacyBuilder.setDataValue(data.toString());
+
+        if (isJsonObject(value)) {
+            try {
+                JSONObject valueJSONObject = new JSONObject(value);
+                int appId = valueJSONObject.optInt("appid");
+                legacyBuilder.setAppId(appId);
+                String intent = valueJSONObject.optString("intent");
+                legacyBuilder.setIntentName(intent);
+            } catch (JSONException e) {
+                Log.e(TAG, "create JSONObject error:" + value);
+                e.printStackTrace();
+            }
+        } else {
+            legacyBuilder.setAppId(-1);
         }
 
         return legacyBuilder.build();
@@ -550,7 +595,7 @@ public class EmotibotConverter extends AbstractConverter {
                 new LegacyUnderstandResult.LegacyData.Builder();
         JSONObject data = getDataJSONObject();
         String value = data.optString("value");
-        legacyBuilder.setDataValue(value);
+        legacyBuilder.setDataValue(data.toString());
 
         if (isJsonObject(value)) {
             try {
@@ -572,9 +617,14 @@ public class EmotibotConverter extends AbstractConverter {
     }
 
     @Override
-    public LegacyUnderstandResult convert() {
+    public LegacyUnderstandResult convert(LegacyUnderstandResult.Builder builder) {
+        Preconditions.checkNotNull(builder,
+                "EmotibotConverter convert(builder) refuse builder==null ");
         strategy = getStrategy(mRoot);
-        LegacyUnderstandResult convert = super.convert();
+        builder.setSource(mPlatform);
+        builder.setLanguage("zh-CN");
+        builder.setActionIncomplete(false);
+        LegacyUnderstandResult convert = super.convert(builder);
 
         return convert;
     }
@@ -651,6 +701,9 @@ public class EmotibotConverter extends AbstractConverter {
         return pairs;
     }
 
+    /**
+     * get first JsonObject in data[...]
+     */
     public JSONObject getDataJSONObject() {
         JSONArray data = mRoot.optJSONArray("data");
         if (null != data && data.length() != 0) {
@@ -722,6 +775,12 @@ public class EmotibotConverter extends AbstractConverter {
         Iterator<String> keys = data.keys();
         while (keys.hasNext()) {
             String key = keys.next();
+            //boolean isNull = data.isNull(key);
+            //这里是否需要追究null值，因为设置null值会清除掉对应字段
+            /* String value = null;
+            if (!isNull) {
+                value = data.optString(key);
+            }*/
             String value = data.optString(key);
             Pair<String, String> pair = new Pair<>(key, value);
             pairs.add(pair);

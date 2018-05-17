@@ -13,14 +13,14 @@ import java.util.List;
 
 public class UnderstandResult implements Parcelable {
 
-    private String sessionId;
-    private String source;
-    private String language;
+    private String sessionId = "";
+    private String source = "";
+    private String language = "";
     private boolean actionIncomplete;
     private Intent intent;
     private List<Context> contexts;
     private Fulfillment fulfillment;
-    private String inputText;
+    private String inputText = "";
 
     protected UnderstandResult() {
 
@@ -256,7 +256,7 @@ public class UnderstandResult implements Parcelable {
      */
     public static class Context implements Parcelable {
 
-        private String name;
+        private String name = "";
         private JSONObject parameters = new JSONObject();
         private int lifespan;
 
@@ -353,8 +353,8 @@ public class UnderstandResult implements Parcelable {
      */
     public static class Fulfillment implements Parcelable {
 
-        private String speech;
-        private List<Message> messages;
+        private String speech = "";
+        private List<Message> messages = new ArrayList<>();
         private Status status;
 
         private Fulfillment() {
@@ -410,7 +410,7 @@ public class UnderstandResult implements Parcelable {
 
         public static class Builder {
 
-            private String speech;
+            private String speech = "";
             private List<Message> messages = new ArrayList<>();
             private Status status;
 
@@ -498,8 +498,8 @@ public class UnderstandResult implements Parcelable {
         public static class Builder {
 
             private int code;
-            private String errorMessage;
-            private String errorDetails;
+            private String errorMessage = "";
+            private String errorDetails = "";
 
             public Builder setCode(int code) {
                 this.code = code;
@@ -616,8 +616,8 @@ public class UnderstandResult implements Parcelable {
             public static final String TYPE_ORIGINAL = "original";
             public static final String TYPE_TEXT = "text";
             public static final String TYPE_USERDEFINE = "userDefine";
-            private String type;
-            private String platform;
+            private String type = "";
+            private String platform = "";
             private JSONObject parameters = new JSONObject();
 
             public Builder setType(String type) {
@@ -649,15 +649,15 @@ public class UnderstandResult implements Parcelable {
 
     public static class Builder {
 
-        private String sessionId;
+        private String sessionId = "";
         private List<Intent> intentCandidates;
-        private String source;
-        private String language;
+        private String source = "";
+        private String language = "";
         private boolean actionIncomplete;
         private Intent intent;
-        private List<Context> contexts;
+        private List<Context> contexts = new ArrayList<>();
         private Fulfillment fulfillment;
-        private String inputText;
+        private String inputText = "";
 
         public Builder setSessionId(String sessionId) {
             this.sessionId = sessionId;

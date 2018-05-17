@@ -35,6 +35,9 @@ public class LegacyUnderstandResult extends UnderstandResult {
 
         private LegacyData legacyData;
 
+        public Builder() {
+        }
+
         public void setLegacyData(LegacyData legacyData) {
             this.legacyData = legacyData;
         }

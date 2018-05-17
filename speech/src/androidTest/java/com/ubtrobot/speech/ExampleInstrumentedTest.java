@@ -19,6 +19,7 @@ import com.ubtrobot.nlp.http.RetrofitWrapper;
 import com.ubtrobot.retrofit.adapter.urest.URestCall;
 import com.ubtrobot.speech.understand.AbstractConverter;
 import com.ubtrobot.speech.understand.EmotibotConverter;
+import com.ubtrobot.speech.understand.LegacyUnderstandResult;
 import com.ubtrobot.speech.understand.UnderstandResult;
 import com.ubtrobot.speech.understand.XmlParseHelper;
 
@@ -56,16 +57,27 @@ public class ExampleInstrumentedTest {
     @Test
     public void jsonTest() throws Exception {
         String json = "{\n"
-                + "                \"param\": {\n"
-                + "                    \"entities_root>>city\": [\n"
-                + "                        \"昆明\"\n"
-                + "                    ]\n"
-                + "                }\n"
+                + "                \"type\": \"flight\",\n"
+                + "                \"category\": \"优必选\",\n"
+                + "                \"atime\": null,\n"
+                + "                \"fnumb\": null,\n"
+                + "                \"atimeEndStandard\": null,\n"
+                + "                \"btime\": null,\n"
+                + "                \"btimeBeginStandard\": null,\n"
+                + "                \"atimeBeginStandard\": null,\n"
+                + "                \"btimeEndStandard\": null,\n"
+                + "                \"acity\": \"昆明\",\n"
+                + "                \"aport\": null,\n"
+                + "                \"bport\": null,\n"
+                + "                \"airline\": null,\n"
+                + "                \"bcity\": \"北京\"\n"
                 + "            }";
 
         JSONObject object = new JSONObject(json);
-        Object param = object.optJSONObject("param").opt("entities_root>>city");
-        Log.i("test", "value:" + (param instanceof JSONArray));
+        String string = object.getString("atime");
+        boolean atime = object.isNull("atime");
+        Log.i("test", "value:" + string.length());
+        Log.i("test", "value:" + string.length());
 
     }
 
@@ -238,10 +250,11 @@ public class ExampleInstrumentedTest {
         Gson gson = new Gson();
         EmotibotService nlpHttpService = RetrofitWrapper.get().createEmotibotService(
                 EmotibotService.class);
+        String q = "中转联程";
         Call<JsonObject> understand = nlpHttpService.understand(
                 "c8f64283751155611dfc7842aeaacca9",
                 "b0f1ecccdc04",
-                "带我去洗手间",
+                q,
                 "chat",
                 "深圳市");
         Response<JsonObject> execute = understand.execute();
@@ -256,7 +269,9 @@ public class ExampleInstrumentedTest {
                 xmlParseHelper.getMapper());
 
         if (null != converter) {
-            UnderstandResult convert = converter.convert();
+            LegacyUnderstandResult.Builder builder = new LegacyUnderstandResult.Builder();
+            builder.setInputText(q);
+            UnderstandResult convert = converter.convert(builder);
             Log.i("test", "response:" + gson.toJson(convert));
         }
     }

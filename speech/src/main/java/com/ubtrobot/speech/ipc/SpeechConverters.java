@@ -180,7 +180,7 @@ public class SpeechConverters {
         statusBuilder.setErrorMessage(fulfillment.getStatus().getErrorMessage());
         fulfillmentBuilder.setStatus(statusBuilder.build());
         builder.setFulfillment(fulfillmentBuilder.build());
-        
+
         return builder.build();
     }
 
@@ -312,4 +312,5 @@ public class SpeechConverters {
                 .setRecognizingMode(configuration.getRecognizeMode())
                 .setUnderstandTimeout(configuration.getUnderstandTimeout())
                 .build();
+    }
 }

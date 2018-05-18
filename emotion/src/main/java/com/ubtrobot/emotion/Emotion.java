@@ -2,10 +2,8 @@ package com.ubtrobot.emotion;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,8 +12,6 @@ import java.io.InputStream;
  * 情绪
  */
 public class Emotion {
-
-    private static final String TAG = "Emotion";
 
     public static final Emotion DEFAULT = new Emotion("", EmotionResource.DEFAULT);
 
@@ -40,36 +36,28 @@ public class Emotion {
     }
 
     public String getName(Context context) {
-        return getResApkContext(context).getString(resource.getNameResource());
+        Context resApkContext = getResApkContext(context);
+        return resApkContext != null ? resApkContext.getString(resource.getNameResource()) : "";
     }
 
     private Context getResApkContext(Context context) {
-        if (context == null) {
-            throw new IllegalArgumentException("Argument context is null.");
+        if (context != null) {
+            try {
+                return context.createPackageContext(resource.getPackageName(),
+                        Context.CONTEXT_IGNORE_SECURITY);
+            } catch (PackageManager.NameNotFoundException e) {
+                // 不处理，因为最终返回是空
+            }
         }
 
-        Context resApkContext = resApkContext(context);
-        if (resApkContext == null) {
-            throw new Resources.NotFoundException();
-        }
-
-        return resApkContext;
-    }
-
-    private Context resApkContext(Context context) {
-        try {
-            return context.createPackageContext(resource.getPackageName(),
-                    Context.CONTEXT_IGNORE_SECURITY);
-        } catch (PackageManager.NameNotFoundException e) {
-            return null;
-        }
+        return null;
     }
 
     public Drawable getIcon(Context context) {
         Context resApkContext = getResApkContext(context);
 
-        return new BitmapDrawable(resApkContext.getResources(),
-                getAssetsInputStream(resApkContext, resource.getIconUri()));
+        return resApkContext != null ? new BitmapDrawable(resApkContext.getResources(),
+                getAssetsInputStream(resApkContext, resource.getIconUri())) : null;
     }
 
     private InputStream getAssetsInputStream(Context context, String uri) {
@@ -77,16 +65,15 @@ public class Emotion {
             throw new IllegalArgumentException("Argument context is null.");
         }
 
-        Context resApkContext = resApkContext(context);
+        Context resApkContext = getResApkContext(context);
 
         try {
-            return resApkContext.getAssets().open(uri);
+            return resApkContext != null ? resApkContext.getAssets().open(uri) : null;
         } catch (IOException e) {
-            // 不处理: 不能正常获取资源时，会抛异常
-            Log.e(TAG, "Please check uri : " + uri);
+            // 不处理，出错的话，最终返回 null
         }
 
-        throw new Resources.NotFoundException();
+        return null;
     }
 
     @Override
@@ -96,5 +83,4 @@ public class Emotion {
                 ", resource=" + resource +
                 '}';
     }
-
 }

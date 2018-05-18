@@ -1,4 +1,4 @@
-include ':commons'
+include ':commons', ':play'
 include ':upgrade', 'wakeup', 'analytics', 'speech', ':emotion', ':navigation', ':light', ':motion'
 include ':service-impl:upgrade', ':service-impl:analytics'
 include ':initialization'

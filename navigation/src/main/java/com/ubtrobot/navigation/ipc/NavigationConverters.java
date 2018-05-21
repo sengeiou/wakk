@@ -9,7 +9,7 @@ import com.ubtrobot.navigation.Marker;
 import com.ubtrobot.navigation.NavMap;
 import com.ubtrobot.navigation.NavigateOption;
 import com.ubtrobot.navigation.Navigator;
-import com.ubtrobot.navigation.Position;
+import com.ubtrobot.navigation.Point;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -21,46 +21,85 @@ public class NavigationConverters {
 
     public static NavigationProto.NavMap toNavMapProto(NavMap map) {
         NavigationProto.NavMap.Builder builder = NavigationProto.NavMap.newBuilder().
-                setId(map.getId()).setName(map.getName());
+                setId(map.getId()).setName(map.getName()).
+                setTag(map.getTag()).setScale(map.getScale());
         for (GroundOverlay groundOverlay : map.getGroundOverlayList()) {
-            builder.addGroundOverlay(NavigationProto.GroundOverlay.newBuilder().
-                    setImage(groundOverlay.getImage()).
-                    setRemoteImage(groundOverlay.getRemoteImage()).build());
+            builder.addGroundOverlay(toGroundOverlayProto(groundOverlay));
         }
 
         for (Marker marker : map.getMarkerList()) {
-            builder.addMarker(NavigationProto.Marker.newBuilder().
-                    setTitle(marker.getTitle()).
-                    setPosition(NavigationProto.Position.newBuilder().
-                            setX(marker.getPosition().getX()).
-                            setY(marker.getPosition().getY()).build()
-                    ).
-                    setZ(marker.getZ()).
-                    setRotation(marker.getRotation()).
-                    build()
-            );
+            builder.addMarker(toMarkerProto(marker));
         }
 
         return builder.build();
     }
 
+    private static NavigationProto.GroundOverlay toGroundOverlayProto(GroundOverlay groundOverlay) {
+        return NavigationProto.GroundOverlay.newBuilder().
+                setName(groundOverlay.getName()).
+                setTag(groundOverlay.getTag()).
+                setWidth(groundOverlay.getWidth()).
+                setHeight(groundOverlay.getHeight()).
+                setOriginInImage(toPointProto(groundOverlay.getOriginInImage())).
+                setImageUri(groundOverlay.getImageUri()).
+                setRemoteImageUri(groundOverlay.getRemoteImageUri()).
+                build();
+    }
+
+    private static NavigationProto.Point toPointProto(Point point) {
+        return NavigationProto.Point.newBuilder().
+                setX(point.getX()).
+                setY(point.getY()).build();
+    }
+
+    private static NavigationProto.Marker toMarkerProto(Marker marker) {
+        return NavigationProto.Marker.newBuilder().
+                setId(marker.getId()).
+                setTitle(marker.getTitle()).
+                setTag(marker.getTag()).
+                setDescription(marker.getDescription()).
+                setPosition(toPointProto(marker.getPosition())).
+                setZ(marker.getZ()).
+                setRotation(marker.getRotation()).
+                build();
+    }
+
     public static NavMap toNavMapPojo(NavigationProto.NavMap mapProto) {
-        NavMap.Builder builder = new NavMap.Builder(mapProto.getId()).setName(mapProto.getName());
+        NavMap.Builder builder = new NavMap.Builder(mapProto.getId(), mapProto.getScale()).
+                setName(mapProto.getName()).setTag(mapProto.getTag());
         for (NavigationProto.GroundOverlay groundOverlay : mapProto.getGroundOverlayList()) {
-            builder.addGroundOverlay(new GroundOverlay(groundOverlay.getImage(),
-                    groundOverlay.getRemoteImage()));
+            builder.addGroundOverlay(toGroundOverlayPojo(groundOverlay));
         }
 
         for (NavigationProto.Marker marker : mapProto.getMarkerList()) {
-            builder.addMarker(new Marker.Builder(
-                    marker.getTitle(),
-                    new Position(
-                            marker.getPosition().getX(),
-                            marker.getPosition().getY())
-            ).setZ(marker.getZ()).setRotation(marker.getRotation()).build());
+            builder.addMarker(toMarkerPojo(marker));
         }
 
         return builder.build();
+    }
+
+    private static GroundOverlay toGroundOverlayPojo(NavigationProto.GroundOverlay groundOverlay) {
+        return new GroundOverlay.Builder(groundOverlay.getWidth(), groundOverlay.getHeight()).
+                setName(groundOverlay.getName()).
+                setTag(groundOverlay.getTag()).
+                setOriginInImage(toPointPojo(groundOverlay.getOriginInImage())).
+                setImageUri(groundOverlay.getImageUri()).
+                setRemoteImageUri(groundOverlay.getRemoteImageUri()).
+                build();
+    }
+
+    private static Point toPointPojo(NavigationProto.Point point) {
+        return new Point(point.getX(), point.getY());
+    }
+
+    private static Marker toMarkerPojo(NavigationProto.Marker marker) {
+        return new Marker.Builder(marker.getId(), toPointPojo(marker.getPosition())).
+                setTitle(marker.getTitle()).
+                setTag(marker.getTag()).
+                setDescription(marker.getDescription()).
+                setZ(marker.getZ()).
+                setRotation(marker.getRotation()).
+                build();
     }
 
     public static NavigationProto.NavMapList toNavMapListProto(Pair<List<NavMap>, String> maps) {
@@ -82,17 +121,13 @@ public class NavigationConverters {
     }
 
     public static Location toLocationPojo(NavigationProto.Location location) {
-        return new Location.Builder(new Position(
-                location.getPosition().getX(),
-                location.getPosition().getY()
-        )).setZ(location.getZ()).setRotation(location.getRotation()).build();
+        return new Location.Builder(toPointPojo(location.getPosition())).
+                setZ(location.getZ()).setRotation(location.getRotation()).build();
     }
 
     public static NavigationProto.Location toLocationProto(Location location) {
         return NavigationProto.Location.newBuilder().
-                setPosition(NavigationProto.Position.newBuilder().
-                        setX(location.getPosition().getX()).
-                        setY(location.getPosition().getY()).build()).
+                setPosition(toPointProto(location.getPosition())).
                 setRotation(location.getRotation()).
                 setZ(location.getZ()).
                 build();
@@ -101,7 +136,7 @@ public class NavigationConverters {
     public static NavigationProto.LocateOption toLocateOptionProto(LocateOption option) {
         return NavigationProto.LocateOption.newBuilder().setUseNearby(option.useNearby()).
                 setNearby(NavigationProto.Location.newBuilder()
-                        .setPosition(NavigationProto.Position.newBuilder()
+                        .setPosition(NavigationProto.Point.newBuilder()
                                 .setX(option.getNearby().getPosition().getX())
                                 .setY(option.getNearby().getPosition().getY())
                                 .build()

@@ -1,5 +1,7 @@
 package com.ubtrobot.navigation;
 
+import android.text.TextUtils;
+
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,11 +13,14 @@ public class NavMap {
 
     private String id;
     private String name;
+    private String tag;
+    private float scale;
     private List<GroundOverlay> groundOverlayList;
     private List<Marker> markerList;
 
-    private NavMap(String id) {
+    private NavMap(String id, float scale) {
         this.id = id;
+        this.scale = scale;
     }
 
     public String getId() {
@@ -24,6 +29,14 @@ public class NavMap {
 
     public String getName() {
         return name;
+    }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public float getScale() {
+        return scale;
     }
 
     public List<GroundOverlay> getGroundOverlayList() {
@@ -49,6 +62,8 @@ public class NavMap {
         return "NavMap{" +
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
+                ", tag='" + tag + '\'' +
+                ", scale=" + scale +
                 ", groundOverlayList=" + groundOverlayList +
                 ", markerList=" + markerList +
                 '}';
@@ -58,6 +73,8 @@ public class NavMap {
 
         private String id;
         private String name;
+        private String tag;
+        private float scale;
         private List<GroundOverlay> groundOverlayList = new LinkedList<>();
         private LinkedList<Marker> markerList = new LinkedList<>();
 
@@ -71,12 +88,13 @@ public class NavMap {
             this.markerList.addAll(map.getMarkerList());
         }
 
-        public Builder(String id) {
-            if (id == null) {
-                throw new IllegalArgumentException("Argument is is null.");
+        public Builder(String id, float scale) {
+            if (TextUtils.isEmpty(id) || scale <= 0) {
+                throw new IllegalArgumentException("Argument id is an empty string or scale <= 0.");
             }
 
             this.id = id;
+            this.scale = scale;
         }
 
         public Builder setName(String name) {
@@ -85,6 +103,11 @@ public class NavMap {
             }
 
             this.name = name;
+            return this;
+        }
+
+        public Builder setTag(String tag) {
+            this.tag = tag;
             return this;
         }
 
@@ -125,8 +148,9 @@ public class NavMap {
         }
 
         public NavMap build() {
-            NavMap navMap = new NavMap(id);
-            navMap.name = name;
+            NavMap navMap = new NavMap(id, scale);
+            navMap.name = name == null ? "" : name;
+            navMap.tag = tag == null ? "" : tag;
             navMap.groundOverlayList = Collections.unmodifiableList(groundOverlayList);
             navMap.markerList = Collections.unmodifiableList(markerList);
 
@@ -138,6 +162,8 @@ public class NavMap {
             return "Builder{" +
                     "id='" + id + '\'' +
                     ", name='" + name + '\'' +
+                    ", tag='" + tag + '\'' +
+                    ", scale=" + scale +
                     ", groundOverlayList=" + groundOverlayList +
                     ", markerList=" + markerList +
                     '}';

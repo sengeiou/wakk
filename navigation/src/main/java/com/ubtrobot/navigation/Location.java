@@ -5,13 +5,13 @@ package com.ubtrobot.navigation;
  */
 public class Location {
 
-    public static final Location DEFAULT = new Location.Builder(Position.DEFAULT).build();
+    public static final Location DEFAULT = new Location.Builder(Point.DEFAULT).build();
 
-    private Position position;
-    private double z;
+    private Point position;
+    private int z;
     private float rotation;
 
-    protected Location(Position position) {
+    protected Location(Point position) {
         this.position = position;
     }
 
@@ -21,11 +21,11 @@ public class Location {
         rotation = builder.rotation;
     }
 
-    public Position getPosition() {
+    public Point getPosition() {
         return position;
     }
 
-    public double getZ() {
+    public int getZ() {
         return z;
     }
 
@@ -40,18 +40,15 @@ public class Location {
 
         Location location = (Location) o;
 
-        if (Double.compare(location.z, z) != 0) return false;
+        if (z != location.z) return false;
         if (Float.compare(location.rotation, rotation) != 0) return false;
         return position != null ? position.equals(location.position) : location.position == null;
     }
 
     @Override
     public int hashCode() {
-        int result;
-        long temp;
-        result = position != null ? position.hashCode() : 0;
-        temp = Double.doubleToLongBits(z);
-        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        int result = position != null ? position.hashCode() : 0;
+        result = 31 * result + z;
         result = 31 * result + (rotation != +0.0f ? Float.floatToIntBits(rotation) : 0);
         return result;
     }
@@ -67,18 +64,18 @@ public class Location {
 
     public static class Builder extends GenericBuilder<Builder> {
 
-        public Builder(Position position) {
+        public Builder(Point position) {
             super(position);
         }
     }
 
     protected static class GenericBuilder<T extends GenericBuilder<T>> {
 
-        private Position position;
-        private double z;
+        private Point position;
+        private int z;
         private float rotation;
 
-        public GenericBuilder(Position position) {
+        public GenericBuilder(Point position) {
             if (position == null) {
                 throw new IllegalArgumentException("Argument position is null.");
             }
@@ -87,7 +84,7 @@ public class Location {
         }
 
         @SuppressWarnings("unchecked")
-        public T setZ(double elevation) {
+        public T setZ(int elevation) {
             this.z = elevation;
             return (T) this;
         }

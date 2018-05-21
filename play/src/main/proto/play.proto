@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package play;
+
+option java_package = "com.ubtrobot.play.ipc";
+option java_outer_classname = "PlayProto";
+
+import "google/protobuf/any.proto";
+
+message Segment {
+    string name = 1;
+    string description = 2;
+    int32 loops = 3;
+    int64 duration = 4;
+    bool blank = 5;
+    google.protobuf.Any option = 6;
+}
+
+message SegmentGroup {
+    repeated Segment children = 1;
+    Segment segment = 2;
+}
+
+message Track {
+    string type = 1;
+    SegmentGroup segment_group = 2;
+    string description = 3;
+}

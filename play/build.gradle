@@ -20,6 +20,8 @@ android {
 }
 
 dependencies {
+    implementation project(':commons')
+
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     def deps = rootProject.ext.deps

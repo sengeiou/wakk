@@ -55,7 +55,6 @@ public class Segment<O> {
     }
 
     public static class Builder<O> extends GenericBuilder<O, Builder<O>> {
-
     }
 
     protected static class GenericBuilder<O, T extends GenericBuilder<O, T>> {

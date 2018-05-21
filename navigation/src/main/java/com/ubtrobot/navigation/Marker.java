@@ -5,11 +5,11 @@ package com.ubtrobot.navigation;
  */
 public class Marker extends Location {
 
-    public static final Marker DEFAULT = new Marker.Builder("", LatLng.DEFAULT).build();
+    public static final Marker DEFAULT = new Marker.Builder("", Position.DEFAULT).build();
 
     private String title;
 
-    protected Marker(String title, LatLng position) {
+    protected Marker(String title, Position position) {
         super(position);
         this.title = title;
     }
@@ -46,7 +46,7 @@ public class Marker extends Location {
         return "Marker{" +
                 "title='" + title + '\'' +
                 "position=" + getPosition() +
-                ", elevation=" + getElevation() +
+                ", z=" + getZ() +
                 ", rotation=" + getRotation() +
                 '}';
     }
@@ -55,7 +55,7 @@ public class Marker extends Location {
 
         private final String title;
 
-        public Builder(String title, LatLng position) {
+        public Builder(String title, Position position) {
             super(position);
 
             if (title == null) {

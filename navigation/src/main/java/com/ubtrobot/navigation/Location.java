@@ -5,28 +5,28 @@ package com.ubtrobot.navigation;
  */
 public class Location {
 
-    public static final Location DEFAULT = new Location.Builder(LatLng.DEFAULT).build();
+    public static final Location DEFAULT = new Location.Builder(Position.DEFAULT).build();
 
-    private LatLng position;
-    private double elevation;
+    private Position position;
+    private double z;
     private float rotation;
 
-    protected Location(LatLng position) {
+    protected Location(Position position) {
         this.position = position;
     }
 
     protected Location(GenericBuilder builder) {
         position = builder.position;
-        elevation = builder.elevation;
+        z = builder.z;
         rotation = builder.rotation;
     }
 
-    public LatLng getPosition() {
+    public Position getPosition() {
         return position;
     }
 
-    public double getElevation() {
-        return elevation;
+    public double getZ() {
+        return z;
     }
 
     public float getRotation() {
@@ -40,7 +40,7 @@ public class Location {
 
         Location location = (Location) o;
 
-        if (Double.compare(location.elevation, elevation) != 0) return false;
+        if (Double.compare(location.z, z) != 0) return false;
         if (Float.compare(location.rotation, rotation) != 0) return false;
         return position != null ? position.equals(location.position) : location.position == null;
     }
@@ -50,7 +50,7 @@ public class Location {
         int result;
         long temp;
         result = position != null ? position.hashCode() : 0;
-        temp = Double.doubleToLongBits(elevation);
+        temp = Double.doubleToLongBits(z);
         result = 31 * result + (int) (temp ^ (temp >>> 32));
         result = 31 * result + (rotation != +0.0f ? Float.floatToIntBits(rotation) : 0);
         return result;
@@ -60,25 +60,25 @@ public class Location {
     public String toString() {
         return "Location{" +
                 "position=" + position +
-                ", elevation=" + elevation +
+                ", z=" + z +
                 ", rotation=" + rotation +
                 '}';
     }
 
     public static class Builder extends GenericBuilder<Builder> {
 
-        public Builder(LatLng position) {
+        public Builder(Position position) {
             super(position);
         }
     }
 
     protected static class GenericBuilder<T extends GenericBuilder<T>> {
 
-        private LatLng position;
-        private double elevation;
+        private Position position;
+        private double z;
         private float rotation;
 
-        public GenericBuilder(LatLng position) {
+        public GenericBuilder(Position position) {
             if (position == null) {
                 throw new IllegalArgumentException("Argument position is null.");
             }
@@ -87,8 +87,8 @@ public class Location {
         }
 
         @SuppressWarnings("unchecked")
-        public T setElevation(double elevation) {
-            this.elevation = elevation;
+        public T setZ(double elevation) {
+            this.z = elevation;
             return (T) this;
         }
 
@@ -100,7 +100,7 @@ public class Location {
 
         public Location build() {
             Location location = new Location(position);
-            location.elevation = elevation;
+            location.z = z;
             location.rotation = rotation;
             return location;
         }

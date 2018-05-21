@@ -3,13 +3,13 @@ package com.ubtrobot.navigation.ipc;
 import android.util.Pair;
 
 import com.ubtrobot.navigation.GroundOverlay;
-import com.ubtrobot.navigation.LatLng;
 import com.ubtrobot.navigation.LocateOption;
 import com.ubtrobot.navigation.Location;
 import com.ubtrobot.navigation.Marker;
 import com.ubtrobot.navigation.NavMap;
 import com.ubtrobot.navigation.NavigateOption;
 import com.ubtrobot.navigation.Navigator;
+import com.ubtrobot.navigation.Position;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -31,11 +31,11 @@ public class NavigationConverters {
         for (Marker marker : map.getMarkerList()) {
             builder.addMarker(NavigationProto.Marker.newBuilder().
                     setTitle(marker.getTitle()).
-                    setPosition(NavigationProto.LatLng.newBuilder().
-                            setLatitude(marker.getPosition().getLatitude()).
-                            setLongitude(marker.getPosition().getLongitude()).build()
+                    setPosition(NavigationProto.Position.newBuilder().
+                            setX(marker.getPosition().getX()).
+                            setY(marker.getPosition().getY()).build()
                     ).
-                    setElevation(marker.getElevation()).
+                    setZ(marker.getZ()).
                     setRotation(marker.getRotation()).
                     build()
             );
@@ -54,10 +54,10 @@ public class NavigationConverters {
         for (NavigationProto.Marker marker : mapProto.getMarkerList()) {
             builder.addMarker(new Marker.Builder(
                     marker.getTitle(),
-                    new LatLng(
-                            marker.getPosition().getLatitude(),
-                            marker.getPosition().getLongitude())
-            ).setElevation(marker.getElevation()).setRotation(marker.getRotation()).build());
+                    new Position(
+                            marker.getPosition().getX(),
+                            marker.getPosition().getY())
+            ).setZ(marker.getZ()).setRotation(marker.getRotation()).build());
         }
 
         return builder.build();
@@ -82,31 +82,31 @@ public class NavigationConverters {
     }
 
     public static Location toLocationPojo(NavigationProto.Location location) {
-        return new Location.Builder(new LatLng(
-                location.getPosition().getLatitude(),
-                location.getPosition().getLongitude()
-        )).setElevation(location.getElevation()).setRotation(location.getRotation()).build();
+        return new Location.Builder(new Position(
+                location.getPosition().getX(),
+                location.getPosition().getY()
+        )).setZ(location.getZ()).setRotation(location.getRotation()).build();
     }
 
     public static NavigationProto.Location toLocationProto(Location location) {
         return NavigationProto.Location.newBuilder().
-                setPosition(NavigationProto.LatLng.newBuilder().
-                        setLatitude(location.getPosition().getLatitude()).
-                        setLongitude(location.getPosition().getLongitude()).build()).
+                setPosition(NavigationProto.Position.newBuilder().
+                        setX(location.getPosition().getX()).
+                        setY(location.getPosition().getY()).build()).
                 setRotation(location.getRotation()).
-                setElevation(location.getElevation()).
+                setZ(location.getZ()).
                 build();
     }
 
     public static NavigationProto.LocateOption toLocateOptionProto(LocateOption option) {
         return NavigationProto.LocateOption.newBuilder().setUseNearby(option.useNearby()).
                 setNearby(NavigationProto.Location.newBuilder()
-                        .setPosition(NavigationProto.LatLng.newBuilder()
-                                .setLatitude(option.getNearby().getPosition().getLatitude())
-                                .setLongitude(option.getNearby().getPosition().getLongitude())
+                        .setPosition(NavigationProto.Position.newBuilder()
+                                .setX(option.getNearby().getPosition().getX())
+                                .setY(option.getNearby().getPosition().getY())
                                 .build()
                         ).setRotation(option.getNearby().getRotation())
-                        .setElevation(option.getNearby().getElevation())
+                        .setZ(option.getNearby().getZ())
                         .build()).build();
     }
 

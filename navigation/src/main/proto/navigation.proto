@@ -11,17 +11,17 @@ message GroundOverlay {
     string remote_image = 2;
 }
 
-message LatLng {
+message Position {
 
-    double latitude = 1;
-    double longitude = 2;
+    double x = 1;
+    double y = 2;
 }
 
 message Marker {
 
     string title = 1;
-    LatLng position = 2;
-    double elevation = 3;
+    Position position = 2;
+    double z = 3;
     float rotation = 4;
 }
 
@@ -42,8 +42,8 @@ message NavMapList {
 
 message Location {
 
-    LatLng position = 1;
-    double elevation = 2;
+    Position position = 1;
+    double z = 2;
     float rotation = 3;
 }
 

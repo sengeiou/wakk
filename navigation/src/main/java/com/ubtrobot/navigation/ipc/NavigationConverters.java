@@ -1,7 +1,5 @@
 package com.ubtrobot.navigation.ipc;
 
-import android.util.Pair;
-
 import com.ubtrobot.navigation.GroundOverlay;
 import com.ubtrobot.navigation.LocateOption;
 import com.ubtrobot.navigation.Location;
@@ -104,22 +102,22 @@ public class NavigationConverters {
                 build();
     }
 
-    public static NavigationProto.NavMapList toNavMapListProto(Pair<List<NavMap>, String> maps) {
+    public static NavigationProto.NavMapList toNavMapListProto(List<NavMap> maps) {
         NavigationProto.NavMapList.Builder builder = NavigationProto.NavMapList.newBuilder();
-        for (NavMap map : maps.first) {
+        for (NavMap map : maps) {
             builder.addMap(toNavMapProto(map));
         }
 
-        return builder.setIdSelected(maps.second).build();
+        return builder.build();
     }
 
-    public static Pair<List<NavMap>, String> toNavMapListPojo(NavigationProto.NavMapList mapListProto) {
+    public static List<NavMap> toNavMapListPojo(NavigationProto.NavMapList mapListProto) {
         List<NavMap> maps = new LinkedList<>();
         for (NavigationProto.NavMap mapProto : mapListProto.getMapList()) {
             maps.add(toNavMapPojo(mapProto));
         }
 
-        return new Pair<>(maps, mapListProto.getIdSelected());
+        return maps;
     }
 
     public static Location toLocationPojo(NavigationProto.Location location) {

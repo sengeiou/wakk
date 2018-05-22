@@ -1,10 +1,7 @@
 package com.ubtrobot.navigation;
 
-import android.util.Pair;
-
 import com.google.protobuf.StringValue;
 import com.ubtrobot.async.Promise;
-import com.ubtrobot.cache.CachedField;
 import com.ubtrobot.master.adapter.ProtoCallAdapter;
 import com.ubtrobot.navigation.ipc.NavigationConstants;
 import com.ubtrobot.navigation.ipc.NavigationConverters;
@@ -13,7 +10,6 @@ import com.ubtrobot.transport.message.CallException;
 import com.ubtrobot.ulog.FwLoggerFactory;
 import com.ubtrobot.ulog.Logger;
 
-import java.util.Collections;
 import java.util.List;
 
 public class NavMapList {
@@ -22,43 +18,39 @@ public class NavMapList {
 
     private final ProtoCallAdapter mNavigationService;
 
-    private final CachedField<Pair<List<NavMap>, String>> mNavMapList;
-
     public NavMapList(ProtoCallAdapter navigationService) {
         mNavigationService = navigationService;
-        mNavMapList = new CachedField<>(new CachedField.FieldGetter<Pair<List<NavMap>, String>>() {
-            @Override
-            public Pair<List<NavMap>, String> get() {
-                try {
-                    NavigationProto.NavMapList navMapList = mNavigationService.syncCall(
-                            NavigationConstants.CALL_PATH_GET_NAV_MAP_LIST,
-                            NavigationProto.NavMapList.class
-                    );
+    }
 
-                    Pair<List<NavMap>, String> pair = NavigationConverters.
-                            toNavMapListPojo(navMapList);
-                    return new Pair<>(Collections.unmodifiableList(pair.first), pair.second);
-                } catch (CallException e) {
-                    LOGGER.e(e, "Framework error when getting the navigation map list.");
-                    return new Pair<>(Collections.<NavMap>emptyList(), "");
+    public Promise<List<NavMap>, NavMapException> all() {
+        return mNavigationService.call(
+                NavigationConstants.CALL_PATH_GET_NAV_MAP_LIST,
+                new ProtoCallAdapter.DFProtoConverter<
+                        List<NavMap>, NavigationProto.NavMapList, NavMapException>() {
+                    @Override
+                    public Class<NavigationProto.NavMapList> doneProtoClass() {
+                        return NavigationProto.NavMapList.class;
+                    }
+
+                    @Override
+                    public List<NavMap> convertDone(NavigationProto.NavMapList navMapList) {
+                        return NavigationConverters.toNavMapListPojo(navMapList);
+                    }
+
+                    @Override
+                    public NavMapException convertFail(CallException e) {
+                        return new NavMapException.Factory().from(e);
+                    }
                 }
-            }
-        });
+        );
     }
 
-    public List<NavMap> all() {
-        //noinspection ConstantConditions
-        return mNavMapList.get().first;
-    }
-
-    public NavMap get(String mapId) {
-        for (NavMap navMap : all()) {
-            if (navMap.getId().equals(mapId)) {
-                return navMap;
-            }
-        }
-
-        throw new NavMapNotFoundException();
+    public Promise<NavMap, NavMapException> get(String mapId) {
+        return mNavigationService.call(
+                NavigationConstants.CALL_PATH_GET_NAV_MAP,
+                StringValue.newBuilder().setValue(mapId).build(),
+                new NavMapConverter()
+        );
     }
 
     public Promise<NavMap, NavMapException> add(NavMap map) {
@@ -69,9 +61,11 @@ public class NavMapList {
         );
     }
 
-    public NavMap getSelected() {
-        //noinspection ConstantConditions
-        return get(mNavMapList.get().second);
+    public Promise<NavMap, NavMapException> getSelected() {
+        return mNavigationService.call(
+                NavigationConstants.CALL_PATH_GET_SELECTED_NAV_MAP,
+                new NavMapConverter()
+        );
     }
 
     public Promise<NavMap, NavMapException> select(String mapId) {
@@ -98,12 +92,9 @@ public class NavMapList {
         );
     }
 
-    public static class NavMapNotFoundException extends RuntimeException {
-    }
-
     private static class NavMapConverter
             implements ProtoCallAdapter.DFProtoConverter<
-            NavMap,NavigationProto.NavMap,NavMapException> {
+            NavMap, NavigationProto.NavMap, NavMapException> {
 
         @Override
         public Class<NavigationProto.NavMap> doneProtoClass() {

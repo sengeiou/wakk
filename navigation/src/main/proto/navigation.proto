@@ -47,7 +47,6 @@ message NavMap {
 message NavMapList {
 
     repeated NavMap map = 1;
-    string id_selected = 2;
 }
 
 message Location {

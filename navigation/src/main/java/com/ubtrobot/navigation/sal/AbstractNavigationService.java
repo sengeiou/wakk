@@ -1,7 +1,5 @@
 package com.ubtrobot.navigation.sal;
 
-import android.util.Pair;
-
 import com.ubtrobot.async.AsyncTask;
 import com.ubtrobot.async.InterruptibleAsyncTask;
 import com.ubtrobot.async.InterruptibleProgressiveAsyncTask;
@@ -33,9 +31,9 @@ public abstract class AbstractNavigationService implements NavigationService {
     }
 
     @Override
-    public Promise<Pair<List<NavMap>, String>, NavMapException>
+    public Promise<List<NavMap>, NavMapException>
     getNavMapList() {
-        AsyncTask<Pair<List<NavMap>, String>, NavMapException> task =
+        AsyncTask<List<NavMap>, NavMapException> task =
                 createGetNavMapListTask();
         if (task == null) {
             throw new IllegalStateException("createGetNavMapListTask return null.");
@@ -45,8 +43,34 @@ public abstract class AbstractNavigationService implements NavigationService {
         return task.promise();
     }
 
-    protected abstract AsyncTask<Pair<List<NavMap>, String>, NavMapException>
+    protected abstract AsyncTask<List<NavMap>, NavMapException>
     createGetNavMapListTask();
+
+    @Override
+    public Promise<NavMap, NavMapException> getNavMap(String mapId) {
+        AsyncTask<NavMap, NavMapException> task = createGetNavMapTask(mapId);
+        if (task == null) {
+            throw new IllegalStateException("createGetNavMapTask return null.");
+        }
+
+        task.start();
+        return task.promise();
+    }
+
+    protected abstract AsyncTask<NavMap, NavMapException> createGetNavMapTask(String mapId);
+
+    @Override
+    public Promise<NavMap, NavMapException> getSelectedNavMap() {
+        AsyncTask<NavMap, NavMapException> task = createGetSelectedNavMap();
+        if (task == null) {
+            throw new IllegalStateException("createGetSelectedNavMap return null.");
+        }
+
+        task.start();
+        return task.promise();
+    }
+
+    protected abstract AsyncTask<NavMap, NavMapException> createGetSelectedNavMap();
 
     @Override
     public Promise<NavMap, NavMapException> addNavMap(NavMap navMap) {

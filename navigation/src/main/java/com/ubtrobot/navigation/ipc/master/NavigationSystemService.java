@@ -3,7 +3,6 @@ package com.ubtrobot.navigation.ipc.master;
 import android.app.Application;
 import android.os.Handler;
 import android.text.TextUtils;
-import android.util.Pair;
 
 import com.google.protobuf.Message;
 import com.ubtrobot.async.ProgressivePromise;
@@ -76,16 +75,16 @@ public class NavigationSystemService extends MasterSystemService {
     public void onGetNavMapList(Request request, final Responder responder) {
         mCallProcessor.onCall(
                 responder,
-                new CallProcessAdapter.Callable<Pair<List<NavMap>, String>, NavMapException>() {
+                new CallProcessAdapter.Callable<List<NavMap>, NavMapException>() {
                     @Override
-                    public Promise<Pair<List<NavMap>, String>, NavMapException>
+                    public Promise<List<NavMap>, NavMapException>
                     call() throws CallException {
                         return mService.getNavMapList();
                     }
                 },
-                new ProtoCallProcessAdapter.DFConverter<Pair<List<NavMap>, String>, NavMapException>() {
+                new ProtoCallProcessAdapter.DFConverter<List<NavMap>, NavMapException>() {
                     @Override
-                    public Message convertDone(Pair<List<NavMap>, String> mapList) {
+                    public Message convertDone(List<NavMap> mapList) {
                         return NavigationConverters.toNavMapListProto(mapList);
                     }
 
@@ -94,6 +93,39 @@ public class NavigationSystemService extends MasterSystemService {
                         return new CallException(e.getCode(), e.getMessage());
                     }
                 }
+        );
+    }
+
+    @Call(path = NavigationConstants.CALL_PATH_GET_NAV_MAP)
+    public void onGetNavMap(Request request, final Responder responder) {
+        final String navMapId = ProtoParamParser.parseStringParam(request, responder);
+        if (TextUtils.isEmpty(navMapId)) {
+            return;
+        }
+
+        mCallProcessor.onCall(
+                responder,
+                new CallProcessAdapter.Callable<NavMap, NavMapException>() {
+                    @Override
+                    public Promise<NavMap, NavMapException> call() throws CallException {
+                        return mService.getNavMap(navMapId);
+                    }
+                },
+                new NavMapConverter()
+        );
+    }
+
+    @Call(path = NavigationConstants.CALL_PATH_GET_SELECTED_NAV_MAP)
+    public void onGetSelectedNavMap(Request request, final Responder responder) {
+        mCallProcessor.onCall(
+                responder,
+                new CallProcessAdapter.Callable<NavMap, NavMapException>() {
+                    @Override
+                    public Promise<NavMap, NavMapException> call() throws CallException {
+                        return mService.getSelectedNavMap();
+                    }
+                },
+                new NavMapConverter()
         );
     }
 

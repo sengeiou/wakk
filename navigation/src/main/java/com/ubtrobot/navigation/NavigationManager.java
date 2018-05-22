@@ -35,11 +35,11 @@ public class NavigationManager {
         mNavigator = new Navigator(handler);
     }
 
-    public List<NavMap> getNavMapList() {
+    public Promise<List<NavMap>, NavMapException> getNavMapList() {
         return mNavMapList.all();
     }
 
-    public NavMap getNavMap(String navMapId) {
+    public Promise<NavMap, NavMapException> getNavMap(String navMapId) {
         return mNavMapList.get(navMapId);
     }
 
@@ -47,7 +47,7 @@ public class NavigationManager {
         return mNavMapList.add(navMap);
     }
 
-    public NavMap getSelectedNavMap() {
+    public Promise<NavMap, NavMapException> getSelectedNavMap() {
         return mNavMapList.getSelected();
     }
 

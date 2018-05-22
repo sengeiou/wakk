@@ -8,7 +8,7 @@ include ':speech', ':sal:speech'
 include ':upgrade', ':sal:upgrade', ':service-impl:upgrade'
 include ':wakeup', ':sal:wakeup'
 include 'analytics', ':sal:analytics', ':service-impl:analytics'
-
+include ':dance'
 include ':initialization'
 
 include ':sample', ':service-mocks'

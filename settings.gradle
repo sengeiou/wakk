@@ -1,5 +1,6 @@
 include ':commons', ':play'
-include ':upgrade', 'wakeup', 'analytics', 'speech', ':emotion', ':navigation', ':light', ':motion'
+include ':navigation', ':navigation:sal'
+include ':upgrade', 'wakeup', 'analytics', 'speech', ':emotion', ':light', ':motion'
 include ':service-impl:upgrade', ':service-impl:analytics'
 include ':initialization'
 include ':sample', ':service-mocks'

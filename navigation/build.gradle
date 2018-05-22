@@ -41,7 +41,7 @@ protobuf {
 }
 
 dependencies {
-    implementation project(':commons')
+    api project(':commons')
 
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
@@ -63,10 +63,7 @@ task jarFramework(
     exclude('**/BuildConfig.class')
     exclude('**/BuildConfig$*.class')
     exclude('android/')
-
     exclude('com/ubtrobot/commons/')
-    exclude('com/ubtrobot/navigation/ipc/master')
-    exclude('com/ubtrobot/navigation/sal/')
 
     from 'build/intermediates/classes/release'
 }

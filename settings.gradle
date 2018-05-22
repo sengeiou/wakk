@@ -1,5 +1,5 @@
 include ':commons', ':play'
-include ':navigation', ':navigation:sal'
+include ':navigation', ':sal:navigation'
 include ':upgrade', 'wakeup', 'analytics', 'speech', ':emotion', ':light', ':motion'
 include ':service-impl:upgrade', ':service-impl:analytics'
 include ':initialization'

@@ -91,6 +91,8 @@ public class Marker extends Location {
             if (TextUtils.isEmpty(id)) {
                 throw new IllegalArgumentException("Argument id is an empty string.");
             }
+
+            this.id = id;
         }
 
         public Builder setTitle(String title) {

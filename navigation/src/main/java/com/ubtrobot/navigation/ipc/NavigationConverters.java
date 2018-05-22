@@ -79,7 +79,9 @@ public class NavigationConverters {
     }
 
     private static GroundOverlay toGroundOverlayPojo(NavigationProto.GroundOverlay groundOverlay) {
-        return new GroundOverlay.Builder(groundOverlay.getWidth(), groundOverlay.getHeight()).
+        return new GroundOverlay.Builder().
+                setWidth(groundOverlay.getWidth()).
+                setHeight(groundOverlay.getHeight()).
                 setName(groundOverlay.getName()).
                 setTag(groundOverlay.getTag()).
                 setOriginInImage(toPointPojo(groundOverlay.getOriginInImage())).

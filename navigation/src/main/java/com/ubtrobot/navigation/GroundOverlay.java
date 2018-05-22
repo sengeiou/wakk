@@ -5,7 +5,7 @@ package com.ubtrobot.navigation;
  */
 public class GroundOverlay {
 
-    public static final GroundOverlay DEFAULT = new Builder(0, 0).build();
+    public static final GroundOverlay DEFAULT = new Builder().build();
 
     private String name;
     private String tag;
@@ -88,13 +88,22 @@ public class GroundOverlay {
         private String imageUri;
         private String remoteImageUri;
 
-        public Builder(int width, int height) {
-            if (width <= 0 || height <= 0) {
-                throw new IllegalArgumentException("Argument width <= 0 or height <= 0");
+        public Builder setWidth(int width) {
+            if (width <= 0) {
+                throw new IllegalArgumentException("Argument width <= 0");
             }
 
             this.width = width;
+            return this;
+        }
+
+        public Builder setHeight(int height) {
+            if (height <= 0) {
+                throw new IllegalArgumentException("Argument height <= 0");
+            }
+
             this.height = height;
+            return this;
         }
 
         public Builder setName(String name) {

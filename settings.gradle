@@ -9,7 +9,7 @@ include ':upgrade', ':sal:upgrade', ':service-impl:upgrade'
 include 'analytics', ':sal:analytics', ':service-impl:analytics'
 include ':sensor', ':sal:sensor'
 include ':power', ':sal:power'
-
+include ':dance'
 include ':initialization'
 
 include ':sample', ':service-mocks'

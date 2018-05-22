@@ -33,7 +33,7 @@ public class CompetingCallDelegate {
         mMasterService = masterService;
     }
 
-    public <D, F, P> void onCall(
+    public <D, F extends Throwable, P> void onCall(
             final Request request,
             Collection<String> competingItemIds,
             final Responder responder,
@@ -85,7 +85,7 @@ public class CompetingCallDelegate {
         }
     }
 
-    private <D, F> void onCall(
+    private <D, F extends Throwable> void onCall(
             final Request request,
             CompetitionSessionInfo sessionInfo,
             final Responder responder,
@@ -128,7 +128,7 @@ public class CompetingCallDelegate {
         }
     }
 
-    public <D, F> void onCall(
+    public <D, F extends Throwable> void onCall(
             final Request request,
             Collection<String> competingItemIds,
             final Responder responder,
@@ -159,7 +159,7 @@ public class CompetingCallDelegate {
         });
     }
 
-    public <F> void onCall(
+    public <F extends Throwable> void onCall(
             final Request request,
             Collection<String> competingItemIds,
             final Responder responder,
@@ -168,7 +168,7 @@ public class CompetingCallDelegate {
         onCall(request, competingItemIds, responder, callable, (DFConverter<Void, F>) converter);
     }
 
-    public <D, F, P> void onCall(
+    public <D, F extends Throwable, P> void onCall(
             final Request request,
             String competingItemId,
             final Responder responder,
@@ -177,7 +177,7 @@ public class CompetingCallDelegate {
         onCall(request, Collections.singleton(competingItemId), responder, callable, converter);
     }
 
-    public <D, F> void onCall(
+    public <D, F extends Throwable> void onCall(
             final Request request,
             String competingItemId,
             final Responder responder,
@@ -186,7 +186,7 @@ public class CompetingCallDelegate {
         onCall(request, Collections.singleton(competingItemId), responder, callable, converter);
     }
 
-    public <F> void onCall(
+    public <F extends Throwable> void onCall(
             final Request request,
             String competingItemId,
             final Responder responder,
@@ -221,12 +221,12 @@ public class CompetingCallDelegate {
         });
     }
 
-    public interface SessionCallable<D, F> {
+    public interface SessionCallable<D, F extends Throwable> {
 
         Promise<D, F> call() throws CallException;
     }
 
-    public interface SessionProgressiveCallable<D, F, P> extends SessionCallable<D, F> {
+    public interface SessionProgressiveCallable<D, F extends Throwable, P> extends SessionCallable<D, F> {
 
         ProgressivePromise<D, F, P> call() throws CallException;
     }

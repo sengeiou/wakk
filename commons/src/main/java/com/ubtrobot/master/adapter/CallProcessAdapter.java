@@ -21,7 +21,7 @@ public class CallProcessAdapter {
         mHandler = handler;
     }
 
-    public <D, F, P> void onCall(
+    public <D, F extends Throwable, P> void onCall(
             final Responder responder,
             final ProgressiveCallable<D, F, P> callable,
             final DFPConverter<D, F, P> converter) {
@@ -48,7 +48,7 @@ public class CallProcessAdapter {
         });
     }
 
-    private <D, F> void onCall(
+    private <D, F extends Throwable> void onCall(
             final Responder responder,
             final Promise<D, F> promise,
             final DFConverter<D, F> converter) {
@@ -73,7 +73,7 @@ public class CallProcessAdapter {
         });
     }
 
-    public <D, F> void onCall(
+    public <D, F extends Throwable> void onCall(
             final Responder responder,
             final Callable<D, F> callable,
             final DFConverter<D, F> converter) {
@@ -90,24 +90,24 @@ public class CallProcessAdapter {
         });
     }
 
-    public <F> void onCall(
+    public <F extends Throwable> void onCall(
             final Responder responder,
             final Callable<Void, F> callable,
             final FConverter<F> converter) {
         onCall(responder, callable, (DFConverter<Void, F>) converter);
     }
 
-    public interface Callable<D, F> {
+    public interface Callable<D, F extends Throwable> {
 
         Promise<D, F> call() throws CallException;
     }
 
-    public interface ProgressiveCallable<D, F, P> {
+    public interface ProgressiveCallable<D, F extends Throwable, P> {
 
         ProgressivePromise<D, F, P> call() throws CallException;
     }
 
-    public static abstract class FConverter<F> implements DFConverter<Void, F> {
+    public static abstract class FConverter<F extends Throwable> implements DFConverter<Void, F> {
 
         @Override
         public Param convertDone(Void done) {

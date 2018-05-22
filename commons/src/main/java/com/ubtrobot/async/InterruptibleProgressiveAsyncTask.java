@@ -1,6 +1,7 @@
 package com.ubtrobot.async;
 
-public abstract class InterruptibleProgressiveAsyncTask<D, F, P> extends ProgressiveAsyncTask<D, F, P> {
+public abstract class InterruptibleProgressiveAsyncTask<D, F extends Throwable, P>
+        extends ProgressiveAsyncTask<D, F, P> {
 
     private boolean interrupted;
 

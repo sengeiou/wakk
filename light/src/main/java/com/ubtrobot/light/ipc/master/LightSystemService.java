@@ -67,7 +67,7 @@ public class LightSystemService extends MasterSystemService {
     @Override
     protected List<CompetingItemDetail> getCompetingItems() {
         try {
-            List<LightDevice> lightList = mService.getLightList().getDone();
+            List<LightDevice> lightList = mService.getLightList().get();
             LinkedList<CompetingItemDetail> details = new LinkedList<>();
             for (LightDevice lightDevice : lightList) {
                 details.add(
@@ -82,8 +82,7 @@ public class LightSystemService extends MasterSystemService {
             }
 
             return details;
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+        } catch (AccessServiceException e) {
             throw new IllegalStateException(e);
         }
     }

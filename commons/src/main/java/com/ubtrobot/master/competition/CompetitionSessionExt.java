@@ -22,7 +22,7 @@ public class CompetitionSessionExt<C extends Competing> {
         return mSession;
     }
 
-    public <D, F, P> ProgressivePromise<D, F, P> execute(
+    public <D, F extends Throwable, P> ProgressivePromise<D, F, P> execute(
             final C competing,
             final SessionProgressiveCallable<D, F, P, C> callable,
             final Converter<F> converter) {
@@ -87,7 +87,7 @@ public class CompetitionSessionExt<C extends Competing> {
         }
     }
 
-    public <D, F> Promise<D, F> execute(
+    public <D, F extends Throwable> Promise<D, F> execute(
             final C competing,
             final SessionCallable<D, F, C> callable,
             final Converter<F> converter) {
@@ -146,12 +146,12 @@ public class CompetitionSessionExt<C extends Competing> {
         }
     }
 
-    public interface SessionCallable<D, F, C extends Competing> {
+    public interface SessionCallable<D, F extends Throwable, C extends Competing> {
 
         Promise<D, F> call(CompetitionSession session, C competing);
     }
 
-    public interface SessionProgressiveCallable<D, F, P, C extends Competing>
+    public interface SessionProgressiveCallable<D, F extends Throwable, P, C extends Competing>
             extends SessionCallable<D, F, C> {
 
         ProgressivePromise<D, F, P> call(CompetitionSession session, C competing);

@@ -20,7 +20,7 @@ public class InterruptibleTaskHelper {
 
     private final HashMap<String, TaskEnv<?, ?, ?>> mTasks = new HashMap<>();
 
-    public <D, F, P> ProgressivePromise<D, F, P> start(
+    public <D, F extends Throwable, P> ProgressivePromise<D, F, P> start(
             Collection<String> receivers,
             String name,
             InterruptibleProgressiveAsyncTask<D, F, P> task,
@@ -77,7 +77,7 @@ public class InterruptibleTaskHelper {
         return receiverList.toString();
     }
 
-    public <D, F, P> ProgressivePromise<D, F, P> start(
+    public <D, F extends Throwable, P> ProgressivePromise<D, F, P> start(
             String receiver,
             String name,
             InterruptibleProgressiveAsyncTask<D, F, P> task,
@@ -85,7 +85,7 @@ public class InterruptibleTaskHelper {
         return start(Collections.singleton(receiver), name, task, creator);
     }
 
-    public <D, F> Promise<D, F> start(
+    public <D, F extends Throwable> Promise<D, F> start(
             Collection<String> receivers,
             String name,
             InterruptibleAsyncTask<D, F> task,
@@ -93,7 +93,7 @@ public class InterruptibleTaskHelper {
         return start(receivers, name, (InterruptibleProgressiveAsyncTask<D, F, Void>) task, creator);
     }
 
-    public <D, F> Promise<D, F> start(
+    public <D, F extends Throwable> Promise<D, F> start(
             String receiver,
             String name,
             InterruptibleAsyncTask<D, F> task,
@@ -142,7 +142,7 @@ public class InterruptibleTaskHelper {
     }
 
     @SuppressWarnings("unchecked")
-    public <F> boolean reject(Collection<String> receivers, String name, F fail) {
+    public <F extends Throwable> boolean reject(Collection<String> receivers, String name, F fail) {
         synchronized (mTasks) {
             String receiverSeq = receiverSeq(receivers);
             TaskEnv<?, ?, ?> taskEnv = mTasks.get(receiverSeq);
@@ -156,7 +156,7 @@ public class InterruptibleTaskHelper {
         }
     }
 
-    public <F> boolean reject(String receiver, String name, F fail) {
+    public <F extends Throwable> boolean reject(String receiver, String name, F fail) {
         return reject(Collections.singleton(receiver), name, fail);
     }
 
@@ -179,7 +179,7 @@ public class InterruptibleTaskHelper {
         return report(Collections.singleton(receiver), name, progress);
     }
 
-    private static class TaskEnv<D, F, P> {
+    private static class TaskEnv<D, F extends Throwable, P> {
 
         Set<String> receivers;
         String receiverSeq;

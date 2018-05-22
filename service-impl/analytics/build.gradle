@@ -20,7 +20,7 @@ android {
 }
 
 dependencies {
-    api project(':analytics')
+    api project(':sal:analytics')
 
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 

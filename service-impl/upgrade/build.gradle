@@ -20,7 +20,7 @@ android {
 }
 
 dependencies {
-    api project(':upgrade')
+    api project(':sal:upgrade')
 
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 

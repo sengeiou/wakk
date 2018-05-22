@@ -11,7 +11,18 @@ project(':analytics') {
 
                 artifact("$buildDir/libs/analytics.jar")
             }
+        }
+    }
 
+    artifactoryPublish {
+        publications(publishing.publications.jarFramework)
+    }
+}
+
+project(':sal:analytics') {
+    artifactoryPublish.dependsOn('assembleRelease')
+    publishing {
+        publications {
             aarSal(MavenPublication) {
                 groupId = rootProject.ext.groupId
                 artifactId = "analytics-sal"
@@ -20,12 +31,20 @@ project(':analytics') {
                 rootProject.ext.isSnapshot = version.toUpperCase().endsWith("-SNAPSHOT")
 
                 artifact("$buildDir/outputs/aar/analytics-release.aar")
+                pom.withXml {
+                    def dependenciesNode = asNode().appendNode('dependencies')
+
+                    def dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.ubtrobot.framework')
+                    dependencyNode.appendNode('artifactId', 'analytics')
+                    dependencyNode.appendNode('version', rootProject.ext.versions.analyticsVersion)
+                }
             }
         }
     }
 
     artifactoryPublish {
-        publications(publishing.publications.jarFramework, publishing.publications.aarSal)
+        publications(publishing.publications.aarSal)
     }
 }
 

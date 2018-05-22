@@ -1,16 +1,1 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.ubtrobot.analytics.sal">
-
-    <permission
-        android:name="com.ubtrobot.analytics.permissions.ANALYTICS"
-        android:protectionLevel="normal" />
-
-    <application>
-        <provider
-            android:name="com.ubtrobot.analytics.ipc.provider.AnalyticsProvider"
-            android:authorities="com.ubtrobot.analytics.ipc.provider.AnalyticsProvider"
-            android:exported="true"
-            android:permission="com.ubtrobot.analytics.permissions.ANALYTICS" />
-
-    </application>
-</manifest>
+<manifest package="com.ubtrobot.analytics" />

@@ -2,6 +2,7 @@
 <service
     name="navigation"
     level="system">
+    <call path="/navigation/map" />
     <call path="/navigation/map/list" />
     <call path="/navigation/map/add" />
     <call path="/navigation/map/select" />

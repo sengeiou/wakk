@@ -35,24 +35,23 @@ public class WakeupManager {
     }
 
     public void registerWakeupListener(WakeupListener listener) {
+        mListener.register(listener);
         synchronized (mSubscribeLock) {
-            if (!mHasSubscribed) {
+            if (!mListener.isEmpty() && !mHasSubscribed) {
                 mHasSubscribed = true;
                 subscribeEventReceiver();
             }
         }
 
-        mListener.register(listener);
     }
 
 
     public void unregisterWakeupListener(WakeupListener listener) {
         mListener.unregister(listener);
-
         synchronized (mSubscribeLock) {
             if (mListener.isEmpty() && mHasSubscribed) {
-                mHasSubscribed = false;
                 unSubscribeEventReceiver();
+                mHasSubscribed = false;
             }
         }
     }
@@ -66,19 +65,22 @@ public class WakeupManager {
 
     }
 
-    private final ProtoEventReceiver<WakeupProto.WakeupEvent> mEventReceiver = new ProtoEventReceiver<WakeupProto.WakeupEvent>() {
+    private final ProtoEventReceiver<WakeupProto.WakeupEvent> mEventReceiver =
+            new ProtoEventReceiver<WakeupProto.WakeupEvent>() {
 
-        @Override
-        public void onReceive(MasterContext masterContext, String action, WakeupProto.WakeupEvent event) {
-            WakeupEvent wakeupEvent = WakeupConverter.toWakeUpEventPojo(event);
-            notifyListener(wakeupEvent);
-        }
+                @Override
+                public void onReceive(MasterContext masterContext, String action,
+                        WakeupProto.WakeupEvent event) {
+                    WakeupEvent wakeupEvent = WakeupConverter.toWakeUpEventPojo(event);
+                    notifyListener(wakeupEvent);
+                }
 
-        @Override
-        protected Class<WakeupProto.WakeupEvent> protoClass() {
-            return WakeupProto.WakeupEvent.class;
-        }
-    };
+                @Override
+                protected Class<WakeupProto.WakeupEvent> protoClass() {
+                    return WakeupProto.WakeupEvent.class;
+
+                }
+            };
 
     private void notifyListener(final WakeupEvent event) {
         mListener.forEach(new Consumer<WakeupListener>() {

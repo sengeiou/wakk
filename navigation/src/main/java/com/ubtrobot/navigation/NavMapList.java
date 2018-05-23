@@ -1,5 +1,6 @@
 package com.ubtrobot.navigation;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.StringValue;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.master.adapter.ProtoCallAdapter;
@@ -33,7 +34,8 @@ public class NavMapList {
                     }
 
                     @Override
-                    public List<NavMap> convertDone(NavigationProto.NavMapList navMapList) {
+                    public List<NavMap> convertDone(NavigationProto.NavMapList navMapList)
+                            throws InvalidProtocolBufferException {
                         return NavigationConverters.toNavMapListPojo(navMapList);
                     }
 
@@ -102,7 +104,8 @@ public class NavMapList {
         }
 
         @Override
-        public NavMap convertDone(NavigationProto.NavMap NavMap) {
+        public NavMap convertDone(NavigationProto.NavMap NavMap)
+                throws InvalidProtocolBufferException {
             return NavigationConverters.toNavMapPojo(NavMap);
         }
 

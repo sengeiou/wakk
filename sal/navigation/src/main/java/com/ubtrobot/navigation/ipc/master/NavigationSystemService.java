@@ -4,6 +4,7 @@ import android.app.Application;
 import android.os.Handler;
 import android.text.TextUtils;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
@@ -16,6 +17,7 @@ import com.ubtrobot.master.competition.CompetingItemDetail;
 import com.ubtrobot.master.competition.CompetitionSessionInfo;
 import com.ubtrobot.master.competition.ProtoCompetingCallDelegate;
 import com.ubtrobot.master.service.MasterSystemService;
+import com.ubtrobot.master.transport.message.CallGlobalCode;
 import com.ubtrobot.navigation.LocateException;
 import com.ubtrobot.navigation.Location;
 import com.ubtrobot.navigation.NavMap;
@@ -142,7 +144,11 @@ public class NavigationSystemService extends MasterSystemService {
                 new CallProcessAdapter.Callable<NavMap, NavMapException>() {
                     @Override
                     public Promise<NavMap, NavMapException> call() throws CallException {
-                        return mService.addNavMap(NavigationConverters.toNavMapPojo(navMap));
+                        try {
+                            return mService.addNavMap(NavigationConverters.toNavMapPojo(navMap));
+                        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                            throw new CallException(CallGlobalCode.BAD_REQUEST, "Illegal navmap.");
+                        }
                     }
                 },
                 new NavMapConverter()
@@ -181,7 +187,11 @@ public class NavigationSystemService extends MasterSystemService {
                 new CallProcessAdapter.Callable<NavMap, NavMapException>() {
                     @Override
                     public Promise<NavMap, NavMapException> call() throws CallException {
-                        return mService.modifyNavMap(NavigationConverters.toNavMapPojo(navMap));
+                        try {
+                            return mService.modifyNavMap(NavigationConverters.toNavMapPojo(navMap));
+                        } catch (InvalidProtocolBufferException e) {
+                            throw new CallException(CallGlobalCode.BAD_REQUEST, "Illegal navmap.");
+                        }
                     }
                 },
                 new NavMapConverter()

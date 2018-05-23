@@ -1,5 +1,9 @@
 package com.ubtrobot.navigation.ipc;
 
+import com.google.protobuf.Any;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.ubtrobot.io.IoConverters;
+import com.ubtrobot.io.ipc.IoProto;
 import com.ubtrobot.navigation.GroundOverlay;
 import com.ubtrobot.navigation.LocateOption;
 import com.ubtrobot.navigation.Location;
@@ -39,8 +43,7 @@ public class NavigationConverters {
                 setWidth(groundOverlay.getWidth()).
                 setHeight(groundOverlay.getHeight()).
                 setOriginInImage(toPointProto(groundOverlay.getOriginInImage())).
-                setImageUri(groundOverlay.getImageUri()).
-                setRemoteImageUri(groundOverlay.getRemoteImageUri()).
+                setImage(Any.pack(IoConverters.toFileInfoProto(groundOverlay.getImage()))).
                 build();
     }
 
@@ -62,7 +65,8 @@ public class NavigationConverters {
                 build();
     }
 
-    public static NavMap toNavMapPojo(NavigationProto.NavMap mapProto) {
+    public static NavMap toNavMapPojo(NavigationProto.NavMap mapProto)
+            throws InvalidProtocolBufferException {
         NavMap.Builder builder = new NavMap.Builder(mapProto.getId(), mapProto.getScale()).
                 setName(mapProto.getName()).setTag(mapProto.getTag());
         for (NavigationProto.GroundOverlay groundOverlay : mapProto.getGroundOverlayList()) {
@@ -76,15 +80,15 @@ public class NavigationConverters {
         return builder.build();
     }
 
-    private static GroundOverlay toGroundOverlayPojo(NavigationProto.GroundOverlay groundOverlay) {
+    private static GroundOverlay toGroundOverlayPojo(NavigationProto.GroundOverlay groundOverlay)
+            throws InvalidProtocolBufferException {
         return new GroundOverlay.Builder().
                 setWidth(groundOverlay.getWidth()).
                 setHeight(groundOverlay.getHeight()).
                 setName(groundOverlay.getName()).
                 setTag(groundOverlay.getTag()).
                 setOriginInImage(toPointPojo(groundOverlay.getOriginInImage())).
-                setImageUri(groundOverlay.getImageUri()).
-                setRemoteImageUri(groundOverlay.getRemoteImageUri()).
+                setImage(IoConverters.toFileInfoPojo(groundOverlay.getImage().unpack(IoProto.FileInfo.class))).
                 build();
     }
 
@@ -111,7 +115,8 @@ public class NavigationConverters {
         return builder.build();
     }
 
-    public static List<NavMap> toNavMapListPojo(NavigationProto.NavMapList mapListProto) {
+    public static List<NavMap> toNavMapListPojo(NavigationProto.NavMapList mapListProto)
+            throws InvalidProtocolBufferException {
         List<NavMap> maps = new LinkedList<>();
         for (NavigationProto.NavMap mapProto : mapListProto.getMapList()) {
             maps.add(toNavMapPojo(mapProto));

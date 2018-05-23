@@ -5,6 +5,8 @@ package navigation;
 option java_package = "com.ubtrobot.navigation.ipc";
 option java_outer_classname = "NavigationProto";
 
+import "google/protobuf/any.proto";
+
 message GroundOverlay {
 
     string name = 1;
@@ -12,8 +14,7 @@ message GroundOverlay {
     int32 width = 3;
     int32 height = 4;
     Point origin_In_Image = 5;
-    string image_Uri = 6;
-    string remote_Image_Uri = 7;
+    google.protobuf.Any image = 6;
 }
 
 message Point {

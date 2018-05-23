@@ -1,5 +1,7 @@
 package com.ubtrobot.navigation;
 
+import com.ubtrobot.io.FileInfo;
+
 /**
  * 地图地面叠层
  */
@@ -12,8 +14,7 @@ public class GroundOverlay {
     private int width;
     private int height;
     private Point originInImage;
-    private String imageUri;
-    private String remoteImageUri;
+    private FileInfo image;
 
     private GroundOverlay(int width, int height) {
         this.width = width;
@@ -40,12 +41,8 @@ public class GroundOverlay {
         return originInImage;
     }
 
-    public String getImageUri() {
-        return imageUri;
-    }
-
-    public String getRemoteImageUri() {
-        return remoteImageUri;
+    public FileInfo getImage() {
+        return image;
     }
 
     @Override
@@ -53,17 +50,15 @@ public class GroundOverlay {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        GroundOverlay that = (GroundOverlay) o;
+        GroundOverlay overlay = (GroundOverlay) o;
 
-        if (width != that.width) return false;
-        if (height != that.height) return false;
-        if (name != null ? !name.equals(that.name) : that.name != null) return false;
-        if (tag != null ? !tag.equals(that.tag) : that.tag != null) return false;
-        if (originInImage != null ? !originInImage.equals(that.originInImage) : that.originInImage != null)
+        if (width != overlay.width) return false;
+        if (height != overlay.height) return false;
+        if (name != null ? !name.equals(overlay.name) : overlay.name != null) return false;
+        if (tag != null ? !tag.equals(overlay.tag) : overlay.tag != null) return false;
+        if (originInImage != null ? !originInImage.equals(overlay.originInImage) : overlay.originInImage != null)
             return false;
-        if (imageUri != null ? !imageUri.equals(that.imageUri) : that.imageUri != null)
-            return false;
-        return remoteImageUri != null ? remoteImageUri.equals(that.remoteImageUri) : that.remoteImageUri == null;
+        return image != null ? image.equals(overlay.image) : overlay.image == null;
     }
 
     @Override
@@ -73,9 +68,20 @@ public class GroundOverlay {
         result = 31 * result + width;
         result = 31 * result + height;
         result = 31 * result + (originInImage != null ? originInImage.hashCode() : 0);
-        result = 31 * result + (imageUri != null ? imageUri.hashCode() : 0);
-        result = 31 * result + (remoteImageUri != null ? remoteImageUri.hashCode() : 0);
+        result = 31 * result + (image != null ? image.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "GroundOverlay{" +
+                "name='" + name + '\'' +
+                ", tag='" + tag + '\'' +
+                ", width=" + width +
+                ", height=" + height +
+                ", originInImage=" + originInImage +
+                ", image=" + image +
+                '}';
     }
 
     public static class Builder {
@@ -85,8 +91,7 @@ public class GroundOverlay {
         private int width;
         private int height;
         private Point originInImage;
-        private String imageUri;
-        private String remoteImageUri;
+        private FileInfo image;
 
         public Builder setWidth(int width) {
             if (width <= 0) {
@@ -125,13 +130,12 @@ public class GroundOverlay {
             return this;
         }
 
-        public Builder setImageUri(String imageUri) {
-            this.imageUri = imageUri;
-            return this;
-        }
+        public Builder setImage(FileInfo image) {
+            if (image == null) {
+                throw new IllegalArgumentException("Argument image is null.");
+            }
 
-        public Builder setRemoteImageUri(String remoteImageUri) {
-            this.remoteImageUri = remoteImageUri;
+            this.image = image;
             return this;
         }
 
@@ -140,8 +144,7 @@ public class GroundOverlay {
             overlay.name = name == null ? "" : name;
             overlay.tag = tag == null ? "" : tag;
             overlay.originInImage = originInImage;
-            overlay.imageUri = imageUri == null ? "" : imageUri;
-            overlay.remoteImageUri = remoteImageUri == null ? "" : remoteImageUri;
+            overlay.image = image == null ? FileInfo.DEFAULT : image;
             return overlay;
         }
     }

@@ -2,6 +2,8 @@ package com.ubtrobot.navigation;
 
 import android.text.TextUtils;
 
+import com.ubtrobot.io.FileInfo;
+
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,6 +19,7 @@ public class NavMap {
     private float scale;
     private List<GroundOverlay> groundOverlayList;
     private List<Marker> markerList;
+    private FileInfo navFile;
 
     private NavMap(String id, float scale) {
         this.id = id;
@@ -57,6 +60,10 @@ public class NavMap {
         return null;
     }
 
+    public FileInfo getNavFile() {
+        return navFile;
+    }
+
     public Builder toBuilder() {
         return new Builder(this);
     }
@@ -70,6 +77,7 @@ public class NavMap {
                 ", scale=" + scale +
                 ", groundOverlayList=" + groundOverlayList +
                 ", markerList=" + markerList +
+                ", navFile=" + navFile +
                 '}';
     }
 
@@ -79,6 +87,7 @@ public class NavMap {
         private String name;
         private String tag;
         private float scale;
+        private FileInfo navFile;
 
         private List<GroundOverlay> groundOverlayList = new LinkedList<>();
         private LinkedList<Marker> markerList = new LinkedList<>();
@@ -92,6 +101,7 @@ public class NavMap {
             name = map.getName();
             tag = map.getTag();
             scale = map.scale;
+            navFile = map.getNavFile();
 
             groundOverlayList.addAll(map.getGroundOverlayList());
             this.markerList.addAll(map.getMarkerList());
@@ -117,6 +127,15 @@ public class NavMap {
 
         public Builder setTag(String tag) {
             this.tag = tag;
+            return this;
+        }
+
+        public Builder setNavFile(FileInfo navFile) {
+            if (navFile == null) {
+                throw new IllegalArgumentException("Argument navFile is null.");
+            }
+
+            this.navFile = navFile;
             return this;
         }
 
@@ -202,6 +221,7 @@ public class NavMap {
             NavMap navMap = new NavMap(id, scale);
             navMap.name = name == null ? "" : name;
             navMap.tag = tag == null ? "" : tag;
+            navMap.navFile = navFile == null ? FileInfo.DEFAULT : navFile;
             navMap.groundOverlayList = Collections.unmodifiableList(groundOverlayList);
             navMap.markerList = Collections.unmodifiableList(markerList);
 
@@ -215,6 +235,7 @@ public class NavMap {
                     ", name='" + name + '\'' +
                     ", tag='" + tag + '\'' +
                     ", scale=" + scale +
+                    ", navFile=" + navFile +
                     ", groundOverlayList=" + groundOverlayList +
                     ", markerList=" + markerList +
                     '}';

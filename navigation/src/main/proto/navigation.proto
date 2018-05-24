@@ -43,6 +43,7 @@ message NavMap {
 
     repeated GroundOverlay ground_overlay = 5;
     repeated Marker marker = 6;
+    google.protobuf.Any navFile = 7;
 }
 
 message NavMapList {

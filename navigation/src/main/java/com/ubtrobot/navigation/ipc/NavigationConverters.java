@@ -24,7 +24,8 @@ public class NavigationConverters {
     public static NavigationProto.NavMap toNavMapProto(NavMap map) {
         NavigationProto.NavMap.Builder builder = NavigationProto.NavMap.newBuilder().
                 setId(map.getId()).setName(map.getName()).
-                setTag(map.getTag()).setScale(map.getScale());
+                setTag(map.getTag()).setScale(map.getScale()).
+                setNavFile(Any.pack(IoConverters.toFileInfoProto(map.getNavFile())));
         for (GroundOverlay groundOverlay : map.getGroundOverlayList()) {
             builder.addGroundOverlay(toGroundOverlayProto(groundOverlay));
         }
@@ -68,7 +69,9 @@ public class NavigationConverters {
     public static NavMap toNavMapPojo(NavigationProto.NavMap mapProto)
             throws InvalidProtocolBufferException {
         NavMap.Builder builder = new NavMap.Builder(mapProto.getId(), mapProto.getScale()).
-                setName(mapProto.getName()).setTag(mapProto.getTag());
+                setName(mapProto.getName()).setTag(mapProto.getTag()).
+                setNavFile(IoConverters.toFileInfoPojo(mapProto.getNavFile().
+                        unpack(IoProto.FileInfo.class)));
         for (NavigationProto.GroundOverlay groundOverlay : mapProto.getGroundOverlayList()) {
             builder.addGroundOverlay(toGroundOverlayPojo(groundOverlay));
         }

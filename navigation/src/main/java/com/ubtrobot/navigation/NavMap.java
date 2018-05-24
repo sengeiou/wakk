@@ -47,14 +47,18 @@ public class NavMap {
         return markerList;
     }
 
-    public Marker getMarker(String title) {
+    public Marker getMarker(String id) {
         for (Marker marker : markerList) {
-            if (marker.getTitle().equals(title)) {
+            if (marker.getId().equals(id)) {
                 return marker;
             }
         }
 
         return null;
+    }
+
+    public Builder toBuilder() {
+        return new Builder(this);
     }
 
     @Override
@@ -75,6 +79,7 @@ public class NavMap {
         private String name;
         private String tag;
         private float scale;
+
         private List<GroundOverlay> groundOverlayList = new LinkedList<>();
         private LinkedList<Marker> markerList = new LinkedList<>();
 
@@ -83,8 +88,12 @@ public class NavMap {
                 throw new IllegalArgumentException("Argument map is null.");
             }
 
-            this.id = map.getId();
-            this.name = map.getName();
+            id = map.getId();
+            name = map.getName();
+            tag = map.getTag();
+            scale = map.scale;
+
+            groundOverlayList.addAll(map.getGroundOverlayList());
             this.markerList.addAll(map.getMarkerList());
         }
 
@@ -129,6 +138,27 @@ public class NavMap {
             return this;
         }
 
+        public Builder setMarker(int index, Marker marker) {
+            if (index < 0 || index >= markerList.size()) {
+                throw new IllegalArgumentException("Index out of bounds.");
+            }
+            if (marker == null) {
+                throw new IllegalArgumentException("Argument marker is null.");
+            }
+
+            markerList.set(index, marker);
+            return this;
+        }
+
+        public Builder removeMarker(int index) {
+            if (index < 0 || index >= markerList.size()) {
+                throw new IllegalArgumentException("Index out of bounds.");
+            }
+
+            markerList.remove(index);
+            return this;
+        }
+
         public Builder addGroundOverlays(List<GroundOverlay> overlays) {
             if (overlays == null) {
                 throw new IllegalArgumentException("Argument overlays is null.");
@@ -144,6 +174,27 @@ public class NavMap {
             }
 
             groundOverlayList.add(overlay);
+            return this;
+        }
+
+        public Builder setGroundOverlay(int index, GroundOverlay overlay) {
+            if (index < 0 || index >= groundOverlayList.size()) {
+                throw new IllegalArgumentException("Index out of bounds.");
+            }
+            if (overlay == null) {
+                throw new IllegalArgumentException("Argument overlay is null.");
+            }
+
+            groundOverlayList.set(index, overlay);
+            return this;
+        }
+
+        public Builder removeGroundOverlay(int index) {
+            if (index < 0 || index >= groundOverlayList.size()) {
+                throw new IllegalArgumentException("Index out of bounds.");
+            }
+
+            groundOverlayList.remove(index);
             return this;
         }
 

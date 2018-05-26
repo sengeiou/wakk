@@ -60,8 +60,9 @@ message Location {
 
 message LocateOption {
 
-    bool use_nearby = 2;
-    Location nearby = 1;
+    bool use_nearby = 1;
+    Location nearby = 2;
+    int32 timeout = 3;
 }
 
 message NavigateOption {

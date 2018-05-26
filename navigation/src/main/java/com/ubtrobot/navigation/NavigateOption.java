@@ -18,6 +18,14 @@ public class NavigateOption {
         return retryCount;
     }
 
+    @Override
+    public String toString() {
+        return "NavigateOption{" +
+                "maxSpeed=" + maxSpeed +
+                ", retryCount=" + retryCount +
+                '}';
+    }
+
     public static final class Builder {
 
         private float maxSpeed;

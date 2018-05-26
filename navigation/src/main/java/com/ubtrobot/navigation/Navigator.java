@@ -6,9 +6,11 @@ import com.google.protobuf.Message;
 import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.master.adapter.ProtoCallAdapter;
+import com.ubtrobot.master.call.CallConfiguration;
 import com.ubtrobot.master.competition.Competing;
 import com.ubtrobot.master.competition.CompetingItem;
 import com.ubtrobot.master.competition.CompetitionSession;
+import com.ubtrobot.master.service.ServiceProxy;
 import com.ubtrobot.navigation.ipc.NavigationConstants;
 import com.ubtrobot.navigation.ipc.NavigationConverters;
 import com.ubtrobot.navigation.ipc.NavigationProto;
@@ -45,10 +47,13 @@ public class Navigator implements Competing {
             throw new IllegalArgumentException("Argument option is null.");
         }
 
-        ProtoCallAdapter navigationService = new ProtoCallAdapter(
-                session.createSystemServiceProxy(NavigationConstants.SERVICE_NAME),
-                mHandler
-        );
+        ServiceProxy serviceProxy = session.createSystemServiceProxy(NavigationConstants.SERVICE_NAME);
+        if (option.getTimeout() > 0) {
+            serviceProxy.setConfiguration(new CallConfiguration.Builder(
+                    serviceProxy.getConfiguration()).setTimeout(option.getTimeout()).build());
+        }
+
+        ProtoCallAdapter navigationService = new ProtoCallAdapter(serviceProxy, mHandler);
         return navigationService.call(
                 NavigationConstants.CALL_PATH_LOCATE_SELF,
                 NavigationConverters.toLocateOptionProto(option),

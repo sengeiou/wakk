@@ -142,20 +142,15 @@ public class NavigationConverters {
     }
 
     public static NavigationProto.LocateOption toLocateOptionProto(LocateOption option) {
-        return NavigationProto.LocateOption.newBuilder().setUseNearby(option.useNearby()).
-                setNearby(NavigationProto.Location.newBuilder()
-                        .setPosition(NavigationProto.Point.newBuilder()
-                                .setX(option.getNearby().getPosition().getX())
-                                .setY(option.getNearby().getPosition().getY())
-                                .build()
-                        ).setRotation(option.getNearby().getRotation())
-                        .setZ(option.getNearby().getZ())
-                        .build()).build();
+        return NavigationProto.LocateOption.newBuilder().setUseNearby(option.useNearby())
+                .setTimeout(option.getTimeout()).setNearby(toLocationProto(option.getNearby()))
+                .build();
     }
 
     public static LocateOption toLocateOptionPojo(NavigationProto.LocateOption option) {
         if (option.getUseNearby()) {
-            return new LocateOption.Builder().setNearby(toLocationPojo(option.getNearby())).build();
+            return new LocateOption.Builder().setNearby(toLocationPojo(option.getNearby()))
+                    .setTimeout(option.getTimeout()).build();
         } else {
             return new LocateOption.Builder().build();
         }

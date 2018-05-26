@@ -161,6 +161,7 @@ public abstract class AbstractLightService implements LightService {
         return mInterruptibleTaskHelper.start(
                 lightsReceivers(lightIds),
                 TASK_NAME_DISPLAY_EFFECT,
+                new InterruptibleTaskHelper.Session(),
                 new InterruptibleAsyncTask<Void, DisplayException>() {
                     @Override
                     protected void onStart() {

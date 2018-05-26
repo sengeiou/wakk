@@ -5,6 +5,7 @@
     <call path="/navigation/map" />
     <call path="/navigation/map/list" />
     <call path="/navigation/map/add" />
+    <call path="/navigation/map/selected" />
     <call path="/navigation/map/select" />
     <call path="/navigation/map/modify" />
     <call path="/navigation/map/remove" />

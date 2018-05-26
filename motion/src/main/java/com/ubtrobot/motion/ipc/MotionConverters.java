@@ -3,15 +3,27 @@ package com.ubtrobot.motion.ipc;
 import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.ubtrobot.device.ipc.DeviceProto;
-import com.ubtrobot.motion.Joint;
 import com.ubtrobot.motion.JointDevice;
+import com.ubtrobot.motion.JointGroupRotatingProgress;
+import com.ubtrobot.motion.JointRotatingOption;
 import com.ubtrobot.motion.LocomotorDevice;
 
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class MotionConverters {
 
     private MotionConverters() {
+    }
+
+    public static MotionProto.JointIdList toJointIdListProto(List<JointDevice> jointDevices) {
+        MotionProto.JointIdList.Builder builder = MotionProto.JointIdList.newBuilder();
+        for (JointDevice jointDevice : jointDevices) {
+            builder.addId(jointDevice.getId());
+        }
+        return builder.build();
     }
 
     public static JointDevice toJointDevicePojo(DeviceProto.Device deviceProto)
@@ -56,46 +68,56 @@ public class MotionConverters {
         return builder.build();
     }
 
-    public static MotionProto.JointRotatingOption
-    toJointRotatingOptionProto(String jointId, boolean relatively, float angle, float speed) {
-        return MotionProto.JointRotatingOption.newBuilder().
-                setJointId(jointId).
-                setRelatively(relatively).
-                setAngle(angle).
-                setUseSpeed(true).
-                setSpeed(speed).
-                build();
+    public static Map<String, List<JointRotatingOption>> toJointRotatingOptionSequenceMapPojo(
+            MotionProto.JointRotatingOptionSequenceMap optionSequenceMap) {
+        HashMap<String, List<JointRotatingOption>> ret = new HashMap<>();
+        for (Map.Entry<String, MotionProto.JointRotatingOptionSequence> entry
+                : optionSequenceMap.getOptionSequenceMap().entrySet()) {
+            LinkedList<JointRotatingOption> optionSequence = new LinkedList<>();
+            ret.put(entry.getKey(), optionSequence);
+
+            for (MotionProto.JointRotatingOption option : entry.getValue().getOptionList()) {
+                optionSequence.add(toJointRotatingOptionPojo(option));
+            }
+        }
+
+        return ret;
     }
 
     public static MotionProto.JointRotatingOption
-    toJointRotatingOptionProto(String jointId, boolean relatively, float angle, long timeMillis) {
+    toJointRotatingOptionProto(JointRotatingOption option) {
         return MotionProto.JointRotatingOption.newBuilder().
-                setJointId(jointId).
-                setRelatively(relatively).
-                setAngle(angle).
-                setUseSpeed(false).
-                setTimeMillis(timeMillis).
+                setJointId(option.getJointId()).
+                setAngle(option.getAngle()).
+                setAngleAbsolute(option.isAngleAbsolute()).
+                setDuration(option.getDuration()).
+                setSpeed(option.getSpeed()).
                 build();
     }
 
-    public static MotionProto.JointRotatingProgress
-    toJointRotatingProgressProto(Joint.RotatingProgress progress) {
-        return MotionProto.JointRotatingProgress.newBuilder().
-                setState(progress.getState()).
-                setCurrentAngle(progress.getCurrentAngle()).
-                setRotatedAngle(progress.getRotatedAngle()).
-                setRotatedTimeMillis(progress.getRotatedTimeMillis()).
+    public static JointRotatingOption
+    toJointRotatingOptionPojo(MotionProto.JointRotatingOption option) {
+        return new JointRotatingOption.Builder().
+                setJointId(option.getJointId()).
+                setAngle(option.getAngle()).
+                setAngleAbsolute(option.getAngleAbsolute()).
+                setDuration(option.getDuration()).
+                setSpeed(option.getSpeed()).
                 build();
     }
 
-    public static Joint.RotatingProgress
-    toJointRotatingProgressPojo(MotionProto.JointRotatingProgress progress) {
-        return new Joint.RotatingProgress(
-                progress.getState(),
-                progress.getCurrentAngle(),
-                progress.getRotatedAngle(),
-                progress.getRotatedTimeMillis()
-        );
+    public static MotionProto.JointGroupRotatingProgress
+    toJointGroupRotatingProgressProto(JointGroupRotatingProgress progress) {
+        return MotionProto.JointGroupRotatingProgress.newBuilder()
+                .setSessionId(progress.getSessionId())
+                .setState(progress.getState())
+                .build();
+    }
+
+    public static JointGroupRotatingProgress
+    toJointGroupRotatingProgressPojo(MotionProto.JointGroupRotatingProgress progress) {
+        return new JointGroupRotatingProgress.Builder(
+                progress.getSessionId(), progress.getState()).build();
     }
 
     public static LocomotorDevice toLocomotorDevicePojo(DeviceProto.Device deviceProto)

@@ -3,32 +3,25 @@ package com.ubtrobot.motion.sal;
 import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.exception.AccessServiceException;
-import com.ubtrobot.motion.Joint;
 import com.ubtrobot.motion.JointDevice;
 import com.ubtrobot.motion.JointException;
+import com.ubtrobot.motion.JointGroupRotatingProgress;
+import com.ubtrobot.motion.JointRotatingOption;
 import com.ubtrobot.motion.LocomotorDevice;
 
 import java.util.List;
+import java.util.Map;
 
 public interface MotionService {
 
     Promise<List<JointDevice>, AccessServiceException> getJointList();
 
-    boolean isJointRotating(String jointId);
+    Promise<List<String>, AccessServiceException> isJointsRotating(List<String> jointIdList);
 
-    float getJointAngle(String jointId);
+    Promise<Map<String, Float>, AccessServiceException> getJointsAngle(List<String> jointIdList);
 
-    ProgressivePromise<Void, JointException, Joint.RotatingProgress>
-    jointRotateBy(String jointId, float angle, float speed);
-
-    ProgressivePromise<Void, JointException, Joint.RotatingProgress>
-    jointRotateBy(String jointId, float angle, long timeMillis);
-
-    ProgressivePromise<Void, JointException, Joint.RotatingProgress>
-    jointRotateTo(String jointId, float angle, float speed);
-
-    ProgressivePromise<Void, JointException, Joint.RotatingProgress>
-    jointRotateTo(String jointId, float angle, long timeMillis);
+    ProgressivePromise<Void, JointException, JointGroupRotatingProgress>
+    jointRotate(Map<String, List<JointRotatingOption>> optionSequenceMap);
 
     Promise<LocomotorDevice, AccessServiceException> getLocomotor();
 }

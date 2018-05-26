@@ -3,8 +3,6 @@ package com.ubtrobot.motion.ipc.master;
 import android.app.Application;
 import android.os.Handler;
 
-import com.google.protobuf.BoolValue;
-import com.google.protobuf.FloatValue;
 import com.google.protobuf.Message;
 import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
@@ -14,14 +12,13 @@ import com.ubtrobot.master.adapter.ProtoCallProcessAdapter;
 import com.ubtrobot.master.adapter.ProtoParamParser;
 import com.ubtrobot.master.annotation.Call;
 import com.ubtrobot.master.competition.CompetingCallDelegate;
+import com.ubtrobot.master.competition.CompetingItemDetail;
+import com.ubtrobot.master.competition.CompetitionSessionInfo;
 import com.ubtrobot.master.competition.ProtoCompetingCallDelegate;
-import com.ubtrobot.master.param.ProtoParam;
 import com.ubtrobot.master.service.MasterSystemService;
-import com.ubtrobot.master.transport.message.CallGlobalCode;
-import com.ubtrobot.motion.Joint;
 import com.ubtrobot.motion.JointDevice;
 import com.ubtrobot.motion.JointException;
-import com.ubtrobot.motion.JointList;
+import com.ubtrobot.motion.JointGroupRotatingProgress;
 import com.ubtrobot.motion.LocomotorDevice;
 import com.ubtrobot.motion.ipc.MotionConstants;
 import com.ubtrobot.motion.ipc.MotionConverters;
@@ -33,7 +30,9 @@ import com.ubtrobot.transport.message.CallException;
 import com.ubtrobot.transport.message.Request;
 import com.ubtrobot.transport.message.Responder;
 
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class MotionSystemService extends MasterSystemService {
 
@@ -58,6 +57,26 @@ public class MotionSystemService extends MasterSystemService {
         Handler handler = new Handler(getMainLooper());
         mCallProcessor = new ProtoCallProcessAdapter(handler);
         mCompetingCallDelegate = new ProtoCompetingCallDelegate(this, handler);
+    }
+
+    @Override
+    protected List<CompetingItemDetail> getCompetingItems() {
+        LinkedList<CompetingItemDetail> itemDetails = new LinkedList<>();
+        try {
+            List<JointDevice> jointDevices = mService.getJointList().get();
+            for (JointDevice jointDevice : jointDevices) {
+                itemDetails.add(new CompetingItemDetail.Builder(
+                        getName(),
+                        MotionConstants.COMPETING_ITEM_PREFIX_JOINT + jointDevice.getId()
+                ).addCallPath(MotionConstants.CALL_PATH_JOINT_ROTATE)
+                        .setDescription("Competing item detail for joint " + jointDevice.getId())
+                        .build());
+            }
+
+            return itemDetails;
+        } catch (AccessServiceException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     @Call(path = MotionConstants.CALL_PATH_GET_JOINT_LIST)
@@ -87,85 +106,95 @@ public class MotionSystemService extends MasterSystemService {
 
     @Call(path = MotionConstants.CALL_PATH_QUERY_JOINT_IS_ROTATING)
     public void onQueryJointIsRotating(Request request, Responder responder) {
-        String jointId;
-        if ((jointId = ProtoParamParser.parseStringParam(request, responder)) == null) {
+        final MotionProto.JointIdList jointIdList;
+        if ((jointIdList = ProtoParamParser.parseParam(
+                request, MotionProto.JointIdList.class, responder)) == null) {
             return;
         }
 
-        try {
-            responder.respondSuccess(ProtoParam.create(BoolValue.newBuilder().
-                    setValue(mService.isJointRotating(jointId)).build()));
-        } catch (JointList.JointNotFoundException e) {
-            jointNotFound(jointId, responder);
-        }
-    }
+        mCallProcessor.onCall(
+                responder,
+                new CallProcessAdapter.Callable<List<String>, AccessServiceException>() {
+                    @Override
+                    public Promise<List<String>, AccessServiceException> call() throws CallException {
+                        return mService.isJointsRotating(jointIdList.getIdList());
+                    }
+                },
+                new ProtoCallProcessAdapter.DFConverter<List<String>, AccessServiceException>() {
+                    @Override
+                    public Message convertDone(List<String> idList) {
+                        return MotionProto.JointIdList.newBuilder().addAllId(idList).build();
+                    }
 
-    private void jointNotFound(String jointId, Responder responder) {
-        responder.respondFailure(CallGlobalCode.BAD_REQUEST, "Bad request. Joint not found. " +
-                "jointId=" + jointId);
+                    @Override
+                    public CallException convertFail(AccessServiceException e) {
+                        return new CallException(e.getCode(), e.getMessage());
+                    }
+                }
+        );
     }
 
     @Call(path = MotionConstants.CALL_PATH_GET_JOINT_ANGLE)
     public void onGetJointAngle(Request request, Responder responder) {
-        String jointId;
-        if ((jointId = ProtoParamParser.parseStringParam(request, responder)) == null) {
+        final MotionProto.JointIdList jointIdList;
+        if ((jointIdList = ProtoParamParser.parseParam(
+                request, MotionProto.JointIdList.class, responder)) == null) {
             return;
         }
 
-        try {
-            responder.respondSuccess(ProtoParam.create(FloatValue.newBuilder().
-                    setValue(mService.getJointAngle(jointId)).build()
-            ));
-        } catch (JointList.JointNotFoundException e) {
-            jointNotFound(jointId, responder);
-        }
+        mCallProcessor.onCall(
+                responder,
+                new CallProcessAdapter.Callable<Map<String, Float>, AccessServiceException>() {
+                    @Override
+                    public Promise<Map<String, Float>, AccessServiceException> call() throws CallException {
+                        return mService.getJointsAngle(jointIdList.getIdList());
+                    }
+                },
+                new ProtoCallProcessAdapter.DFConverter<Map<String, Float>, AccessServiceException>() {
+                    @Override
+                    public Message convertDone(Map<String, Float> angleMap) {
+                        return MotionProto.JointAngleMap.newBuilder().putAllAngle(angleMap).build();
+                    }
+
+                    @Override
+                    public CallException convertFail(AccessServiceException e) {
+                        return new CallException(e.getCode(), e.getMessage());
+                    }
+                }
+        );
     }
 
     @Call(path = MotionConstants.CALL_PATH_JOINT_ROTATE)
     public void onJointRotate(final Request request, final Responder responder) {
-        final MotionProto.JointRotatingOption option;
-        if ((option = ProtoParamParser.parseParam(
-                request, MotionProto.JointRotatingOption.class, responder)) == null) {
+        final MotionProto.JointRotatingOptionSequenceMap optionSequenceMap;
+        if ((optionSequenceMap = ProtoParamParser.parseParam(
+                request, MotionProto.JointRotatingOptionSequenceMap.class, responder)) == null) {
             return;
+        }
+
+        LinkedList<String> competingItemIds = new LinkedList<>();
+        for (String jointId : optionSequenceMap.getOptionSequenceMap().keySet()) {
+            competingItemIds.add(MotionConstants.COMPETING_ITEM_PREFIX_JOINT + jointId);
         }
 
         mCompetingCallDelegate.onCall(
                 request,
-                MotionConstants.COMPETING_ITEM_PREFIX_JOINT + option.getJointId(),
+                competingItemIds,
                 responder,
-                new CompetingCallDelegate.SessionProgressiveCallable<
-                        Void, JointException, Joint.RotatingProgress>() {
+                new CompetingCallDelegate.SessionProgressiveCallable<Void, JointException, JointGroupRotatingProgress>() {
                     @Override
-                    public ProgressivePromise<Void, JointException, Joint.RotatingProgress>
+                    public ProgressivePromise<Void, JointException, JointGroupRotatingProgress>
                     call() throws CallException {
-                        try {
-                            if (option.getRelatively()) {
-                                if (option.getUseSpeed()) {
-                                    return mService.jointRotateBy(option.getJointId(),
-                                            option.getAngle(), option.getSpeed());
-                                } else {
-                                    return mService.jointRotateBy(option.getJointId(),
-                                            option.getAngle(), option.getTimeMillis());
-                                }
-                            } else {
-                                if (option.getUseSpeed()) {
-                                    return mService.jointRotateTo(option.getJointId(),
-                                            option.getAngle(), option.getSpeed());
-                                } else {
-                                    return mService.jointRotateTo(option.getJointId(),
-                                            option.getAngle(), option.getTimeMillis());
-                                }
-                            }
-                        } catch (JointList.JointNotFoundException e) {
-                            throw new CallException(
-                                    CallGlobalCode.BAD_REQUEST,
-                                    "Illegal argument. Joint NOT found. jointId=" +
-                                            option.getJointId());
-                        }
+                        return mService.jointRotate(MotionConverters.
+                                toJointRotatingOptionSequenceMapPojo(optionSequenceMap));
                     }
                 },
-                new ProtoCompetingCallDelegate.DFPConverter<
-                        Void, JointException, Joint.RotatingProgress>() {
+                new ProtoCompetingCallDelegate.DFPConverter<Void, JointException, JointGroupRotatingProgress>() {
+                    @Override
+                    public Message convertProgress(JointGroupRotatingProgress progress) {
+                        return MotionConverters.toJointGroupRotatingProgressProto(progress);
+                    }
+
                     @Override
                     public Message convertDone(Void done) {
                         return null;
@@ -174,11 +203,6 @@ public class MotionSystemService extends MasterSystemService {
                     @Override
                     public CallException convertFail(JointException e) {
                         return new CallException(e.getCode(), e.getMessage());
-                    }
-
-                    @Override
-                    public Message convertProgress(Joint.RotatingProgress progress) {
-                        return MotionConverters.toJointRotatingProgressProto(progress);
                     }
                 }
         );
@@ -207,5 +231,10 @@ public class MotionSystemService extends MasterSystemService {
                     }
                 }
         );
+    }
+
+    @Override
+    protected void onCompetitionSessionInactive(CompetitionSessionInfo sessionInfo) {
+        mCompetingCallDelegate.onCompetitionSessionInactive(sessionInfo);
     }
 }

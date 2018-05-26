@@ -1,12 +1,14 @@
 package com.ubtrobot.motion.sal;
 
 import com.ubtrobot.async.AsyncTask;
+import com.ubtrobot.async.InterruptibleAsyncTask;
 import com.ubtrobot.async.InterruptibleProgressiveAsyncTask;
 import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.cache.CachedField;
 import com.ubtrobot.exception.AccessServiceException;
 import com.ubtrobot.master.competition.InterruptibleTaskHelper;
+import com.ubtrobot.motion.ExecuteException;
 import com.ubtrobot.motion.JointDevice;
 import com.ubtrobot.motion.JointException;
 import com.ubtrobot.motion.JointGroupRotatingProgress;
@@ -22,6 +24,7 @@ public abstract class AbstractMotionService implements MotionService {
 
     private static final String TASK_RECEIVER_JOINT_PREFIX = "joint-";
     private static final String TASK_NAME_JOINT_ROTATE = "joint-rotate";
+    private static final String TASK_NAME_SCRIPT_EXECUTE = "script-execute";
 
     private final CachedField<Promise<List<JointDevice>, AccessServiceException>> mJoingListPromise;
     private final InterruptibleTaskHelper mInterruptibleTaskHelper;
@@ -138,5 +141,55 @@ public abstract class AbstractMotionService implements MotionService {
     @Override
     public Promise<LocomotorDevice, AccessServiceException> getLocomotor() {
         return null;
+    }
+
+    @Override
+    public Promise<Void, ExecuteException> executeScript(final String scriptId) {
+        LinkedList<String> receivers = new LinkedList<>();
+        try {
+            List<JointDevice> jointDevices = mJoingListPromise.get().get();
+            for (JointDevice jointDevice : jointDevices) {
+                receivers.add(TASK_RECEIVER_JOINT_PREFIX + jointDevice.getId());
+            }
+        } catch (AccessServiceException e) {
+            throw new IllegalStateException(e);
+        }
+
+        final InterruptibleTaskHelper.Session session = new InterruptibleTaskHelper.Session();
+        return mInterruptibleTaskHelper.start(
+                receivers,
+                TASK_NAME_SCRIPT_EXECUTE,
+                session,
+                new InterruptibleAsyncTask<Void, ExecuteException>() {
+                    @Override
+                    protected void onStart() {
+                        startExecutingScript(session.getId(), scriptId);
+                    }
+
+                    @Override
+                    protected void onCancel() {
+                        stopExecutingScript(session.getId());
+                    }
+                },
+                new InterruptibleTaskHelper.InterruptedExceptionCreator<ExecuteException>() {
+                    @Override
+                    public ExecuteException createInterruptedException(Set<String> interrupters) {
+                        return new ExecuteException.Factory().interrupted("Interrupted by joints("
+                                + interrupters + ").");
+                    }
+                }
+        );
+    }
+
+    protected abstract void startExecutingScript(String sessionId, String scriptId);
+
+    protected abstract void stopExecutingScript(String sessionId);
+
+    protected void resolveExecutingScript(String sessionId) {
+        mInterruptibleTaskHelper.resolve(sessionId, null);
+    }
+
+    protected void rejectExecutingScript(String sessionId, ExecuteException e) {
+        mInterruptibleTaskHelper.reject(sessionId, e);
     }
 }

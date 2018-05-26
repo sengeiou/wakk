@@ -25,6 +25,9 @@ public class MotionManager {
 
     private final LocomotorGetter mLocomotorGetter;
 
+    private final MotionScriptExecutor mScriptExecutor;
+    private CompetitionSessionExt<MotionScriptExecutor> mScriptSession;
+
     public MotionManager(MasterContext masterContext) {
         if (masterContext == null) {
             throw new IllegalArgumentException("Argument masterContext is null.");
@@ -39,6 +42,7 @@ public class MotionManager {
 
         mJointList = new JointList(motionService);
         mLocomotorGetter = new LocomotorGetter(motionService);
+        mScriptExecutor = new MotionScriptExecutor(mJointList);
     }
 
     public List<Joint> getJointList() {
@@ -253,5 +257,36 @@ public class MotionManager {
      */
     public Locomotor getLocomotor() {
         return mLocomotorGetter.get();
+    }
+
+    public Promise<Void, ExecuteException> executeScript(final String scriptId) {
+        return scriptSession().execute(
+                mScriptExecutor,
+                new CompetitionSessionExt.SessionCallable<
+                        Void, ExecuteException, MotionScriptExecutor>() {
+                    @Override
+                    public Promise<Void, ExecuteException>
+                    call(CompetitionSession session, MotionScriptExecutor executor) {
+                        return executor.execute(session, scriptId);
+                    }
+                },
+                new CompetitionSessionExt.Converter<ExecuteException>() {
+                    @Override
+                    public ExecuteException convert(ActivateException e) {
+                        return new ExecuteException.Factory().occupied(e);
+                    }
+                }
+        );
+    }
+
+    private CompetitionSessionExt<MotionScriptExecutor> scriptSession() {
+        synchronized (mScriptExecutor) {
+            if (mScriptSession == null) {
+                mScriptSession = new CompetitionSessionExt<>(mMasterContext
+                        .openCompetitionSession().addCompeting(mScriptExecutor));
+            }
+
+            return mScriptSession;
+        }
     }
 }

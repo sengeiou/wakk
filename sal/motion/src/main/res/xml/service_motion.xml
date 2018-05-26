@@ -7,4 +7,5 @@
     <call path="/joint/angle" />
     <call path="/joint/rotate" />
     <call path="/locomotor/device" />
+    <call path="/motion/script/execute" />
 </service>

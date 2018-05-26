@@ -3,6 +3,7 @@ package com.ubtrobot.motion.sal;
 import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.exception.AccessServiceException;
+import com.ubtrobot.motion.ExecuteException;
 import com.ubtrobot.motion.JointDevice;
 import com.ubtrobot.motion.JointException;
 import com.ubtrobot.motion.JointGroupRotatingProgress;
@@ -24,4 +25,6 @@ public interface MotionService {
     jointRotate(Map<String, List<JointRotatingOption>> optionSequenceMap);
 
     Promise<LocomotorDevice, AccessServiceException> getLocomotor();
+
+    Promise<Void, ExecuteException> executeScript(String scriptId);
 }

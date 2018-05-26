@@ -16,6 +16,7 @@ import com.ubtrobot.master.competition.CompetingItemDetail;
 import com.ubtrobot.master.competition.CompetitionSessionInfo;
 import com.ubtrobot.master.competition.ProtoCompetingCallDelegate;
 import com.ubtrobot.master.service.MasterSystemService;
+import com.ubtrobot.motion.ExecuteException;
 import com.ubtrobot.motion.JointDevice;
 import com.ubtrobot.motion.JointException;
 import com.ubtrobot.motion.JointGroupRotatingProgress;
@@ -73,6 +74,11 @@ public class MotionSystemService extends MasterSystemService {
                         .build());
             }
 
+            itemDetails.add(new CompetingItemDetail.Builder(getName(),
+                    MotionConstants.COMPETING_ITEM_SCRIPT_EXECUTOR)
+                    .addCallPath(MotionConstants.CALL_PATH_EXECUTE_MOTION_SCRIPT)
+                    .setDescription("Competing item detail for executing script")
+                    .build());
             return itemDetails;
         } catch (AccessServiceException e) {
             throw new IllegalStateException(e);
@@ -227,6 +233,42 @@ public class MotionSystemService extends MasterSystemService {
 
                     @Override
                     public CallException convertFail(AccessServiceException e) {
+                        return new CallException(e.getCode(), e.getMessage());
+                    }
+                }
+        );
+    }
+
+    @Call(path = MotionConstants.CALL_PATH_EXECUTE_MOTION_SCRIPT)
+    public void onScriptExecute(final Request request, final Responder responder) {
+        final String scriptId = ProtoParamParser.parseStringParam(request, responder);
+        if (scriptId == null) {
+            return;
+        }
+
+        LinkedList<String> competingItems = new LinkedList<>();
+        try {
+            List<JointDevice> jointDevices = mService.getJointList().get();
+            for (JointDevice jointDevice : jointDevices) {
+                competingItems.add(MotionConstants.COMPETING_ITEM_PREFIX_JOINT + jointDevice.getId());
+            }
+        } catch (AccessServiceException e) {
+            throw new IllegalStateException(e);
+        }
+
+        mCompetingCallDelegate.onCall(
+                request,
+                competingItems,
+                responder,
+                new CompetingCallDelegate.SessionCallable<Void, ExecuteException>() {
+                    @Override
+                    public Promise<Void, ExecuteException> call() throws CallException {
+                        return mService.executeScript(scriptId);
+                    }
+                },
+                new ProtoCompetingCallDelegate.FConverter<ExecuteException>() {
+                    @Override
+                    public CallException convertFail(ExecuteException e) {
                         return new CallException(e.getCode(), e.getMessage());
                     }
                 }

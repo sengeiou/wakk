@@ -7,5 +7,7 @@
     <call path="/joint/angle" />
     <call path="/joint/rotate" />
     <call path="/locomotor/device" />
+    <call path="/locomotor/locomote" />
+    <call path="/locomotor/query-is-locomoting" />
     <call path="/motion/script/execute" />
 </service>

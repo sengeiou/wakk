@@ -6,6 +6,8 @@ import com.ubtrobot.device.ipc.DeviceProto;
 import com.ubtrobot.motion.JointDevice;
 import com.ubtrobot.motion.JointGroupRotatingProgress;
 import com.ubtrobot.motion.JointRotatingOption;
+import com.ubtrobot.motion.LocomotionOption;
+import com.ubtrobot.motion.LocomotionProgress;
 import com.ubtrobot.motion.LocomotorDevice;
 
 import java.util.HashMap;
@@ -153,5 +155,62 @@ public class MotionConverters {
                                 build()
                 )).
                 build();
+    }
+
+    public static List<LocomotionOption>
+    toLocomotionOptionSequencePojo(MotionProto.LocomotionOptionSequence optionSequence) {
+        LinkedList<LocomotionOption> ret = new LinkedList<>();
+        for (MotionProto.LocomotionOption option : optionSequence.getOptionList()) {
+            ret.add(toLocomotionOptionPojo(option));
+        }
+
+        return ret;
+    }
+
+    public static LocomotionOption toLocomotionOptionPojo(MotionProto.LocomotionOption option) {
+        return new LocomotionOption.Builder()
+                .setMovingSpeed(option.getMovingSpeed())
+                .setMovingAngle(option.getMovingAngle())
+                .setMovingDistance(option.getMovingDistance())
+                .setTurningSpeed(option.getTurningSpeed())
+                .setTurningAngle(option.getTurningAngle())
+                .setDuration(option.getDuration())
+                .build();
+    }
+
+    public static MotionProto.LocomotionOption toLocomotionOptionProto(LocomotionOption option) {
+        return MotionProto.LocomotionOption.newBuilder()
+                .setMovingSpeed(option.getMovingSpeed())
+                .setMovingAngle(option.getMovingAngle())
+                .setMovingDistance(option.getMovingDistance())
+                .setTurningSpeed(option.getTurningSpeed())
+                .setTurningAngle(option.getTurningAngle())
+                .setDuration(option.getDuration())
+                .build();
+    }
+
+    public static MotionProto.LocomotionOptionSequence
+    toLocomotionOptionSequenceProto(List<LocomotionOption> optionSequence) {
+        MotionProto.LocomotionOptionSequence.Builder builder = MotionProto
+                .LocomotionOptionSequence.newBuilder();
+        for (LocomotionOption option : optionSequence) {
+            builder.addOption(toLocomotionOptionProto(option));
+        }
+
+        return builder.build();
+    }
+
+    public static MotionProto.LocomotionProgress
+    toLocomotionProgressProto(LocomotionProgress progress) {
+        return MotionProto.LocomotionProgress.newBuilder()
+                .setSessionId(progress.getSessionId())
+                .setState(progress.getState())
+                .build();
+    }
+
+    public static LocomotionProgress
+    toLocomotionProgressPojo(MotionProto.LocomotionProgress progress) {
+        return new LocomotionProgress.Builder(
+                progress.getSessionId(), progress.getState()).build();
     }
 }

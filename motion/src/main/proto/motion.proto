@@ -54,3 +54,23 @@ message LocomotorDeviceExt {
     float max_moving_speed = 5;
     float default_moving_speed = 6;
 }
+
+message LocomotionOption {
+    float moving_speed = 1;
+    float moving_angle = 2;
+    float moving_distance = 3;
+
+    float turning_speed = 4;
+    float turning_angle = 5;
+
+    int64 duration = 6;
+}
+
+message LocomotionOptionSequence {
+    repeated LocomotionOption option = 1;
+}
+
+message LocomotionProgress {
+    string session_id = 1;
+    int32 state = 2;
+}

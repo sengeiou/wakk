@@ -13,6 +13,7 @@ import com.ubtrobot.master.competition.CompetitionSessionExt;
 import com.ubtrobot.master.context.MasterContext;
 import com.ubtrobot.motion.ipc.MotionConstants;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -24,6 +25,7 @@ public class MotionManager {
     private final HashMap<String, CompetitionSessionExt<Joint>> mJointSessions = new HashMap<>();
 
     private final LocomotorGetter mLocomotorGetter;
+    private CompetitionSessionExt<Locomotor> mLocomotionSession;
 
     private final MotionScriptExecutor mScriptExecutor;
     private CompetitionSessionExt<MotionScriptExecutor> mScriptSession;
@@ -257,6 +259,166 @@ public class MotionManager {
      */
     public Locomotor getLocomotor() {
         return mLocomotorGetter.get();
+    }
+
+    public ProgressivePromise<Void, LocomotionException, LocomotionProgress>
+    locomote(final List<LocomotionOption> optionSequence) {
+        return locomotionSession().execute(
+                mLocomotorGetter.get(),
+                new CompetitionSessionExt.SessionProgressiveCallable<
+                        Void, LocomotionException, LocomotionProgress, Locomotor>() {
+                    @Override
+                    public ProgressivePromise<Void, LocomotionException, LocomotionProgress>
+                    call(CompetitionSession session, Locomotor locomotor) {
+                        return locomotor.locomote(session, optionSequence);
+                    }
+                },
+                new CompetitionSessionExt.Converter<LocomotionException>() {
+                    @Override
+                    public LocomotionException convert(ActivateException e) {
+                        return new LocomotionException.Factory().occupied(e);
+                    }
+                }
+        );
+    }
+
+    private CompetitionSessionExt<Locomotor> locomotionSession() {
+        synchronized (mLocomotorGetter) {
+            if (mLocomotionSession == null) {
+                mLocomotionSession = new CompetitionSessionExt<>(mMasterContext
+                        .openCompetitionSession().addCompeting(mLocomotorGetter.get()));
+            }
+
+            return mLocomotionSession;
+        }
+    }
+
+    public ProgressivePromise<Void, LocomotionException, LocomotionProgress>
+    locomote(LocomotionOption... optionSequence) {
+        return locomote(Arrays.asList(optionSequence));
+    }
+
+    /**
+     * 以默认速度朝某个方位移动一定距离
+     *
+     * @param angle    移动方位
+     * @param distance 移动距离
+     */
+    public ProgressivePromise<Void, LocomotionException, LocomotionProgress>
+    moveStraightBy(float angle, float distance) {
+        return locomote(new LocomotionOption.Builder().setMovingAngle(angle)
+                .setMovingDistance(distance)
+                .setMovingSpeed(mLocomotorGetter.get().getDevice().getDefaultMovingSpeed()).build());
+    }
+
+    /**
+     * 以一定速度朝某个方位移动一定距离
+     *
+     * @param angle    移动方位
+     * @param distance 移动距离
+     * @param speed    移动速度
+     */
+    public ProgressivePromise<Void, LocomotionException, LocomotionProgress>
+    moveStraightBy(float angle, float distance, float speed) {
+        return locomote(new LocomotionOption.Builder().setMovingAngle(angle)
+                .setMovingDistance(distance).setMovingSpeed(speed).build());
+    }
+
+
+    /**
+     * 一定时间内朝某个方位移动一定距离
+     *
+     * @param angle    移动方位
+     * @param distance 移动距离
+     * @param duration 移动时间
+     */
+    public ProgressivePromise<Void, LocomotionException, LocomotionProgress>
+    moveStraightBy(float angle, float distance, long duration) {
+        return locomote(new LocomotionOption.Builder().setMovingAngle(angle)
+                .setMovingDistance(distance).setDuration(duration).build());
+    }
+
+    /**
+     * 以一定速度朝某个方位持续移动
+     *
+     * @param angle 移动方位
+     * @param speed 移动速度
+     */
+    public ProgressivePromise<Void, LocomotionException, LocomotionProgress>
+    moveStraight(float angle, float speed) {
+        return locomote(new LocomotionOption.Builder().setMovingAngle(angle)
+                .setMovingSpeed(speed).build());
+    }
+
+    /**
+     * 以默认速度朝某个方位持续移动
+     *
+     * @param angle 移动方位
+     */
+    public ProgressivePromise<Void, LocomotionException, LocomotionProgress>
+    moveStraight(float angle) {
+        return locomote(new LocomotionOption.Builder().setMovingAngle(angle).setMovingSpeed(
+                mLocomotorGetter.get().getDevice().getDefaultMovingSpeed()).build());
+    }
+
+    /**
+     * 以默认速度旋转一定角度
+     *
+     * @param angle 旋转角度。正值顺时针旋转，负值逆时针旋转
+     */
+    public ProgressivePromise<Void, LocomotionException, LocomotionProgress>
+    turnBy(float angle) {
+        return locomote(new LocomotionOption.Builder().setTurningAngle(angle).setTurningSpeed(
+                mLocomotorGetter.get().getDevice().getDefaultTurningSpeed()).build());
+    }
+
+    /**
+     * 以一定速度旋转一定角度
+     *
+     * @param angle 旋转角度。正值顺时针旋转，负值逆时针旋转
+     * @param speed 旋转速度
+     */
+    public ProgressivePromise<Void, LocomotionException, LocomotionProgress>
+    turnBy(float angle, float speed) {
+        return locomote(new LocomotionOption.Builder().setTurningAngle(angle)
+                .setTurningSpeed(speed).build());
+    }
+
+    /**
+     * 一定时间内旋转一定角度
+     *
+     * @param angle    旋转角度。正值顺时针旋转，负值逆时针旋转
+     * @param duration 旋转时间
+     */
+    public ProgressivePromise<Void, LocomotionException, LocomotionProgress>
+    turnBy(float angle, long duration) {
+        return locomote(new LocomotionOption.Builder().setTurningAngle(angle)
+                .setDuration(duration).build());
+    }
+
+    /**
+     * 以一定速度向某个时针方向持续旋转
+     *
+     * @param speed 旋转速度。正为顺时针，负为逆时针
+     */
+    public ProgressivePromise<Void, LocomotionException, LocomotionProgress>
+    turn(float speed) {
+        return locomote(new LocomotionOption.Builder().setTurningSpeed(speed).build());
+    }
+
+    /**
+     * 以默认速度向某个时针方向持续旋转
+     *
+     * @param clockwise 是否顺时针
+     */
+    public ProgressivePromise<Void, LocomotionException, LocomotionProgress>
+    turn(boolean clockwise) {
+        return locomote(new LocomotionOption.Builder().setTurningSpeed(mLocomotorGetter.get()
+                .getDevice().getDefaultTurningSpeed() * (clockwise ? 1 : -1)).build());
+    }
+
+    public Promise<Boolean, AccessServiceException> isLocomoting() {
+        return mLocomotorGetter.get().isLocomoting();
     }
 
     public Promise<Void, ExecuteException> executeScript(final String scriptId) {

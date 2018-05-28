@@ -8,6 +8,9 @@ import com.ubtrobot.motion.JointDevice;
 import com.ubtrobot.motion.JointException;
 import com.ubtrobot.motion.JointGroupRotatingProgress;
 import com.ubtrobot.motion.JointRotatingOption;
+import com.ubtrobot.motion.LocomotionException;
+import com.ubtrobot.motion.LocomotionOption;
+import com.ubtrobot.motion.LocomotionProgress;
 import com.ubtrobot.motion.LocomotorDevice;
 
 import java.util.List;
@@ -25,6 +28,11 @@ public interface MotionService {
     jointRotate(Map<String, List<JointRotatingOption>> optionSequenceMap);
 
     Promise<LocomotorDevice, AccessServiceException> getLocomotor();
+
+    Promise<Boolean, AccessServiceException> isLocomoting();
+
+    ProgressivePromise<Void, LocomotionException, LocomotionProgress>
+    locomote(List<LocomotionOption> optionSequence);
 
     Promise<Void, ExecuteException> executeScript(String scriptId);
 }

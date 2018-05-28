@@ -13,6 +13,9 @@ import com.ubtrobot.motion.JointDevice;
 import com.ubtrobot.motion.JointException;
 import com.ubtrobot.motion.JointGroupRotatingProgress;
 import com.ubtrobot.motion.JointRotatingOption;
+import com.ubtrobot.motion.LocomotionException;
+import com.ubtrobot.motion.LocomotionOption;
+import com.ubtrobot.motion.LocomotionProgress;
 import com.ubtrobot.motion.LocomotorDevice;
 
 import java.util.LinkedList;
@@ -23,8 +26,10 @@ import java.util.Set;
 public abstract class AbstractMotionService implements MotionService {
 
     private static final String TASK_RECEIVER_JOINT_PREFIX = "joint-";
+    private static final String TASK_RECEIVER_LOCOMOTION = "locomotion";
     private static final String TASK_NAME_JOINT_ROTATE = "joint-rotate";
     private static final String TASK_NAME_SCRIPT_EXECUTE = "script-execute";
+    private static final String TASK_NAME_LOCOMOTION = "locomotion";
 
     private final CachedField<Promise<List<JointDevice>, AccessServiceException>> mJoingListPromise;
     private final InterruptibleTaskHelper mInterruptibleTaskHelper;
@@ -140,7 +145,73 @@ public abstract class AbstractMotionService implements MotionService {
 
     @Override
     public Promise<LocomotorDevice, AccessServiceException> getLocomotor() {
-        return null;
+        AsyncTask<LocomotorDevice, AccessServiceException> task = createGettingLocomotorTask();
+        if (task == null) {
+            throw new IllegalStateException("createGettingLocomotorTask return null.");
+        }
+
+        task.start();
+        return task.promise();
+    }
+
+    protected abstract AsyncTask<LocomotorDevice, AccessServiceException> createGettingLocomotorTask();
+
+    @Override
+    public Promise<Boolean, AccessServiceException> isLocomoting() {
+        AsyncTask<Boolean, AccessServiceException> task = createGettingLocomotingTask();
+        if (task == null) {
+            throw new IllegalStateException("createGettingLocomotingTask returns null.");
+        }
+
+        task.start();
+        return task.promise();
+    }
+
+    protected abstract AsyncTask<Boolean, AccessServiceException>
+    createGettingLocomotingTask();
+
+    @Override
+    public ProgressivePromise<Void, LocomotionException, LocomotionProgress>
+    locomote(final List<LocomotionOption> optionSequence) {
+        return mInterruptibleTaskHelper.start(
+                TASK_RECEIVER_LOCOMOTION,
+                TASK_NAME_LOCOMOTION,
+                new InterruptibleProgressiveAsyncTask<
+                        Void, LocomotionException, LocomotionProgress>() {
+                    @Override
+                    protected void onStart() {
+                        startLocomotion(optionSequence);
+                    }
+
+                    @Override
+                    protected void onCancel() {
+                        stopLocomotion();
+                    }
+                },
+                new InterruptibleTaskHelper.InterruptedExceptionCreator<LocomotionException>() {
+                    @Override
+                    public LocomotionException createInterruptedException(Set<String> interrupters) {
+                        return new LocomotionException.Factory().interrupted("Interrupted by "
+                                + interrupters + ".");
+                    }
+                }
+        );
+    }
+
+    protected abstract void startLocomotion(List<LocomotionOption> optionSequence);
+
+    protected abstract void stopLocomotion();
+
+    protected void reportLocomotionProgress(LocomotionProgress progress) {
+        mInterruptibleTaskHelper.report(TASK_RECEIVER_LOCOMOTION, TASK_NAME_LOCOMOTION, progress);
+    }
+
+    protected void resolveLocomotion() {
+        mInterruptibleTaskHelper.resolve(TASK_RECEIVER_LOCOMOTION, TASK_NAME_LOCOMOTION, null);
+    }
+
+    protected void rejectLocomotion(LocomotionException e) {
+        mInterruptibleTaskHelper.reject(TASK_RECEIVER_LOCOMOTION, TASK_NAME_LOCOMOTION, e);
     }
 
     @Override
@@ -151,6 +222,7 @@ public abstract class AbstractMotionService implements MotionService {
             for (JointDevice jointDevice : jointDevices) {
                 receivers.add(TASK_RECEIVER_JOINT_PREFIX + jointDevice.getId());
             }
+            receivers.add(TASK_RECEIVER_LOCOMOTION);
         } catch (AccessServiceException e) {
             throw new IllegalStateException(e);
         }

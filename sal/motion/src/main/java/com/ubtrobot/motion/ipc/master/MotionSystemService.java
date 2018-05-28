@@ -3,6 +3,7 @@ package com.ubtrobot.motion.ipc.master;
 import android.app.Application;
 import android.os.Handler;
 
+import com.google.protobuf.BoolValue;
 import com.google.protobuf.Message;
 import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
@@ -20,6 +21,8 @@ import com.ubtrobot.motion.ExecuteException;
 import com.ubtrobot.motion.JointDevice;
 import com.ubtrobot.motion.JointException;
 import com.ubtrobot.motion.JointGroupRotatingProgress;
+import com.ubtrobot.motion.LocomotionException;
+import com.ubtrobot.motion.LocomotionProgress;
 import com.ubtrobot.motion.LocomotorDevice;
 import com.ubtrobot.motion.ipc.MotionConstants;
 import com.ubtrobot.motion.ipc.MotionConverters;
@@ -74,10 +77,17 @@ public class MotionSystemService extends MasterSystemService {
                         .build());
             }
 
-            itemDetails.add(new CompetingItemDetail.Builder(getName(),
-                    MotionConstants.COMPETING_ITEM_SCRIPT_EXECUTOR)
-                    .addCallPath(MotionConstants.CALL_PATH_EXECUTE_MOTION_SCRIPT)
+            itemDetails.add(new CompetingItemDetail.Builder(
+                    getName(),
+                    MotionConstants.COMPETING_ITEM_SCRIPT_EXECUTOR
+            ).addCallPath(MotionConstants.CALL_PATH_EXECUTE_MOTION_SCRIPT)
                     .setDescription("Competing item detail for executing script")
+                    .build());
+
+            itemDetails.add(new CompetingItemDetail.Builder(
+                    getName(), MotionConstants.COMPETING_ITEM_LOCOMOTOR
+            ).addCallPath(MotionConstants.CALL_PATH_LOCOMOTE)
+                    .setDescription("Competing item detail for locomotion")
                     .build());
             return itemDetails;
         } catch (AccessServiceException e) {
@@ -233,6 +243,71 @@ public class MotionSystemService extends MasterSystemService {
 
                     @Override
                     public CallException convertFail(AccessServiceException e) {
+                        return new CallException(e.getCode(), e.getMessage());
+                    }
+                }
+        );
+    }
+
+    @Call(path = MotionConstants.CALL_PATH_QUERY_IS_LOCOMOTING)
+    public void onQueryIsLocomoting(Request request, Responder responder) {
+        mCallProcessor.onCall(
+                responder,
+                new CallProcessAdapter.Callable<Boolean, AccessServiceException>() {
+                    @Override
+                    public Promise<Boolean, AccessServiceException> call() throws CallException {
+                        return mService.isLocomoting();
+                    }
+                },
+                new ProtoCallProcessAdapter.DFConverter<Boolean, AccessServiceException>() {
+                    @Override
+                    public Message convertDone(Boolean locomoting) {
+                        return BoolValue.newBuilder().setValue(locomoting).build();
+                    }
+
+                    @Override
+                    public CallException convertFail(AccessServiceException e) {
+                        return new CallException(e.getCode(), e.getMessage());
+                    }
+                }
+        );
+    }
+
+    @Call(path = MotionConstants.CALL_PATH_LOCOMOTE)
+    public void onLocomote(Request request, Responder responder) {
+        final MotionProto.LocomotionOptionSequence optionSequence;
+        if ((optionSequence = ProtoParamParser.parseParam(
+                request, MotionProto.LocomotionOptionSequence.class, responder)) == null) {
+            return;
+        }
+
+        mCompetingCallDelegate.onCall(
+                request,
+                MotionConstants.COMPETING_ITEM_LOCOMOTOR,
+                responder,
+                new CompetingCallDelegate.SessionProgressiveCallable<
+                        Void, LocomotionException, LocomotionProgress>() {
+                    @Override
+                    public ProgressivePromise<Void, LocomotionException, LocomotionProgress>
+                    call() throws CallException {
+                        return mService.locomote(MotionConverters
+                                .toLocomotionOptionSequencePojo(optionSequence));
+                    }
+                },
+                new ProtoCompetingCallDelegate.DFPConverter<
+                        Void, LocomotionException, LocomotionProgress>() {
+                    @Override
+                    public Message convertProgress(LocomotionProgress progress) {
+                        return MotionConverters.toLocomotionProgressProto(progress);
+                    }
+
+                    @Override
+                    public Message convertDone(Void done) {
+                        return null;
+                    }
+
+                    @Override
+                    public CallException convertFail(LocomotionException e) {
                         return new CallException(e.getCode(), e.getMessage());
                     }
                 }

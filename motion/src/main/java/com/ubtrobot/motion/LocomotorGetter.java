@@ -29,7 +29,7 @@ public class LocomotorGetter {
                         return null;
                     }
 
-                    return new Locomotor(MotionConverters.toLocomotorDevicePojo(device));
+                    return new Locomotor(motionService, MotionConverters.toLocomotorDevicePojo(device));
                 } catch (CallException e) {
                     LOGGER.e(e, "Framework error when getting the locomotor device.");
                 } catch (InvalidProtocolBufferException e) {

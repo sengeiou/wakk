@@ -166,11 +166,11 @@ public class MotionManager {
      *
      * @param jointId    关节 id
      * @param angle      旋转角度。正值顺时针旋转，负值逆时针旋转
-     * @param timeMillis 旋转时间
+     * @param duration 旋转时间
      * @return promise。promise.done 通知成功后旋转到的角度
      */
     public ProgressivePromise<Void, JointException, JointRotatingProgress>
-    jointRotateBy(String jointId, final float angle, final long timeMillis) {
+    jointRotateBy(String jointId, final float angle, final long duration) {
         return jointRotate(
                 jointId,
                 new CompetitionSessionExt.SessionProgressiveCallable<
@@ -178,7 +178,7 @@ public class MotionManager {
                     @Override
                     public ProgressivePromise<Void, JointException, JointRotatingProgress>
                     call(CompetitionSession session, Joint joint) {
-                        return joint.rotateBy(session, angle, timeMillis);
+                        return joint.rotateBy(session, angle, duration);
                     }
                 }
         );
@@ -234,11 +234,11 @@ public class MotionManager {
      *
      * @param jointId    关节 id
      * @param angle      旋转停留角度
-     * @param timeMillis 旋转时间
+     * @param duration 旋转时间
      * @return promise
      */
     public ProgressivePromise<Void, JointException, JointRotatingProgress>
-    jointRotateTo(String jointId, final float angle, final long timeMillis) {
+    jointRotateTo(String jointId, final float angle, final long duration) {
         return jointRotate(
                 jointId,
                 new CompetitionSessionExt.SessionProgressiveCallable<
@@ -246,7 +246,7 @@ public class MotionManager {
                     @Override
                     public ProgressivePromise<Void, JointException, JointRotatingProgress>
                     call(CompetitionSession session, Joint joint) {
-                        return joint.rotateTo(session, angle, timeMillis);
+                        return joint.rotateTo(session, angle, duration);
                     }
                 }
         );

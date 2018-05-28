@@ -34,6 +34,11 @@ public class LocomotionProgress {
         private final String sessionId;
         private final int state;
 
+        public Builder(int state) {
+            this.state = state;
+            sessionId = "";
+        }
+
         public Builder(String sessionId, int state) {
             if (sessionId == null) {
                 throw new IllegalArgumentException("Argument sessionId is null.");

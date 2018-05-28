@@ -66,13 +66,6 @@ public class JointRotatingOption {
         }
 
         public Builder setAngle(float angle) {
-            if (angle == 0) {
-                throw new IllegalArgumentException("Argument angle == 0.");
-            }
-            if (duration > 0 && speed != 0) {
-                throw new IllegalStateException("Already setSpeed and setDuration.");
-            }
-
             this.angle = angle;
             return this;
         }
@@ -86,22 +79,12 @@ public class JointRotatingOption {
             if (duration < 0) {
                 throw new IllegalArgumentException("Argument duration < 0.");
             }
-            if (duration > 0 && angle != 0 && speed != 0) {
-                throw new IllegalStateException("Already setAngle and setSpeed.");
-            }
 
             this.duration = duration;
             return this;
         }
 
         public Builder setSpeed(float speed) {
-            if (speed == 0) {
-                throw new IllegalArgumentException("Argument speed <= 0.");
-            }
-            if (angle != 0 && duration > 0) {
-                throw new IllegalStateException("Already setAngle and setDuration.");
-            }
-
             this.speed = speed;
             return this;
         }

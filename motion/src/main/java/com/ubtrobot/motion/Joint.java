@@ -70,6 +70,7 @@ public class Joint implements Competing {
     public ProgressivePromise<Void, JointException, JointRotatingProgress>
     rotateBy(CompetitionSession session, float angle) {
         return rotate(session, new JointRotatingOption.Builder()
+                .setJointId(getId())
                 .setAngle(angle)
                 .setAngleAbsolute(false)
                 .setSpeed(mDevice.getDefaultSpeed())
@@ -79,6 +80,7 @@ public class Joint implements Competing {
     public ProgressivePromise<Void, JointException, JointRotatingProgress>
     rotateBy(CompetitionSession session, float angle, float speed) {
         return rotate(session, new JointRotatingOption.Builder()
+                .setJointId(getId())
                 .setAngle(angle)
                 .setAngleAbsolute(false)
                 .setSpeed(speed)
@@ -88,6 +90,7 @@ public class Joint implements Competing {
     public ProgressivePromise<Void, JointException, JointRotatingProgress>
     rotateBy(CompetitionSession session, float angle, long duration) {
         return rotate(session, new JointRotatingOption.Builder()
+                .setJointId(getId())
                 .setAngle(angle)
                 .setAngleAbsolute(false)
                 .setDuration(duration)
@@ -97,6 +100,7 @@ public class Joint implements Competing {
     public ProgressivePromise<Void, JointException, JointRotatingProgress>
     rotateTo(CompetitionSession session, float angle) {
         return rotate(session, new JointRotatingOption.Builder()
+                .setJointId(getId())
                 .setAngle(angle)
                 .setAngleAbsolute(true)
                 .setSpeed(mDevice.getDefaultSpeed())
@@ -106,6 +110,7 @@ public class Joint implements Competing {
     public ProgressivePromise<Void, JointException, JointRotatingProgress>
     rotateTo(CompetitionSession session, float angle, float speed) {
         return rotate(session, new JointRotatingOption.Builder()
+                .setJointId(getId())
                 .setAngle(angle)
                 .setAngleAbsolute(true)
                 .setSpeed(speed)
@@ -115,6 +120,7 @@ public class Joint implements Competing {
     public ProgressivePromise<Void, JointException, JointRotatingProgress>
     rotateTo(CompetitionSession session, float angle, long duration) {
         return rotate(session, new JointRotatingOption.Builder()
+                .setJointId(getId())
                 .setAngle(angle)
                 .setAngleAbsolute(true)
                 .setDuration(duration)

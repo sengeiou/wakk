@@ -79,7 +79,7 @@ public class JointGroup implements Competing {
                     = MotionProto.JointRotatingOptionSequence.newBuilder();
 
             for (JointRotatingOption option : options) {
-                seqBuilder.addOption(MotionConverters.toJointRotatingOptionProto(option));
+                seqBuilder.addOption(MotionConverters.toJointRotatingOptionProto(option, jointId));
             }
 
             mapBuilder.putOptionSequence(jointId, seqBuilder.build());

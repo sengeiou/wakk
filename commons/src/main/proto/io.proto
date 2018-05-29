@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package emotion;
+package io;
 
 option java_package = "com.ubtrobot.io.ipc";
 option java_outer_classname = "IoProto";

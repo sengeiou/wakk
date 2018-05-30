@@ -11,14 +11,17 @@ import com.ubtrobot.ulog.FwLoggerFactory;
 import com.ubtrobot.ulog.Logger;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class JointList {
 
     private static final Logger LOGGER = FwLoggerFactory.getLogger("JointList");
 
     private final CachedField<List<Joint>> mJoints;
+    private final CachedField<Map<String, Joint>> mJointMap;
 
     JointList(final ProtoCallAdapter motionService) {
         mJoints = new CachedField<>(new CachedField.FieldGetter<List<Joint>>() {
@@ -42,6 +45,23 @@ public class JointList {
                 return null;
             }
         });
+
+        mJointMap = new CachedField<>(new CachedField.FieldGetter<Map<String, Joint>>() {
+            @Override
+            public Map<String, Joint> get() {
+                List<Joint> joints = mJoints.get();
+                if (joints == null) {
+                    return null;
+                }
+
+                HashMap<String, Joint> jointMap = new HashMap<>();
+                for (Joint joint : joints) {
+                    jointMap.put(joint.getId(), joint);
+                }
+
+                return jointMap;
+            }
+        });
     }
 
     public List<Joint> all() {
@@ -50,13 +70,13 @@ public class JointList {
     }
 
     public Joint get(String jointId) {
-        for (Joint joint : all()) {
-            if (joint.getId().equals(jointId)) {
-                return joint;
-            }
-        }
+        Map<String, Joint> jointMap = mJointMap.get();
+        Joint joint = jointMap == null ? null : jointMap.get(jointId);
 
-        throw new JointNotFoundException();
+        if (joint == null) {
+            throw new JointNotFoundException();
+        }
+        return joint;
     }
 
     public static class JointNotFoundException extends RuntimeException {

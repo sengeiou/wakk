@@ -50,6 +50,10 @@ public class LocomotorGetter {
         return locomotor;
     }
 
+    public boolean exists() {
+        return mLocomotor.get() != null;
+    }
+
     public static class LocomotorNotFoundException extends RuntimeException {
     }
 }

@@ -18,10 +18,12 @@ import java.util.List;
 public class MotionScriptExecutor implements Competing {
 
     private final JointList mJointList;
+    private final LocomotorGetter mLocomotorGetter;
     private final Handler mHandler = new Handler();
 
-    public MotionScriptExecutor(JointList jointList) {
+    public MotionScriptExecutor(JointList jointList, LocomotorGetter locomotorGetter) {
         mJointList = jointList;
+        mLocomotorGetter = locomotorGetter;
     }
 
     @Override
@@ -30,6 +32,11 @@ public class MotionScriptExecutor implements Competing {
         for (Joint joint : mJointList.all()) {
             items.add(new CompetingItem(MotionConstants.SERVICE_NAME,
                     MotionConstants.COMPETING_ITEM_PREFIX_JOINT + joint.getId()));
+        }
+
+        if (mLocomotorGetter.exists()) {
+            items.add(new CompetingItem(MotionConstants.SERVICE_NAME,
+                    MotionConstants.COMPETING_ITEM_LOCOMOTOR));
         }
 
         items.add(new CompetingItem(MotionConstants.SERVICE_NAME,

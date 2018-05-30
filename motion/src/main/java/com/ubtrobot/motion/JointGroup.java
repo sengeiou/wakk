@@ -15,6 +15,8 @@ import com.ubtrobot.motion.ipc.MotionConstants;
 import com.ubtrobot.motion.ipc.MotionConverters;
 import com.ubtrobot.motion.ipc.MotionProto;
 import com.ubtrobot.transport.message.CallException;
+import com.ubtrobot.ulog.FwLoggerFactory;
+import com.ubtrobot.ulog.Logger;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -24,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 
 public class JointGroup implements Competing {
+
+    private static final Logger LOGGER = FwLoggerFactory.getLogger("JointGroup");
 
     private final ProtoCallAdapter mMotionService;
     private final List<JointDevice> mJointDevices;
@@ -72,6 +76,8 @@ public class JointGroup implements Competing {
             String jointId = entry.getKey();
             List<JointRotatingOption> options = entry.getValue();
             if (!mJointDeviceMap.containsKey(jointId) || options.isEmpty()) {
+                LOGGER.w("Illegal joint id in the optionSequenceMap key or the sequence " +
+                        "for a joint is empty. ");
                 continue;
             }
 

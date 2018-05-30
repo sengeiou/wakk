@@ -35,9 +35,9 @@ public abstract class AbstractNavigationService implements NavigationService {
     public Promise<List<NavMap>, NavMapException>
     getNavMapList() {
         AsyncTask<List<NavMap>, NavMapException> task =
-                createGetNavMapListTask();
+                createGettingNavMapListTask();
         if (task == null) {
-            throw new IllegalStateException("createGetNavMapListTask return null.");
+            throw new IllegalStateException("createGettingNavMapListTask return null.");
         }
 
         task.start();
@@ -45,85 +45,85 @@ public abstract class AbstractNavigationService implements NavigationService {
     }
 
     protected abstract AsyncTask<List<NavMap>, NavMapException>
-    createGetNavMapListTask();
+    createGettingNavMapListTask();
 
     @Override
     public Promise<NavMap, NavMapException> getNavMap(String mapId) {
-        AsyncTask<NavMap, NavMapException> task = createGetNavMapTask(mapId);
+        AsyncTask<NavMap, NavMapException> task = createGettingNavMapTask(mapId);
         if (task == null) {
-            throw new IllegalStateException("createGetNavMapTask return null.");
+            throw new IllegalStateException("createGettingNavMapTask return null.");
         }
 
         task.start();
         return task.promise();
     }
 
-    protected abstract AsyncTask<NavMap, NavMapException> createGetNavMapTask(String mapId);
+    protected abstract AsyncTask<NavMap, NavMapException> createGettingNavMapTask(String mapId);
 
     @Override
     public Promise<NavMap, NavMapException> getSelectedNavMap() {
-        AsyncTask<NavMap, NavMapException> task = createGetSelectedNavMap();
+        AsyncTask<NavMap, NavMapException> task = createGettingSelectedNavMap();
         if (task == null) {
-            throw new IllegalStateException("createGetSelectedNavMap return null.");
+            throw new IllegalStateException("createGettingSelectedNavMap return null.");
         }
 
         task.start();
         return task.promise();
     }
 
-    protected abstract AsyncTask<NavMap, NavMapException> createGetSelectedNavMap();
+    protected abstract AsyncTask<NavMap, NavMapException> createGettingSelectedNavMap();
 
     @Override
     public Promise<NavMap, NavMapException> addNavMap(NavMap navMap) {
-        AsyncTask<NavMap, NavMapException> task = createAddNavMapTask(navMap);
+        AsyncTask<NavMap, NavMapException> task = createAddingNavMapTask(navMap);
         if (task == null) {
-            throw new IllegalStateException("createAddNavMapTask return null.");
+            throw new IllegalStateException("createAddingNavMapTask return null.");
         }
 
         task.start();
         return task.promise();
     }
 
-    protected abstract AsyncTask<NavMap, NavMapException> createAddNavMapTask(NavMap navMap);
+    protected abstract AsyncTask<NavMap, NavMapException> createAddingNavMapTask(NavMap navMap);
 
     @Override
     public Promise<NavMap, NavMapException> selectNavMap(String navMapId) {
-        AsyncTask<NavMap, NavMapException> task = createSelectNavMapTask(navMapId);
+        AsyncTask<NavMap, NavMapException> task = createSelectingNavMapTask(navMapId);
         if (task == null) {
-            throw new IllegalStateException("createSelectNavMapTask return null.");
+            throw new IllegalStateException("createSelectingNavMapTask return null.");
         }
 
         task.start();
         return task.promise();
     }
 
-    protected abstract AsyncTask<NavMap, NavMapException> createSelectNavMapTask(String navMapId);
+    protected abstract AsyncTask<NavMap, NavMapException> createSelectingNavMapTask(String navMapId);
 
     @Override
     public Promise<NavMap, NavMapException> modifyNavMap(NavMap navMap) {
-        AsyncTask<NavMap, NavMapException> task = createModifyNavMapTask(navMap);
+        AsyncTask<NavMap, NavMapException> task = createModifyingNavMapTask(navMap);
         if (task == null) {
-            throw new IllegalStateException("createModifyNavMapTask return null.");
+            throw new IllegalStateException("createModifyingNavMapTask return null.");
         }
 
         task.start();
         return task.promise();
     }
 
-    protected abstract AsyncTask<NavMap, NavMapException> createModifyNavMapTask(NavMap navMap);
+    protected abstract AsyncTask<NavMap, NavMapException> createModifyingNavMapTask(NavMap navMap);
 
     @Override
     public Promise<NavMap, NavMapException> removeNavMap(String navMapId) {
-        AsyncTask<NavMap, NavMapException> task = createRemoveNavMapTask(navMapId);
+        AsyncTask<NavMap, NavMapException> task = createRemovingNavMapTask(navMapId);
         if (task == null) {
-            throw new IllegalStateException("createRemoveNavMapTask return null.");
+            throw new IllegalStateException("createRemovingNavMapTask return null.");
         }
 
         task.start();
         return task.promise();
     }
 
-    protected abstract AsyncTask<NavMap, NavMapException> createRemoveNavMapTask(String navMapId);
+    protected abstract AsyncTask<NavMap, NavMapException> createRemovingNavMapTask(String navMapId);
 
     @Override
     public Promise<Location, LocateException>
@@ -134,12 +134,12 @@ public abstract class AbstractNavigationService implements NavigationService {
                 new InterruptibleAsyncTask<Location, LocateException>() {
                     @Override
                     protected void onStart() {
-                        doStartLocatingSelf(option);
+                        startLocatingSelf(option);
                     }
 
                     @Override
                     protected void onCancel() {
-                        doStopLocatingSelf();
+                        stopLocatingSelf();
                     }
                 },
                 new InterruptibleTaskHelper.InterruptedExceptionCreator<LocateException>() {
@@ -166,9 +166,9 @@ public abstract class AbstractNavigationService implements NavigationService {
 
     protected abstract AsyncTask<Location, GetLocationException> createGettingCurrentLocationTask();
 
-    protected abstract void doStartLocatingSelf(LocateOption option);
+    protected abstract void startLocatingSelf(LocateOption option);
 
-    protected abstract void doStopLocatingSelf();
+    protected abstract void stopLocatingSelf();
 
     public void resolveLocatingSelf(Location location) {
         if (location == null) {
@@ -195,12 +195,12 @@ public abstract class AbstractNavigationService implements NavigationService {
                 new InterruptibleProgressiveAsyncTask<Void, NavigateException, Navigator.NavigatingProgress>() {
                     @Override
                     protected void onStart() {
-                        doStartNavigating(destination, option);
+                        startNavigating(destination, option);
                     }
 
                     @Override
                     protected void onCancel() {
-                        doStopNavigating();
+                        stopNavigating();
                     }
                 },
                 new InterruptibleTaskHelper.InterruptedExceptionCreator<NavigateException>() {
@@ -215,11 +215,11 @@ public abstract class AbstractNavigationService implements NavigationService {
     }
 
     protected abstract void
-    doStartNavigating(Location destination, NavigateOption option);
+    startNavigating(Location destination, NavigateOption option);
 
-    protected abstract void doStopNavigating();
+    protected abstract void stopNavigating();
 
-    public void notifyNavigatingProgress(Navigator.NavigatingProgress progress) {
+    public void reportNavigatingProgress(Navigator.NavigatingProgress progress) {
         if (progress == null) {
             throw new IllegalArgumentException("Argument progress is null.");
         }

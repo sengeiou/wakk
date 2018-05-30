@@ -6,6 +6,7 @@ import com.ubtrobot.async.InterruptibleProgressiveAsyncTask;
 import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.master.competition.InterruptibleTaskHelper;
+import com.ubtrobot.navigation.GetLocationException;
 import com.ubtrobot.navigation.LocateException;
 import com.ubtrobot.navigation.LocateOption;
 import com.ubtrobot.navigation.Location;
@@ -151,6 +152,19 @@ public abstract class AbstractNavigationService implements NavigationService {
                 }
         );
     }
+
+    @Override
+    public Promise<Location, GetLocationException> getCurrentLocation() {
+        AsyncTask<Location, GetLocationException> task = createGettingCurrentLocationTask();
+        if (task == null) {
+            throw new IllegalStateException("createGettingCurrentLocationTask returns null.");
+        }
+
+        task.start();
+        return task.promise();
+    }
+
+    protected abstract AsyncTask<Location, GetLocationException> createGettingCurrentLocationTask();
 
     protected abstract void doStartLocatingSelf(LocateOption option);
 

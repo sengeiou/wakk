@@ -21,9 +21,11 @@ import java.util.List;
 
 public class Navigator implements Competing {
 
+    private final ProtoCallAdapter mNavigationService;
     private final Handler mHandler;
 
-    Navigator(Handler handler) {
+    Navigator(ProtoCallAdapter navigationService, Handler handler) {
+        mNavigationService = navigationService;
         mHandler = handler;
     }
 
@@ -33,6 +35,30 @@ public class Navigator implements Competing {
                 NavigationConstants.SERVICE_NAME,
                 NavigationConstants.COMPETING_ITEM_NAVIGATOR
         ));
+    }
+
+    public Promise<Location, GetLocationException> getCurrentLocation() {
+        return mNavigationService.call(
+                NavigationConstants.CALL_PATH_GET_CURRENT_LOCATION,
+                new ProtoCallAdapter.DFProtoConverter<
+                        Location, NavigationProto.Location, GetLocationException>() {
+                    @Override
+                    public Class<NavigationProto.Location> doneProtoClass() {
+                        return NavigationProto.Location.class;
+                    }
+
+                    @Override
+                    public Location
+                    convertDone(NavigationProto.Location location) throws Exception {
+                        return NavigationConverters.toLocationPojo(location);
+                    }
+
+                    @Override
+                    public GetLocationException convertFail(CallException e) {
+                        return new GetLocationException.Factory().from(e);
+                    }
+                }
+        );
     }
 
     public Promise<Location, LocateException> locateSelf(CompetitionSession session) {

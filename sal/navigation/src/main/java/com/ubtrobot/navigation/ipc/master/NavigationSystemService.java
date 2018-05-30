@@ -18,6 +18,7 @@ import com.ubtrobot.master.competition.CompetitionSessionInfo;
 import com.ubtrobot.master.competition.ProtoCompetingCallDelegate;
 import com.ubtrobot.master.service.MasterSystemService;
 import com.ubtrobot.master.transport.message.CallGlobalCode;
+import com.ubtrobot.navigation.GetLocationException;
 import com.ubtrobot.navigation.LocateException;
 import com.ubtrobot.navigation.Location;
 import com.ubtrobot.navigation.NavMap;
@@ -214,6 +215,31 @@ public class NavigationSystemService extends MasterSystemService {
                     }
                 },
                 new NavMapConverter()
+        );
+    }
+
+    @Call(path = NavigationConstants.CALL_PATH_GET_CURRENT_LOCATION)
+    public void onGetCurrentLocation(Request request, Responder responder) {
+        mCallProcessor.onCall(
+                responder,
+                new CallProcessAdapter.Callable<Location, GetLocationException>() {
+
+                    @Override
+                    public Promise<Location, GetLocationException> call() throws CallException {
+                        return mService.getCurrentLocation();
+                    }
+                },
+                new ProtoCallProcessAdapter.DFConverter<Location, GetLocationException>() {
+                    @Override
+                    public Message convertDone(Location location) {
+                        return NavigationConverters.toLocationProto(location);
+                    }
+
+                    @Override
+                    public CallException convertFail(GetLocationException gle) {
+                        return new CallException(gle.getCode(), gle.getMessage());
+                    }
+                }
         );
     }
 

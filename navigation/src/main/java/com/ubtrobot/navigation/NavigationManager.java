@@ -32,7 +32,7 @@ public class NavigationManager {
                 handler
         );
         mNavMapList = new NavMapList(navigationService);
-        mNavigator = new Navigator(handler);
+        mNavigator = new Navigator(navigationService, handler);
     }
 
     public Promise<List<NavMap>, NavMapException> getNavMapList() {
@@ -77,6 +77,10 @@ public class NavigationManager {
                     addCompeting(navigator()));
             return mSession;
         }
+    }
+
+    public Promise<Location, GetLocationException> getCurrentLocation() {
+        return mNavigator.getCurrentLocation();
     }
 
     public Promise<Location, LocateException> locateSelf() {

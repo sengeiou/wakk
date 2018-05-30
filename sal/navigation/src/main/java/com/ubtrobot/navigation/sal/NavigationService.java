@@ -2,6 +2,7 @@ package com.ubtrobot.navigation.sal;
 
 import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
+import com.ubtrobot.navigation.GetLocationException;
 import com.ubtrobot.navigation.LocateException;
 import com.ubtrobot.navigation.LocateOption;
 import com.ubtrobot.navigation.Location;
@@ -31,6 +32,8 @@ public interface NavigationService {
     Promise<NavMap, NavMapException> modifyNavMap(NavMap navMap);
 
     Promise<NavMap, NavMapException> removeNavMap(String navMapId);
+
+    Promise<Location, GetLocationException> getCurrentLocation();
 
     Promise<Location, LocateException> locateSelf(LocateOption option);
 

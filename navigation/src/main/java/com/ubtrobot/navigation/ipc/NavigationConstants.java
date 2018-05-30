@@ -17,6 +17,7 @@ public class NavigationConstants {
     public static final String CALL_PATH_MODIFY_NAV_MAP = "/navigation/map/modify";
     public static final String CALL_PATH_REMOVE_NAV_MAP = "/navigation/map/remove";
 
+    public static final String CALL_PATH_GET_CURRENT_LOCATION = "/navigation/location/current";
     public static final String CALL_PATH_LOCATE_SELF = "/navigation/locate/self";
     public static final String CALL_PATH_NAVIGATE = "/navigation/navigate";
 }

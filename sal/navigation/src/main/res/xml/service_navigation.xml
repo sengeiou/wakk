@@ -9,6 +9,7 @@
     <call path="/navigation/map/select" />
     <call path="/navigation/map/modify" />
     <call path="/navigation/map/remove" />
+    <call path="/navigation/location/current" />
     <call path="/navigation/locate/self" />
     <call path="/navigation/navigate" />
 </service>

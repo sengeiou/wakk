@@ -49,10 +49,10 @@ message RecognizeOption {
 message UnderstandOption {
     string question = 1;
     float time_out = 2;
+    string params = 3;
 }
 
 message UnderstandResult {
-
     string session_id = 1;
     string source = 2;
     string language = 3;
@@ -93,4 +93,10 @@ message Status {
     int32 code = 1;
     string errorMessage = 2;
     string errorDetails = 3;
+}
+message Error {
+    int32 code = 1;
+    string message = 2;
+    string detail = 3;
+
 }

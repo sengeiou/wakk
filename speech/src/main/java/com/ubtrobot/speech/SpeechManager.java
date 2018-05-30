@@ -56,6 +56,7 @@ public class SpeechManager {
         mSynthesizer = new Synthesizer(mSpeechService, mHandler);
         mRecognizer = new Recognizer(mSpeechService, mHandler);
         mUnderstander = new Understander(mSpeechService, mHandler);
+        mRecognizer = new Recognizer(mSpeechService, mHandler,mMasterContext);
         mSpeakerList = new SpeakerList(mSpeechService);
     }
 

@@ -90,7 +90,6 @@ public class MotionConverters {
     toJointRotatingOptionProto(JointRotatingOption option, String jointId) {
         return MotionProto.JointRotatingOption.newBuilder().
                 setJointId(jointId).
-                setJointId(option.getJointId()).
                 setAngle(option.getAngle()).
                 setAngleAbsolute(option.isAngleAbsolute()).
                 setDuration(option.getDuration()).

@@ -1,26 +1,30 @@
-package com.ubtrobot.speech.understand;
+package com.ubtrobot.speech;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import com.ubtrobot.speech.RecognizeOption;
+import android.text.TextUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class UnderstandResult implements Parcelable {
+
+    public static final UnderstandResult NULL = new UnderstandResult.Builder().build();
 
     private String sessionId = "";
     private String source = "";
     private String language = "";
     private boolean actionIncomplete;
-    private Intent intent;
-    private List<Context> contexts;
-    private Fulfillment fulfillment;
+    private Intent intent = Intent.NULL;
+    private List<Context> contexts = new ArrayList<>();
+    private Fulfillment fulfillment = Fulfillment.NULL;
     private String inputText = "";
+    private Map<String, List<Message>> messageMap = null;
 
     protected UnderstandResult() {
 
@@ -113,6 +117,44 @@ public class UnderstandResult implements Parcelable {
 
     public String getInputText() {
         return inputText;
+    }
+
+    public Message obtainMessage(String type) {
+        if (TextUtils.isEmpty(type)) {
+            return null;
+        }
+        return obtainMessage(type, 0);
+    }
+
+    public Message obtainMessage(String type, int index) {
+        if (null == messageMap) {
+            buildMessageMap();
+        }
+        List<Message> messages = messageMap.get(type);
+        if (null == messages || messages.isEmpty()) {
+            return null;
+        }
+
+        if (index > messages.size() - 1) {
+            index = messages.size() - 1;
+        } else if (index < 0) {
+            index = 0;
+        }
+
+        return messages.get(index);
+    }
+
+    public void buildMessageMap() {
+        //先给messageMap赋值，防止一直为null
+        messageMap = new HashMap<>();
+        if (null == fulfillment) {
+            return;
+        }
+        List<Message> messages = fulfillment.getMessages();
+        for (Message message : messages) {
+            String type = message.getType();
+            messageMap.put(type, messages);
+        }
     }
 
     /**
@@ -249,6 +291,15 @@ public class UnderstandResult implements Parcelable {
             }
         }
 
+        @Override
+        public String toString() {
+            return "Intent{" +
+                    "name='" + name + '\'' +
+                    ", displayName='" + displayName + '\'' +
+                    ", parameters=" + parameters +
+                    ", score=" + score +
+                    '}';
+        }
     }
 
     /**
@@ -346,12 +397,23 @@ public class UnderstandResult implements Parcelable {
                 return context;
             }
         }
+
+        @Override
+        public String toString() {
+            return "Context{" +
+                    "name='" + name + '\'' +
+                    ", parameters=" + parameters +
+                    ", lifespan=" + lifespan +
+                    '}';
+        }
     }
 
     /**
      * 业务数据类
      */
     public static class Fulfillment implements Parcelable {
+
+        public static final Fulfillment NULL = new Fulfillment.Builder().build();
 
         private String speech = "";
         private List<Message> messages = new ArrayList<>();
@@ -437,12 +499,24 @@ public class UnderstandResult implements Parcelable {
                 return fulfillment;
             }
         }
+
+        @Override
+        public String toString() {
+            return "Fulfillment{" +
+                    "speech='" + speech + '\'' +
+                    ", messages=" + messages +
+                    ", status=" + status +
+                    '}';
+        }
     }
 
     public static class Status implements Parcelable {
+
+        public static final Status NULL = new Status.Builder().build();
+
         private int code;
-        private String errorMessage;
-        private String errorDetails;
+        private String errorMessage = "";
+        private String errorDetails = "";
 
         private Status() {
         }
@@ -524,6 +598,15 @@ public class UnderstandResult implements Parcelable {
                 return status;
             }
         }
+
+        @Override
+        public String toString() {
+            return "Status{" +
+                    "code=" + code +
+                    ", errorMessage='" + errorMessage + '\'' +
+                    ", errorDetails='" + errorDetails + '\'' +
+                    '}';
+        }
     }
 
     /**
@@ -551,8 +634,10 @@ public class UnderstandResult implements Parcelable {
      */
     public static class Message implements Parcelable {
 
-        private String type;
-        private String platform;
+        public static final Message NULL = new Message.Builder().build();
+
+        private String type = "";
+        private String platform = "";
         private JSONObject parameters = new JSONObject();
 
         private Message() {
@@ -650,11 +735,11 @@ public class UnderstandResult implements Parcelable {
     public static class Builder {
 
         private String sessionId = "";
-        private List<Intent> intentCandidates;
+        private List<Intent> intentCandidates = new ArrayList<>();
         private String source = "";
         private String language = "";
         private boolean actionIncomplete;
-        private Intent intent;
+        private Intent intent = Intent.NULL;
         private List<Context> contexts = new ArrayList<>();
         private Fulfillment fulfillment;
         private String inputText = "";
@@ -718,5 +803,19 @@ public class UnderstandResult implements Parcelable {
 
             return understandResult;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "UnderstandResult{" +
+                "sessionId='" + sessionId + '\'' +
+                ", source='" + source + '\'' +
+                ", language='" + language + '\'' +
+                ", actionIncomplete=" + actionIncomplete +
+                ", intent=" + intent +
+                ", contexts=" + contexts +
+                ", fulfillment=" + fulfillment +
+                ", inputText='" + inputText + '\'' +
+                '}';
     }
 }

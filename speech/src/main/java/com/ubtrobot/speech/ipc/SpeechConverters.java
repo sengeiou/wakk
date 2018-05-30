@@ -9,11 +9,7 @@ import com.ubtrobot.speech.Speaker;
 import com.ubtrobot.speech.SynthesizeOption;
 import com.ubtrobot.speech.Synthesizer;
 import com.ubtrobot.speech.UnderstandOption;
-import com.ubtrobot.speech.Understander;
-import com.ubtrobot.speech.understand.UnderstandResult;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.ubtrobot.speech.UnderstandResult;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -249,12 +245,21 @@ public class SpeechConverters {
         return SpeechProto.UnderstandOption.newBuilder()
                 .setQuestion(question)
                 .setTimeOut(option.getTimeout())
+                .setParams(option.getParams().toString())
                 .build();
     }
 
     public static UnderstandOption toUnderstandOptionPojo(SpeechProto.UnderstandOption option) {
+        JSONObject params = null;
+        try {
+            params = new JSONObject(option.getParams());
+        } catch (JSONException e) {
+            params = new JSONObject();
+            e.printStackTrace();
+        }
         return new UnderstandOption.Builder()
                 .setTimeout(option.getTimeOut())
+                .setParams(params)
                 .build();
     }
 

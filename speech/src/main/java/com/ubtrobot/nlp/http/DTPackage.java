@@ -1,7 +1,7 @@
 package com.ubtrobot.nlp.http;
 
 import com.google.gson.Gson;
-import com.ubtrobot.speech.understand.UnderstandResult;
+import com.ubtrobot.speech.UnderstandResult;
 import com.ubtrobot.ulog.FwLoggerFactory;
 import com.ubtrobot.ulog.Logger;
 

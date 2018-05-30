@@ -16,7 +16,6 @@ import com.ubtrobot.master.context.MasterContext;
 import com.ubtrobot.speech.ipc.SpeechConstant;
 import com.ubtrobot.speech.ipc.SpeechConverters;
 import com.ubtrobot.speech.ipc.SpeechProto;
-import com.ubtrobot.speech.understand.UnderstandResult;
 import com.ubtrobot.transport.message.CallException;
 import com.ubtrobot.ulog.FwLoggerFactory;
 import com.ubtrobot.ulog.Logger;
@@ -30,7 +29,7 @@ public class SpeechManager {
     private final MasterContext mMasterContext;
     private final Synthesizer mSynthesizer;
     private final Recognizer mRecognizer;
-    private final Understander mUnderstander;
+    private final UnderstanderProxy mUnderstander;
 
     private final SpeakerList mSpeakerList;
 
@@ -54,9 +53,8 @@ public class SpeechManager {
         );
 
         mSynthesizer = new Synthesizer(mSpeechService, mHandler);
-        mRecognizer = new Recognizer(mSpeechService, mHandler);
-        mUnderstander = new Understander(mSpeechService, mHandler);
         mRecognizer = new Recognizer(mSpeechService, mHandler,mMasterContext);
+        mUnderstander = new UnderstanderProxy(mSpeechService, mHandler);
         mSpeakerList = new SpeakerList(mSpeechService);
     }
 

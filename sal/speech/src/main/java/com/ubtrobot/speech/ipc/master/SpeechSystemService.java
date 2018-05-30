@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.google.protobuf.BoolValue;
+import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
@@ -21,21 +22,20 @@ import com.ubtrobot.master.param.ProtoParam;
 import com.ubtrobot.master.service.MasterSystemService;
 import com.ubtrobot.speech.Configuration;
 import com.ubtrobot.speech.RecognizeException;
+import com.ubtrobot.speech.RecognizeListener;
 import com.ubtrobot.speech.RecognizeOption;
 import com.ubtrobot.speech.Recognizer;
 import com.ubtrobot.speech.Speaker;
 import com.ubtrobot.speech.SynthesizeException;
 import com.ubtrobot.speech.Synthesizer;
 import com.ubtrobot.speech.UnderstandException;
-import com.ubtrobot.speech.Understander;
+import com.ubtrobot.speech.UnderstandResult;
 import com.ubtrobot.speech.ipc.SpeechConstant;
 import com.ubtrobot.speech.ipc.SpeechConverters;
 import com.ubtrobot.speech.ipc.SpeechProto;
 import com.ubtrobot.speech.sal.AbstractSpeechService;
 import com.ubtrobot.speech.sal.SpeechFactory;
 import com.ubtrobot.speech.sal.SpeechService;
-import com.ubtrobot.speech.understand.LegacyUnderstandResult;
-import com.ubtrobot.speech.understand.UnderstandResult;
 import com.ubtrobot.transport.message.CallException;
 import com.ubtrobot.transport.message.Request;
 import com.ubtrobot.transport.message.Responder;
@@ -53,6 +53,7 @@ public class SpeechSystemService extends MasterSystemService {
 
     private ProtoCallProcessAdapter mCallProcessor;
     private ProtoCompetingCallDelegate mCompetingCallDelegate;
+
 
     @Override
     protected void onServiceCreate() {
@@ -72,9 +73,9 @@ public class SpeechSystemService extends MasterSystemService {
                     "Application must return a AbstractSpeechService instance");
         }
 
-        Handler handler = new Handler(Looper.getMainLooper());
         mSpeechService.registerRecognizeListener(mRecognitionListener);
 
+        Handler handler = new Handler(Looper.getMainLooper());
         mCompetingCallDelegate = new ProtoCompetingCallDelegate(this, handler);
         mCallProcessor = new ProtoCallProcessAdapter(handler);
     }
@@ -219,18 +220,18 @@ public class SpeechSystemService extends MasterSystemService {
         final String question = understandOption.getQuestion();
 
         mCallProcessor.onCall(responder, new CallProcessAdapter.Callable<
-                        LegacyUnderstandResult, UnderstandException>() {
+                        UnderstandResult, UnderstandException>() {
                     @Override
-                    public Promise<LegacyUnderstandResult, UnderstandException>
+                    public Promise<UnderstandResult, UnderstandException>
                     call() throws CallException {
                         return mSpeechService.understand(question,
                                 SpeechConverters.toUnderstandOptionPojo(understandOption));
                     }
                 },
-                new ProtoCallProcessAdapter.DFConverter<LegacyUnderstandResult,
+                new ProtoCallProcessAdapter.DFConverter<UnderstandResult,
                         UnderstandException>() {
                     @Override
-                    public Message convertDone(LegacyUnderstandResult result) {
+                    public Message convertDone(UnderstandResult result) {
                         return SpeechConverters.toUnderstandResultProto(result);
 
                     }

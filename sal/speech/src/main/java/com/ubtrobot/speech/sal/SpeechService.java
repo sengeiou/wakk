@@ -5,6 +5,7 @@ import com.ubtrobot.async.Promise;
 import com.ubtrobot.exception.AccessServiceException;
 import com.ubtrobot.speech.Configuration;
 import com.ubtrobot.speech.RecognizeException;
+import com.ubtrobot.speech.RecognizeListener;
 import com.ubtrobot.speech.RecognizeOption;
 import com.ubtrobot.speech.Recognizer;
 import com.ubtrobot.speech.Speaker;
@@ -13,8 +14,7 @@ import com.ubtrobot.speech.SynthesizeOption;
 import com.ubtrobot.speech.Synthesizer;
 import com.ubtrobot.speech.UnderstandException;
 import com.ubtrobot.speech.UnderstandOption;
-import com.ubtrobot.speech.understand.LegacyUnderstandResult;
-import com.ubtrobot.speech.understand.UnderstandResult;
+import com.ubtrobot.speech.UnderstandResult;
 
 import java.util.List;
 
@@ -30,11 +30,14 @@ public interface SpeechService {
 
     boolean isRecognizing();
 
-    Promise<LegacyUnderstandResult, UnderstandException> understand(String question, UnderstandOption option);
+    Promise<UnderstandResult, UnderstandException> understand(String question, UnderstandOption option);
 
     Promise<List<Speaker>, AccessServiceException> getSpeakerList();
 
     Promise<Configuration, AccessServiceException> getConfiguration();
 
     Promise<Void, AccessServiceException> setConfiguration(Configuration configuration);
+
+    void registerRecognizeListener(RecognizeListener listener);
+    void unregisterRecognizeListener(RecognizeListener listener);
 }

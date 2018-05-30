@@ -73,6 +73,7 @@ public class SpeechSystemService extends MasterSystemService {
         }
 
         Handler handler = new Handler(Looper.getMainLooper());
+        mSpeechService.registerRecognizeListener(mRecognitionListener);
 
         mCompetingCallDelegate = new ProtoCompetingCallDelegate(this, handler);
         mCallProcessor = new ProtoCallProcessAdapter(handler);
@@ -313,4 +314,48 @@ public class SpeechSystemService extends MasterSystemService {
     protected void onCompetitionSessionInactive(CompetitionSessionInfo sessionInfo) {
         mCompetingCallDelegate.onCompetitionSessionInactive(sessionInfo);
     }
+
+    @Override
+    protected void onServiceDestroy() {
+        super.onServiceDestroy();
+        mSpeechService.unregisterRecognizeListener(mRecognitionListener);
+    }
+
+    private RecognizeListener mRecognitionListener = new RecognizeListener() {
+
+        @Override
+        public void onRecognizeBegin() {
+
+        }
+
+        @Override
+        public void onRecognizing(Recognizer.RecognizingProgress progress) {
+            LOGGER.i("Publish recognize event.");
+            publishCarefully(
+                    SpeechConstant.ACTION_RECOGNIZING,
+                    ProtoParam.create(SpeechConverters.toRecognizingProgressProto(progress)));
+        }
+
+        @Override
+        public void onRecognizeEnd() {
+
+        }
+
+        @Override
+        public void onRecognizeComplete(Recognizer.RecognizeResult result) {
+            publishCarefully(
+                    SpeechConstant.ACTION_RECOGNIZE_RESULT,
+                    ProtoParam.create(SpeechConverters.toRecognizeResultProto(result)));
+        }
+
+        @Override
+        public void OnRecognizeError(RecognizeException e) {
+            publishCarefully(
+                    SpeechConstant.ACTION_RECOGNIZE_ERROR,
+                    ProtoParam.create(SpeechProto.Error.newBuilder().setCode(e.getCode())
+                            .setDetail(e.getDetail().toString())
+                            .setMessage(e.getMessage())
+                            .build()));
+        }
+    };
 }

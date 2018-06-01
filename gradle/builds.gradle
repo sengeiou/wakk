@@ -55,6 +55,7 @@ ext {
             sensorVersion          : '0.5.0-SNAPSHOT',
             powerVersion           : '0.5.0-SNAPSHOT',
             initializationVersion  : '0.5.0-SNAPSHOT',
+            playVersion            : '0.5.0-SNAPSHOT',
 
             sampleVersionCode      : 1,
             sampleVersionName      : '0.0.1',
@@ -129,6 +130,7 @@ apply from: 'gradle/publish_upgrade.gradle'
 apply from: 'gradle/publish_sensor.gradle'
 apply from: 'gradle/publish_power.gradle'
 apply from: 'gradle/publish_initialization.gradle'
+apply from: 'gradle/publish_play.gradle'
 
 apply from: 'gradle/publish_product_cruzr.gradle'
 apply from: 'gradle/publish_product_alpha_mini.gradle'

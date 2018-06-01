@@ -54,6 +54,7 @@ ext {
             upgradeSalImplVersion  : '0.5.0-SNAPSHOT',
             wakeupVersion          : '0.5.0-SNAPSHOT',
             initializationVersion  : '0.5.0-SNAPSHOT',
+            playVersion            : '0.5.0-SNAPSHOT',
 
             sampleVersionCode      : 1,
             sampleVersionName      : '0.0.1',
@@ -127,6 +128,7 @@ apply from: 'gradle/publish_speech.gradle'
 apply from: 'gradle/publish_upgrade.gradle'
 apply from: 'gradle/publish_wakeup.gradle'
 apply from: 'gradle/publish_initialization.gradle'
+apply from: 'gradle/publish_play.gradle'
 
 apply from: 'gradle/publish_product_cruzr.gradle'
 apply from: 'gradle/publish_product_alpha_mini.gradle'

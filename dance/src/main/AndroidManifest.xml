@@ -1,2 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.ubtrobot.dance" />
+    package="com.ubtrobot.dance.sal" >
+<!-- todo package -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+
+</manifest>

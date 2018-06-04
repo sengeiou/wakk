@@ -123,8 +123,7 @@ public class SegmentGroupPlayer<O> implements Player {
                     InfiniteLoopSegmentPlayer<O> infiniteLoopSegmentPlayer =
                             new InfiniteLoopSegmentPlayer<>(
                                     (AbstractSegmentPlayer<O>) mPlayerFactory.
-                                            createPlayer(mLastSegment),
-                                    mLastSegment, false);
+                                            createPlayer(mLastSegment), mLastSegment);
                     mInfiniteSegmentPromise = infiniteLoopSegmentPlayer.play();
                     return;
                 }

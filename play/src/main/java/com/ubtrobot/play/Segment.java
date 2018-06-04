@@ -67,6 +67,17 @@ public class Segment<O> {
         private O option;
 
         @SuppressWarnings("unchecked")
+        public T setSegment(Segment<O> segment) {
+            this.name = segment.getName();
+            this.description = segment.getDescription();
+            this.loops = segment.getLoops();
+            this.duration = segment.getDuration();
+            this.blank = segment.isBlank();
+            this.option = segment.getOption();
+            return (T) this;
+        }
+
+        @SuppressWarnings("unchecked")
         public T setName(String name) {
             this.name = name;
             return (T) this;

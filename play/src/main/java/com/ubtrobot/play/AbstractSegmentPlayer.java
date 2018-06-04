@@ -15,8 +15,7 @@ public abstract class AbstractSegmentPlayer<O> extends SegmentPlayer<O> {
         if (loops > 0) {
             mPlayer = new FiniteLoopSegmentPlayer<>(this, segment);
         } else {
-            mPlayer = new InfiniteLoopSegmentPlayer<>(
-                    this, segment, true);
+            mPlayer = new InfiniteLoopSegmentPlayer<O>(this, segment);
         }
     }
 

@@ -8,7 +8,7 @@ android {
         minSdkVersion sdk.minSdkVersion
         targetSdkVersion sdk.targetSdkVersion
 
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "android.support.play.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -20,6 +20,11 @@ android {
 }
 
 dependencies {
+    api project(':commons')
+    api project(':motion')
+    api project(':emotion')
+    api project(':play')
+
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     def deps = rootProject.ext.deps

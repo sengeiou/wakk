@@ -1,0 +1,15 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.ubtrobot.dance.sal">
+
+    <uses-permission android:name="com.ubtrobot.master.permission.MASTER" />
+
+    <application>
+        <service
+            android:name="com.ubtrobot.dance.ipc.master.DanceSystemService"
+            android:exported="true">
+            <meta-data
+                android:name="master.service"
+                android:resource="@xml/service_dance" />
+        </service>
+    </application>
+</manifest>

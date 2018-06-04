@@ -9,4 +9,6 @@
     <call path="/speech/recognize/doing" />
     <call path="/speech/understand" />
     <call path="/speech/speaker/list" />
+    <call path="/speech/configuration/set" />
+    <call path="/speech/configuration" />
 </service>

@@ -1,3 +1,5 @@
+import java.text.SimpleDateFormat
+
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 apply from: 'gradle/builds.gradle'
 
@@ -19,4 +21,33 @@ buildscript {
 
 task clean(type: Delete) {
     delete rootProject.buildDir
+}
+//获取当前分支名称
+def getGitBranchName() {
+    return 'git symbolic-ref --short -q HEAD'.execute().text.trim()
+}
+//获取当前提交节点
+def static getGitCommit() {
+    return 'git rev-parse HEAD'.execute().text.trim()
+}
+//获取产品的名字
+def getProductName() {
+    return "cruzr_service_V2.0.0"
+}
+//获取当前系统的时间
+def releaseTime() {
+    return new Date().format("yyyyMMdd", TimeZone.getTimeZone("GMT+8"))
+}
+//获取当前系统的时间
+def releaseFullTime() {
+    return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()).toString()
+}
+//获取当前系统的用户信息
+def userName() {
+    Properties props = System.getProperties()
+    return props.getProperty("user.name")
+}
+//填写发布note信息
+def sdkNote() {
+    return releaseFullTime()
 }

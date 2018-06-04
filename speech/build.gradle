@@ -46,6 +46,14 @@ dependencies {
 
     def deps = rootProject.ext.deps
     implementation deps.appcompat
+    implementation deps.okHttp
+    implementation deps.retrofit
+    implementation deps.gsonConverter
+    implementation deps.uRestAdapter
+    implementation deps.signInterceptor
+    implementation deps.authInterceptor
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.4.1'
+    implementation(group: 'com.ubtrobot.ulog', name: 'logger-android', version: '0.0.1')
 
     testImplementation deps.junit
     androidTestImplementation deps.espressoCore

@@ -1,6 +1,6 @@
 package com.ubtrobot.speech;
 
-import android.text.TextUtils;
+import com.ubtrobot.validate.Preconditions;
 
 public class SynthesizeOption {
 
@@ -11,6 +11,10 @@ public class SynthesizeOption {
 
     public static final int SPEAKING_VOLUME_MAX = 100;
     public static final int SPEAKING_VOLUME_MIN = 0;
+
+
+    public static final int DEFAULT_SPEAKING_SPEED = -1;
+    public static final int DEFAULT_SPEAKING_VOLUME = -1;
 
     private String speakerId;
     private int speakingSpeed;
@@ -43,8 +47,8 @@ public class SynthesizeOption {
     public static class Builder {
 
         private String speakerId = "";
-        private int speakingSpeed = -1;
-        private int speakingVolume = -1;
+        private int speakingSpeed = DEFAULT_SPEAKING_SPEED;
+        private int speakingVolume = DEFAULT_SPEAKING_VOLUME;
 
         public Builder() {
         }
@@ -66,7 +70,7 @@ public class SynthesizeOption {
         }
 
         private void checkSpeakSpeed(int speakSpeed) {
-            if (speakSpeed < SPEAKING_SPEED_MIN || speakSpeed > SPEAKING_SPEED_MAX) {
+            if (speakSpeed < DEFAULT_SPEAKING_SPEED || speakSpeed > SPEAKING_SPEED_MAX) {
                 throw new IllegalArgumentException("Invalid speakingSpeed value, verify for [0,100].");
             }
         }
@@ -78,21 +82,14 @@ public class SynthesizeOption {
         }
 
         private void checkSpeakVolume(int speakVolume) {
-            if (speakVolume < SPEAKING_VOLUME_MIN || speakingSpeed > SPEAKING_VOLUME_MAX) {
+            if (speakVolume < DEFAULT_SPEAKING_VOLUME || speakingSpeed > SPEAKING_VOLUME_MAX) {
                 throw new IllegalArgumentException("Invalid speakingVolume value, verify for [0,100].");
             }
         }
 
         public Builder setSpeakerId(String speakerId) {
-            checkSpeakerId(speakerId);
-            this.speakerId = speakerId;
+            this.speakerId = Preconditions.checkNotNull(speakerId, "Invalid speakerId value, verify for not be null.");
             return this;
-        }
-
-        private void checkSpeakerId(String speakId) {
-            if (TextUtils.isEmpty(speakId)) {
-                throw new IllegalArgumentException("Invalid speakerId value, verify for not be null.");
-            }
         }
 
         public SynthesizeOption build() {

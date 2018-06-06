@@ -9,6 +9,8 @@ include ':upgrade', ':sal:upgrade', ':service-impl:upgrade'
 include ':wakeup', ':sal:wakeup'
 include 'analytics', ':sal:analytics', ':service-impl:analytics'
 include ':dance', ':sal:dance'
+include ':sensor'
+
 include ':initialization'
 
 include ':sample', ':service-mocks'

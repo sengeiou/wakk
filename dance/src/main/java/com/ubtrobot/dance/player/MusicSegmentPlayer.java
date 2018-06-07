@@ -21,26 +21,24 @@ public class MusicSegmentPlayer extends AbstractSegmentPlayer<MusicSegmentPlayer
 
     public MusicSegmentPlayer(MusicPlay musicPlay, Segment<MusicOption> segment) {
         super(segment);
-        System.out.println("create music");
         mPlay = musicPlay;
     }
 
     @Override
     protected void onLoopStart(MusicOption option) {
         LOGGER.i("Music Start:" + option.toString());
-        System.out.println("----play music");
         mPlay.play(option.getPath(), this, 10, false);
     }
 
     @Override
     protected void onLoopStop() {
-        System.out.println("----stop music");
+        notifyLoopStopped();
         mPlay.stop();
     }
 
     @Override
     protected void onEnd() {
-
+        mPlay.stop();
     }
 
     @Override

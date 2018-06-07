@@ -63,7 +63,7 @@ public class DanceFileHelper {
                      next = br.readLine()) {
                 }
             } catch (IOException e) {
-                LOGGER.e("File:"+ ABSOLUTE_PATH +" read error.");
+                LOGGER.e("File:"+ ABSOLUTE_PATH +" read fail: caused by first install or read error");
             }
 
             return buffer.toString();

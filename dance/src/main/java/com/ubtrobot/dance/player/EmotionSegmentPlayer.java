@@ -9,11 +9,15 @@ import com.ubtrobot.emotion.ExpressOption;
 import com.ubtrobot.play.AbstractSegmentPlayer;
 import com.ubtrobot.play.PlayException;
 import com.ubtrobot.play.Segment;
+import com.ubtrobot.ulog.FwLoggerFactory;
+import com.ubtrobot.ulog.Logger;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class EmotionSegmentPlayer extends AbstractSegmentPlayer<EmotionSegmentPlayer.EmotionOption> {
+
+    private static final Logger LOGGER = FwLoggerFactory.getLogger("EmotionSegmentPlayer");
 
     private EmotionManager mEmotionManager;
     Promise<Void, ExpressException> mExpressPromise;
@@ -25,8 +29,9 @@ public class EmotionSegmentPlayer extends AbstractSegmentPlayer<EmotionSegmentPl
 
     @Override
     protected void onLoopStart(EmotionOption option) {
-        mExpressPromise = mEmotionManager.express(option.getEmotionId(), new ExpressOption.Builder().
-                setLoops(option.getLoops()).
+        mExpressPromise = mEmotionManager.express(option.getEmotionId(),
+                new ExpressOption.Builder().
+                setLoops(0).
                 setDismissAfterEnd(option.isDismissAfterEnd()).
                 setLoopDefaultAfterEnd(option.isLoopDefaultAfterEnd()).
                 build()).done(new DoneCallback<Void>() {
@@ -37,6 +42,7 @@ public class EmotionSegmentPlayer extends AbstractSegmentPlayer<EmotionSegmentPl
         }).fail(new FailCallback<ExpressException>() {
             @Override
             public void onFail(ExpressException e) {
+                LOGGER.e(e);
                 notifyLoopAborted(new PlayException.Factory().from(e.getCode(),e.getMessage()));
                 mExpressPromise = null;
             }
@@ -45,6 +51,8 @@ public class EmotionSegmentPlayer extends AbstractSegmentPlayer<EmotionSegmentPl
 
     @Override
     protected void onLoopStop() {
+        mEmotionManager.dismiss();
+
         if (mExpressPromise == null) {
             return;
         }

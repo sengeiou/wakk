@@ -49,6 +49,8 @@ public class ArmMotionSegmentPlayer extends AbstractSegmentPlayer<ArmMotionSegme
 
     @Override
     protected void onLoopStop() {
+        mMotionManager.executeScript("reset");
+
         if (mExecutePromise == null) {
             return;
         }

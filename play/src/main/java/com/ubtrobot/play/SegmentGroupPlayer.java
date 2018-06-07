@@ -85,9 +85,11 @@ public class SegmentGroupPlayer<O> implements Player {
 
     private void appendTask(final Segment<O> segment) {
         mTaskSeries.append(new AsyncTask<Void, PlayException>() {
+            Promise<Void, PlayException> promise;
+
             @Override
             protected void onStart() {
-                mPlayerFactory.createPlayer(segment).play().done(new DoneCallback<Void>() {
+                promise = mPlayerFactory.createPlayer(segment).play().done(new DoneCallback<Void>() {
                     @Override
                     public void onDone(Void aVoid) {
                         LOGGER.i("Task success:" + segment.getOption().toString());
@@ -104,6 +106,7 @@ public class SegmentGroupPlayer<O> implements Player {
 
             @Override
             public boolean cancel() {
+                promise.cancel();
                 resolve(null);
                 return super.cancel();
             }

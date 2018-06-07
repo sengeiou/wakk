@@ -40,6 +40,8 @@ public class DanceManager {
 
     private static final Logger LOGGER = FwLoggerFactory.getLogger("DanceManager");
 
+    private static volatile DanceManager mDanceManager;
+
     private DanceList mDanceList;
 
     private AsyncTaskParallel<PlayException> mTaskParallel;
@@ -47,7 +49,16 @@ public class DanceManager {
             AsyncTaskParallel.DoneOrFail<Object, PlayException>>> mProgressivePromise;
 
     public DanceManager(Context context) {
-        mDanceList = new DanceList(context);
+        if (mDanceManager == null) {
+            synchronized (this) {
+                if (mDanceManager != null) {
+                    return;
+                }
+
+                mDanceManager = this;
+                mDanceList = new DanceList(context);
+            }
+        }
     }
 
     public List<Dance> getDanceList() {
@@ -75,8 +86,9 @@ public class DanceManager {
             Map.Entry<String, AsyncTaskParallel.DoneOrFail<Object, PlayException>>>
     play(final Context context, final Dance dance) {
         if (mTaskParallel != null) {
-            LOGGER.w("Dance is running.");
-            return mProgressivePromise;
+            LOGGER.w("Cancel dance: dance is running.");
+            mProgressivePromise.cancel();
+            mProgressivePromise = null;
         }
 
         mTaskParallel = new AsyncTaskParallel<>();
@@ -95,13 +107,11 @@ public class DanceManager {
                     promise = player.play().done(new DoneCallback() {
                         @Override
                         public void onDone(Object o) {
-                            System.out.println("----player end:" + type);
                             resolve(o);
                         }
                     }).fail(new FailCallback() {
                         @Override
                         public void onFail(Object o) {
-                            System.out.println("---fail");
                             mTaskParallel = null;
                         }
                     });
@@ -109,8 +119,8 @@ public class DanceManager {
 
                 @Override
                 protected void onCancel() {
-                    mTaskParallel = null;
                     promise.cancel();
+                    mTaskParallel = null;
                 }
             });
         }
@@ -119,6 +129,10 @@ public class DanceManager {
         mProgressivePromise = mTaskParallel.promise().done(new DoneCallback<Void>() {
             @Override
             public void onDone(Void aVoid) {
+                if (mTaskParallel == null) {
+                    return;
+                }
+
                 Iterator<String> iterator = mTaskParallel.getDoneOrFailMap().keySet().iterator();
                 while (iterator.hasNext()) {
                     if (mainType.equals(iterator.next())) {
@@ -132,11 +146,9 @@ public class DanceManager {
         return mProgressivePromise;
     }
 
-    public void stop() {
-        if (mTaskParallel != null) {
-            mTaskParallel.cancel();
-            mTaskParallel = null;
-        }
+    public ProgressivePromise<Void, PlayException, Map.Entry<String,
+            AsyncTaskParallel.DoneOrFail<Object, PlayException>>> getProgressivePromise() {
+        return mProgressivePromise;
     }
 
     private class TrackPlayerFactory implements PlayerFactory {

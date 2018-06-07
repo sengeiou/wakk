@@ -20,6 +20,9 @@ android {
 }
 
 dependencies {
+    api project(':commons')
+    api project(':sensor')
+
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     def deps = rootProject.ext.deps

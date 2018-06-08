@@ -4,6 +4,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
+import com.ubtrobot.validate.Preconditions;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -374,6 +376,17 @@ public class UnderstandResult implements Parcelable {
             private JSONObject parameters;
             private int lifespan;
 
+            public Builder() {
+            }
+
+            public Builder(Context context) {
+                Preconditions.checkNotNull(context,
+                        "Context.Builder construct refuse null context");
+                this.name = context.name;
+                this.parameters = context.parameters;
+                this.lifespan = context.lifespan;
+            }
+
             public Builder setName(String name) {
                 this.name = name;
                 return this;
@@ -470,11 +483,28 @@ public class UnderstandResult implements Parcelable {
             return status;
         }
 
+        public Builder toBuilder() {
+            return new Builder(this);
+        }
+
         public static class Builder {
 
             private String speech = "";
             private List<Message> messages = new ArrayList<>();
-            private Status status;
+            private Status status = Status.NULL;
+
+            public Builder() {
+            }
+
+            public Builder(Fulfillment fulfillment) {
+                Preconditions.checkNotNull(fulfillment,
+                        "Fulfillment。Builder refuse null Fulfillment");
+                this.speech = fulfillment.speech;
+                //todo 是不是希望可以把message也拷贝了
+                List<UnderstandResult.Message> copy = new ArrayList<>(fulfillment.messages);
+                this.messages = copy;
+                this.status = fulfillment.status;
+            }
 
             public Builder setSpeech(String speech) {
                 this.speech = speech;
@@ -697,6 +727,10 @@ public class UnderstandResult implements Parcelable {
             return parameters;
         }
 
+        public Builder toBuilder() {
+            return new Builder(this);
+        }
+
         public static class Builder {
             public static final String TYPE_ORIGINAL = "original";
             public static final String TYPE_TEXT = "text";
@@ -704,6 +738,21 @@ public class UnderstandResult implements Parcelable {
             private String type = "";
             private String platform = "";
             private JSONObject parameters = new JSONObject();
+
+            public Builder() {
+            }
+
+            public Builder(Message message) {
+                Preconditions.checkNotNull(message, "Message.Builder refuse null message");
+                this.type = message.type;
+                this.platform = message.platform;
+                try {
+                    JSONObject copy = new JSONObject(parameters.toString());
+                    this.parameters = copy;
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
 
             public Builder setType(String type) {
                 this.type = type;
@@ -741,8 +790,25 @@ public class UnderstandResult implements Parcelable {
         private boolean actionIncomplete;
         private Intent intent = Intent.NULL;
         private List<Context> contexts = new ArrayList<>();
-        private Fulfillment fulfillment;
+        private Fulfillment fulfillment = Fulfillment.NULL;
         private String inputText = "";
+
+        public Builder() {
+
+        }
+
+        public Builder(UnderstandResult result) {
+            Preconditions.checkNotNull(result,
+                    "UnderstandResult.Builder refuse null UnderstandResult");
+            this.sessionId = result.sessionId;
+            this.source = result.source;
+            this.language = result.language;
+            this.actionIncomplete = result.actionIncomplete;
+            this.intent = result.intent;
+            this.contexts = result.contexts;
+            this.fulfillment = result.fulfillment;
+            this.inputText = result.inputText;
+        }
 
         public Builder setSessionId(String sessionId) {
             this.sessionId = sessionId;
@@ -788,6 +854,11 @@ public class UnderstandResult implements Parcelable {
         public Builder setInputText(String inputText) {
             this.inputText = inputText;
             return this;
+        }
+
+        //EmotibotConvert need get InputText from this builder
+        public String getInputText() {
+            return inputText;
         }
 
         public UnderstandResult build() {

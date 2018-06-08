@@ -70,6 +70,9 @@ public class ProtoCallAdapter {
                         } catch (ProtoParam.InvalidProtoParamException e) {
                             throw convertFail(new CallException(CallGlobalCode.INTERNAL_ERROR,
                                     "Response illegal protobuf message.", e));
+                        } catch (Exception e) {
+                            throw convertFail(new CallException(CallGlobalCode.INTERNAL_ERROR,
+                                    "Response illegal protobuf message.", e));
                         }
                     }
 
@@ -151,7 +154,7 @@ public class ProtoCallAdapter {
 
         Class<DM> doneProtoClass();
 
-        D convertDone(DM protoParam);
+        D convertDone(DM protoParam) throws Exception;
 
         F convertFail(CallException e);
     }

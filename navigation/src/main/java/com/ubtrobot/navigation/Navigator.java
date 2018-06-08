@@ -6,9 +6,11 @@ import com.google.protobuf.Message;
 import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.master.adapter.ProtoCallAdapter;
+import com.ubtrobot.master.call.CallConfiguration;
 import com.ubtrobot.master.competition.Competing;
 import com.ubtrobot.master.competition.CompetingItem;
 import com.ubtrobot.master.competition.CompetitionSession;
+import com.ubtrobot.master.service.ServiceProxy;
 import com.ubtrobot.navigation.ipc.NavigationConstants;
 import com.ubtrobot.navigation.ipc.NavigationConverters;
 import com.ubtrobot.navigation.ipc.NavigationProto;
@@ -19,9 +21,11 @@ import java.util.List;
 
 public class Navigator implements Competing {
 
+    private final ProtoCallAdapter mNavigationService;
     private final Handler mHandler;
 
-    Navigator(Handler handler) {
+    Navigator(ProtoCallAdapter navigationService, Handler handler) {
+        mNavigationService = navigationService;
         mHandler = handler;
     }
 
@@ -31,6 +35,30 @@ public class Navigator implements Competing {
                 NavigationConstants.SERVICE_NAME,
                 NavigationConstants.COMPETING_ITEM_NAVIGATOR
         ));
+    }
+
+    public Promise<Location, GetLocationException> getCurrentLocation() {
+        return mNavigationService.call(
+                NavigationConstants.CALL_PATH_GET_CURRENT_LOCATION,
+                new ProtoCallAdapter.DFProtoConverter<
+                        Location, NavigationProto.Location, GetLocationException>() {
+                    @Override
+                    public Class<NavigationProto.Location> doneProtoClass() {
+                        return NavigationProto.Location.class;
+                    }
+
+                    @Override
+                    public Location
+                    convertDone(NavigationProto.Location location) throws Exception {
+                        return NavigationConverters.toLocationPojo(location);
+                    }
+
+                    @Override
+                    public GetLocationException convertFail(CallException e) {
+                        return new GetLocationException.Factory().from(e);
+                    }
+                }
+        );
     }
 
     public Promise<Location, LocateException> locateSelf(CompetitionSession session) {
@@ -45,10 +73,13 @@ public class Navigator implements Competing {
             throw new IllegalArgumentException("Argument option is null.");
         }
 
-        ProtoCallAdapter navigationService = new ProtoCallAdapter(
-                session.createSystemServiceProxy(NavigationConstants.SERVICE_NAME),
-                mHandler
-        );
+        ServiceProxy serviceProxy = session.createSystemServiceProxy(NavigationConstants.SERVICE_NAME);
+        if (option.getTimeout() > 0) {
+            serviceProxy.setConfiguration(new CallConfiguration.Builder(
+                    serviceProxy.getConfiguration()).setTimeout(option.getTimeout()).build());
+        }
+
+        ProtoCallAdapter navigationService = new ProtoCallAdapter(serviceProxy, mHandler);
         return navigationService.call(
                 NavigationConstants.CALL_PATH_LOCATE_SELF,
                 NavigationConverters.toLocateOptionProto(option),

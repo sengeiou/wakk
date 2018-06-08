@@ -41,7 +41,7 @@ protobuf {
 }
 
 dependencies {
-    implementation project(':commons')
+    api project(':commons')
 
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 

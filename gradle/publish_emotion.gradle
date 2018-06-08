@@ -19,7 +19,18 @@ project(':emotion') {
                     dependencyNode.appendNode('version', rootProject.ext.versions.commonsVersion)
                 }
             }
+        }
+    }
 
+    artifactoryPublish {
+        publications(publishing.publications.jarFramework)
+    }
+}
+
+project(':sal:emotion') {
+    artifactoryPublish.dependsOn('assembleRelease')
+    publishing {
+        publications {
             aarSal(MavenPublication) {
                 groupId = rootProject.ext.groupId
                 artifactId = "emotion-sal"
@@ -33,14 +44,14 @@ project(':emotion') {
 
                     def dependencyNode = dependenciesNode.appendNode('dependency')
                     dependencyNode.appendNode('groupId', 'com.ubtrobot.framework')
-                    dependencyNode.appendNode('artifactId', 'commons')
-                    dependencyNode.appendNode('version', rootProject.ext.versions.commonsVersion)
+                    dependencyNode.appendNode('artifactId', 'emotion')
+                    dependencyNode.appendNode('version', rootProject.ext.versions.emotionVersion)
                 }
             }
         }
     }
 
     artifactoryPublish {
-        publications(publishing.publications.jarFramework, publishing.publications.aarSal)
+        publications(publishing.publications.aarSal)
     }
 }

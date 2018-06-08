@@ -5,8 +5,35 @@ package motion;
 option java_package = "com.ubtrobot.motion.ipc";
 option java_outer_classname = "MotionProto";
 
-message JointDeviceExt {
+message JointIdList {
+    repeated string id = 1;
+}
 
+message JointAngleMap {
+    map<string, float> angle = 1;
+}
+
+message JointRotatingOptionSequenceMap {
+    map<string, JointRotatingOptionSequence> option_sequence = 1;
+}
+
+message JointRotatingOptionSequence {
+    repeated JointRotatingOption option = 1;
+}
+
+message JointRotatingOption {
+    string joint_id = 1;
+    float angle = 2;
+    bool angleAbsolute = 3;
+    int64 duration = 4;
+    float speed = 5;
+}
+
+message JointRotatingSession {
+    string id = 1;
+}
+
+message JointDeviceExt {
     float min_angle = 1;
     float max_angle = 2;
     float min_speed = 3;
@@ -14,30 +41,36 @@ message JointDeviceExt {
     float default_speed = 5;
 }
 
-message JointRotatingOption {
-
-    string joint_id = 1;
-    bool relatively = 2;
-    float angle = 3;
-    bool use_speed = 4;
-    float speed = 5;
-    int64 time_millis = 6;
-}
-
-message JointRotatingProgress {
-
-    int32 state = 1;
-    float current_angle = 2;
-    float rotated_angle = 3;
-    float rotated_time_millis = 4;
+message JointGroupRotatingProgress {
+    string session_id = 1;
+    int32 state = 2;
 }
 
 message LocomotorDeviceExt {
-
     float min_turning_speed = 1;
     float max_turning_speed = 2;
     float default_turning_speed = 3;
     float min_moving_speed = 4;
     float max_moving_speed = 5;
     float default_moving_speed = 6;
+}
+
+message LocomotionOption {
+    float moving_speed = 1;
+    float moving_angle = 2;
+    float moving_distance = 3;
+
+    float turning_speed = 4;
+    float turning_angle = 5;
+
+    int64 duration = 6;
+}
+
+message LocomotionOptionSequence {
+    repeated LocomotionOption option = 1;
+}
+
+message LocomotionProgress {
+    string session_id = 1;
+    int32 state = 2;
 }

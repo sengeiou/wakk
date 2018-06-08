@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+package wakeup;
+
 option java_outer_classname = "WakeupProto";
 option java_package = "com.ubtrobot.wakeup.ipc";
 

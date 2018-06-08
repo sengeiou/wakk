@@ -1,0 +1,70 @@
+apply plugin: 'com.android.library'
+apply plugin: 'com.google.protobuf'
+
+android {
+    def sdk = rootProject.ext.sdk
+    compileSdkVersion sdk.compileSdkVersion
+
+    defaultConfig {
+        minSdkVersion sdk.minSdkVersion
+        targetSdkVersion sdk.targetSdkVersion
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+protobuf {
+    protoc {
+        artifact = rootProject.ext.protoc
+    }
+
+    plugins {
+        java {
+            artifact = rootProject.ext.protoc
+        }
+    }
+
+    generateProtoTasks {
+        all().each { task ->
+            task.plugins {
+                java {}
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation project(':commons')
+
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+
+    def deps = rootProject.ext.deps
+    implementation deps.appcompat
+
+    testImplementation deps.junit
+    androidTestImplementation deps.espressoCore
+    androidTestImplementation deps.runner
+}
+
+task jarFramework(
+        type: Jar,
+        dependsOn: ['assembleRelease']) {
+    archiveName = "play.jar"
+
+    exclude('**/R.class')
+    exclude('**/R$*.class')
+    exclude('**/BuildConfig.class')
+    exclude('**/BuildConfig$*.class')
+    exclude('android/')
+
+    exclude('com/ubtrobot/commons/')
+
+    from 'build/intermediates/classes/release'
+}

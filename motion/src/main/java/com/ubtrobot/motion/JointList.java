@@ -1,7 +1,5 @@
 package com.ubtrobot.motion;
 
-import android.os.Handler;
-
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.ubtrobot.cache.CachedField;
 import com.ubtrobot.device.ipc.DeviceProto;
@@ -13,16 +11,19 @@ import com.ubtrobot.ulog.FwLoggerFactory;
 import com.ubtrobot.ulog.Logger;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class JointList {
 
     private static final Logger LOGGER = FwLoggerFactory.getLogger("JointList");
 
     private final CachedField<List<Joint>> mJoints;
+    private final CachedField<Map<String, Joint>> mJointMap;
 
-    JointList(final ProtoCallAdapter motionService, final Handler handler) {
+    JointList(final ProtoCallAdapter motionService) {
         mJoints = new CachedField<>(new CachedField.FieldGetter<List<Joint>>() {
             @Override
             public List<Joint> get() {
@@ -31,8 +32,7 @@ public class JointList {
                             MotionConstants.CALL_PATH_GET_JOINT_LIST, DeviceProto.DeviceList.class);
                     LinkedList<Joint> joints = new LinkedList<>();
                     for (DeviceProto.Device device : deviceList.getDeviceList()) {
-                        joints.add(new Joint(motionService,
-                                MotionConverters.toJointDevicePojo(device), handler));
+                        joints.add(new Joint(motionService, MotionConverters.toJointDevicePojo(device)));
                     }
 
                     return Collections.unmodifiableList(joints);
@@ -45,6 +45,23 @@ public class JointList {
                 return null;
             }
         });
+
+        mJointMap = new CachedField<>(new CachedField.FieldGetter<Map<String, Joint>>() {
+            @Override
+            public Map<String, Joint> get() {
+                List<Joint> joints = mJoints.get();
+                if (joints == null) {
+                    return null;
+                }
+
+                HashMap<String, Joint> jointMap = new HashMap<>();
+                for (Joint joint : joints) {
+                    jointMap.put(joint.getId(), joint);
+                }
+
+                return jointMap;
+            }
+        });
     }
 
     public List<Joint> all() {
@@ -53,13 +70,13 @@ public class JointList {
     }
 
     public Joint get(String jointId) {
-        for (Joint joint : all()) {
-            if (joint.getId().equals(jointId)) {
-                return joint;
-            }
-        }
+        Map<String, Joint> jointMap = mJointMap.get();
+        Joint joint = jointMap == null ? null : jointMap.get(jointId);
 
-        throw new JointNotFoundException();
+        if (joint == null) {
+            throw new JointNotFoundException();
+        }
+        return joint;
     }
 
     public static class JointNotFoundException extends RuntimeException {

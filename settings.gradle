@@ -1,6 +1,18 @@
-include ':commons'
-include ':upgrade', 'wakeup', 'analytics', 'speech', ':emotion', ':navigation', ':light', ':motion'
-include ':service-impl:upgrade', ':service-impl:analytics'
+include ':commons', ':play'
+
+include ':navigation', ':sal:navigation'
+include ':emotion', ':sal:emotion'
+include ':motion', ':sal:motion'
+include ':light', ':sal:light'
+include ':speech', ':sal:speech'
+include ':upgrade', ':sal:upgrade', ':service-impl:upgrade'
+include ':wakeup', ':sal:wakeup'
+include 'analytics', ':sal:analytics', ':service-impl:analytics'
+include ':dance', ':sal:dance'
+include ':sensor'
+
 include ':initialization'
+
 include ':sample', ':service-mocks'
+
 include ':product:cruzr', ':product:alpha-mini', ':product:beta'

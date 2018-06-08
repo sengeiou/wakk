@@ -5,52 +5,64 @@ package navigation;
 option java_package = "com.ubtrobot.navigation.ipc";
 option java_outer_classname = "NavigationProto";
 
+import "google/protobuf/any.proto";
+
 message GroundOverlay {
 
-    string image = 1;
-    string remote_image = 2;
+    string name = 1;
+    string tag = 2;
+    int32 width = 3;
+    int32 height = 4;
+    Point origin_In_Image = 5;
+    google.protobuf.Any image = 6;
 }
 
-message LatLng {
+message Point {
 
-    double latitude = 1;
-    double longitude = 2;
+    int32 x = 1;
+    int32 y = 2;
 }
 
 message Marker {
 
-    string title = 1;
-    LatLng position = 2;
-    double elevation = 3;
-    float rotation = 4;
+    string id = 1;
+    string title = 2;
+    Point position = 3;
+    int32 z = 4;
+    float rotation = 5;
+    string tag = 6;
+    string description = 7;
 }
 
 message NavMap {
 
     string id = 1;
     string name = 2;
+    string tag = 3;
+    float scale = 4;
 
-    repeated GroundOverlay ground_overlay = 3;
-    repeated Marker marker = 4;
+    repeated GroundOverlay ground_overlay = 5;
+    repeated Marker marker = 6;
+    google.protobuf.Any navFile = 7;
 }
 
 message NavMapList {
 
     repeated NavMap map = 1;
-    string id_selected = 2;
 }
 
 message Location {
 
-    LatLng position = 1;
-    double elevation = 2;
+    Point position = 1;
+    int32 z = 2;
     float rotation = 3;
 }
 
 message LocateOption {
 
-    bool use_nearby = 2;
-    Location nearby = 1;
+    bool use_nearby = 1;
+    Location nearby = 2;
+    int32 timeout = 3;
 }
 
 message NavigateOption {

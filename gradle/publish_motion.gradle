@@ -19,7 +19,18 @@ project(':motion') {
                     dependencyNode.appendNode('version', rootProject.ext.versions.commonsVersion)
                 }
             }
+        }
+    }
 
+    artifactoryPublish {
+        publications(publishing.publications.jarFramework)
+    }
+}
+
+project(':sal:motion') {
+    artifactoryPublish.dependsOn('assembleRelease')
+    publishing {
+        publications {
             aarSal(MavenPublication) {
                 groupId = rootProject.ext.groupId
                 artifactId = "motion-sal"
@@ -33,14 +44,14 @@ project(':motion') {
 
                     def dependencyNode = dependenciesNode.appendNode('dependency')
                     dependencyNode.appendNode('groupId', 'com.ubtrobot.framework')
-                    dependencyNode.appendNode('artifactId', 'commons')
-                    dependencyNode.appendNode('version', rootProject.ext.versions.commonsVersion)
+                    dependencyNode.appendNode('artifactId', 'motion')
+                    dependencyNode.appendNode('version', rootProject.ext.versions.motionVersion)
                 }
             }
         }
     }
 
     artifactoryPublish {
-        publications(publishing.publications.jarFramework, publishing.publications.aarSal)
+        publications(publishing.publications.aarSal)
     }
 }

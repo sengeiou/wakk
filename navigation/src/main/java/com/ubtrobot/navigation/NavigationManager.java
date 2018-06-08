@@ -32,14 +32,14 @@ public class NavigationManager {
                 handler
         );
         mNavMapList = new NavMapList(navigationService);
-        mNavigator = new Navigator(handler);
+        mNavigator = new Navigator(navigationService, handler);
     }
 
-    public List<NavMap> getNavMapList() {
+    public Promise<List<NavMap>, NavMapException> getNavMapList() {
         return mNavMapList.all();
     }
 
-    public NavMap getNavMap(String navMapId) {
+    public Promise<NavMap, NavMapException> getNavMap(String navMapId) {
         return mNavMapList.get(navMapId);
     }
 
@@ -47,7 +47,7 @@ public class NavigationManager {
         return mNavMapList.add(navMap);
     }
 
-    public NavMap getSelectedNavMap() {
+    public Promise<NavMap, NavMapException> getSelectedNavMap() {
         return mNavMapList.getSelected();
     }
 
@@ -77,6 +77,10 @@ public class NavigationManager {
                     addCompeting(navigator()));
             return mSession;
         }
+    }
+
+    public Promise<Location, GetLocationException> getCurrentLocation() {
+        return mNavigator.getCurrentLocation();
     }
 
     public Promise<Location, LocateException> locateSelf() {

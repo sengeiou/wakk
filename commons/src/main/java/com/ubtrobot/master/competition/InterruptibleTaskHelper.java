@@ -15,33 +15,39 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class InterruptibleTaskHelper {
 
     private final HashMap<String, TaskEnv<?, ?, ?>> mTasks = new HashMap<>();
+    private final HashMap<String, TaskEnv<?, ?, ?>> mSessionTaskMap = new HashMap<>();
 
-    public <D, F, P> ProgressivePromise<D, F, P> start(
+    private static final String SESSION_PREFIX = UUID.randomUUID().toString().substring(0, 4) + "-";
+    private final AtomicInteger mSessionCount = new AtomicInteger(0);
+
+    public <D, F extends Throwable, P> ProgressivePromise<D, F, P> start(
             Collection<String> receivers,
             String name,
+            Session outSession,
             InterruptibleProgressiveAsyncTask<D, F, P> task,
             InterruptedExceptionCreator<F> creator) {
         synchronized (mTasks) {
+            outSession.id = nextSessionId();
+
             Set<String> receiverSet = Collections.unmodifiableSet(new HashSet<>(receivers));
-            Iterator<Map.Entry<String, TaskEnv<?, ?, ?>>> iterator = mTasks.entrySet().iterator();
-            while (iterator.hasNext()) {
-                TaskEnv<?, ?, ?> taskEnv = iterator.next().getValue();
+            for (TaskEnv<?, ?, ?> taskEnv : mTasks.values()) {
                 for (String receiver : receiverSet) {
                     if (taskEnv.receivers.contains(receiver)) {
                         taskEnv.interrupt(receiverSet);
                     }
-
-                    iterator.remove();
-                    break;
                 }
             }
 
-            final TaskEnv<D, F, P> newTaskEnv = new TaskEnv<>(receiverSet, name, task, creator);
+            final TaskEnv<D, F, P> newTaskEnv = new TaskEnv<>(receiverSet, name, outSession,
+                    task, creator);
             mTasks.put(newTaskEnv.receiverSeq, newTaskEnv);
+            mSessionTaskMap.put(outSession.id, newTaskEnv);
 
             task.start();
             return task.promise().done(new DoneCallback<D>() {
@@ -58,6 +64,10 @@ public class InterruptibleTaskHelper {
         }
     }
 
+    private String nextSessionId() {
+        return SESSION_PREFIX + mSessionCount.incrementAndGet();
+    }
+
     private void removeTask(long id) {
         synchronized (mTasks) {
             Iterator<Map.Entry<String, TaskEnv<?, ?, ?>>> iterator = mTasks.entrySet().iterator();
@@ -65,6 +75,7 @@ public class InterruptibleTaskHelper {
                 TaskEnv<?, ?, ?> taskEnv = iterator.next().getValue();
                 if (taskEnv.id == id) {
                     iterator.remove();
+                    mSessionTaskMap.remove(taskEnv.session.id);
                     break;
                 }
             }
@@ -77,28 +88,30 @@ public class InterruptibleTaskHelper {
         return receiverList.toString();
     }
 
-    public <D, F, P> ProgressivePromise<D, F, P> start(
+    public <D, F extends Throwable, P> ProgressivePromise<D, F, P> start(
             String receiver,
             String name,
             InterruptibleProgressiveAsyncTask<D, F, P> task,
             InterruptedExceptionCreator<F> creator) {
-        return start(Collections.singleton(receiver), name, task, creator);
+        return start(Collections.singleton(receiver), name, new Session(), task, creator);
     }
 
-    public <D, F> Promise<D, F> start(
+    public <D, F extends Throwable> Promise<D, F> start(
             Collection<String> receivers,
             String name,
+            Session outSession,
             InterruptibleAsyncTask<D, F> task,
             InterruptedExceptionCreator<F> creator) {
-        return start(receivers, name, (InterruptibleProgressiveAsyncTask<D, F, Void>) task, creator);
+        return start(receivers, name, outSession,
+                (InterruptibleProgressiveAsyncTask<D, F, Void>) task, creator);
     }
 
-    public <D, F> Promise<D, F> start(
+    public <D, F extends Throwable> Promise<D, F> start(
             String receiver,
             String name,
             InterruptibleAsyncTask<D, F> task,
             InterruptedExceptionCreator<F> creator) {
-        return start(Collections.singleton(receiver), name,
+        return start(Collections.singleton(receiver), name, new Session(),
                 (InterruptibleProgressiveAsyncTask<D, F, Void>) task, creator);
     }
 
@@ -142,7 +155,21 @@ public class InterruptibleTaskHelper {
     }
 
     @SuppressWarnings("unchecked")
-    public <F> boolean reject(Collection<String> receivers, String name, F fail) {
+    public <D> boolean resolve(String sessionId, D done) {
+        synchronized (mTasks) {
+            TaskEnv<?, ?, ?> taskEnv = mSessionTaskMap.get(sessionId);
+            if (taskEnv != null) {
+                boolean ret = taskEnv.task.promise().isPending();
+                ((TaskEnv<D, ?, ?>) taskEnv).task.resolve(done);
+                return ret;
+            }
+
+            return false;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public <F extends Throwable> boolean reject(Collection<String> receivers, String name, F fail) {
         synchronized (mTasks) {
             String receiverSeq = receiverSeq(receivers);
             TaskEnv<?, ?, ?> taskEnv = mTasks.get(receiverSeq);
@@ -156,8 +183,22 @@ public class InterruptibleTaskHelper {
         }
     }
 
-    public <F> boolean reject(String receiver, String name, F fail) {
+    public <F extends Throwable> boolean reject(String receiver, String name, F fail) {
         return reject(Collections.singleton(receiver), name, fail);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <F extends Throwable> boolean reject(String sessionId, F fail) {
+        synchronized (mTasks) {
+            TaskEnv<?, ?, ?> taskEnv = mSessionTaskMap.get(sessionId);
+            if (taskEnv != null) {
+                boolean ret = taskEnv.task.promise().isPending();
+                ((TaskEnv<?, F, ?>) taskEnv).task.reject(fail);
+                return ret;
+            }
+
+            return false;
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -179,11 +220,26 @@ public class InterruptibleTaskHelper {
         return report(Collections.singleton(receiver), name, progress);
     }
 
-    private static class TaskEnv<D, F, P> {
+    @SuppressWarnings("unchecked")
+    public <P> boolean report(String sessionId, P progress) {
+        synchronized (mTasks) {
+            TaskEnv<?, ?, ?> taskEnv = mSessionTaskMap.get(sessionId);
+            if (taskEnv != null) {
+                boolean ret = taskEnv.task.promise().isPending();
+                ((TaskEnv<?, ?, P>) taskEnv).task.report(progress);
+                return ret;
+            }
+
+            return false;
+        }
+    }
+
+    private static class TaskEnv<D, F extends Throwable, P> {
 
         Set<String> receivers;
         String receiverSeq;
         String name;
+        Session session;
         InterruptibleProgressiveAsyncTask<D, F, P> task;
         InterruptedExceptionCreator<F> creator;
         long id = System.nanoTime();
@@ -191,10 +247,12 @@ public class InterruptibleTaskHelper {
         public TaskEnv(
                 Set<String> receivers,
                 String name,
+                Session session,
                 InterruptibleProgressiveAsyncTask<D, F, P> task,
                 InterruptedExceptionCreator<F> creator) {
             this.receivers = receivers;
             this.name = name;
+            this.session = session;
             this.task = task;
             this.creator = creator;
             receiverSeq = receiverSeq(receivers);
@@ -208,5 +266,21 @@ public class InterruptibleTaskHelper {
     public interface InterruptedExceptionCreator<E> {
 
         E createInterruptedException(Set<String> interrupters);
+    }
+
+    public static class Session {
+
+        private String id;
+
+        public String getId() {
+            return id;
+        }
+
+        @Override
+        public String toString() {
+            return "Session{" +
+                    "id='" + id + '\'' +
+                    '}';
+        }
     }
 }

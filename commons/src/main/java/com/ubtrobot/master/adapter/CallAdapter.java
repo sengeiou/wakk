@@ -80,6 +80,7 @@ public class CallAdapter {
             }
         };
 
+        task.start();
         return task.promise();
     }
 
@@ -165,6 +166,7 @@ public class CallAdapter {
             }
         };
 
+        task.start();
         return task.promise();
     }
 

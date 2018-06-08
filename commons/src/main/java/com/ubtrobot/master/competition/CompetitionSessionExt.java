@@ -1,10 +1,12 @@
 package com.ubtrobot.master.competition;
 
-import com.ubtrobot.async.AsyncTask;
+import com.ubtrobot.async.AbstractCancelable;
+import com.ubtrobot.async.Cancelable;
+import com.ubtrobot.async.DefaultProgressivePromise;
+import com.ubtrobot.async.DefaultPromise;
 import com.ubtrobot.async.DoneCallback;
 import com.ubtrobot.async.FailCallback;
 import com.ubtrobot.async.ProgressCallback;
-import com.ubtrobot.async.ProgressiveAsyncTask;
 import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
 
@@ -20,133 +22,139 @@ public class CompetitionSessionExt<C extends Competing> {
         return mSession;
     }
 
-    public <D, F, P> ProgressivePromise<D, F, P> execute(
+    public <D, F extends Throwable, P> ProgressivePromise<D, F, P> execute(
             final C competing,
             final SessionProgressiveCallable<D, F, P, C> callable,
             final Converter<F> converter) {
-        ProgressiveAsyncTask<D, F, P> task = new ProgressiveAsyncTask<D, F, P>() {
+        synchronized (mSession) {
+            if (mSession.isActive()) {
+                return callable.call(mSession, competing);
+            }
 
-            private ProgressivePromise<D, F, P> mPromise;
-            private final byte[] mLock = new byte[0];
-
-            @Override
-            protected void onStart() {
-                mSession.activate(new ActivateCallback() {
-                    @Override
-                    public void onSuccess(String sessionId) {
-                        synchronized (mLock) {
-                            if (isCanceled()) {
-                                return;
-                            }
-
-                            mPromise = callable.call(
-                                    mSession,
-                                    competing
-                            ).progress(new ProgressCallback<P>() {
-                                @Override
-                                public void onProgress(P progress) {
-                                    report(progress);
-                                }
-                            }).done(new DoneCallback<D>() {
-                                @Override
-                                public void onDone(D done) {
-                                    resolve(done);
-                                }
-                            }).fail(new FailCallback<F>() {
-                                @Override
-                                public void onFail(F e) {
-                                    reject(e);
-                                }
-                            });
+            final Promise[] callablePromise = new Promise[1];
+            Cancelable cancelable = new AbstractCancelable() {
+                @Override
+                protected void doCancel() {
+                    synchronized (mSession) {
+                        if (callablePromise[0] != null) {
+                            callablePromise[0].cancel();
                         }
                     }
+                }
+            };
 
-                    @Override
-                    public void onFailure(ActivateException e) {
-                        reject(converter.convert(e));
-                    }
-                });
-            }
+            final DefaultProgressivePromise<D, F, P> promise =
+                    new DefaultProgressivePromise<>(cancelable);
+            mSession.activate(new ActivateCallback() {
+                @Override
+                public void onSuccess(String s) {
+                    synchronized (mSession) {
+                        if (promise.isCanceled()) {
+                            return;
+                        }
 
-            @Override
-            protected void onCancel() {
-                synchronized (mLock) {
-                    if (mPromise != null) {
-                        mPromise.cancel();
+                        callablePromise[0] = callable.call(
+                                mSession,
+                                competing
+                        ).progress(new ProgressCallback<P>() {
+                            @Override
+                            public void onProgress(P progress) {
+                                promise.report(progress);
+                            }
+                        }).done(new DoneCallback<D>() {
+                            @Override
+                            public void onDone(D done) {
+                                promise.resolve(done);
+                            }
+                        }).fail(new FailCallback<F>() {
+                            @Override
+                            public void onFail(F fail) {
+                                promise.reject(fail);
+                            }
+                        });
                     }
                 }
-            }
-        };
 
-        task.start();
-        return task.promise();
+                @Override
+                public void onFailure(ActivateException e) {
+                    synchronized (mSession) {
+                        promise.reject(converter.convert(e));
+                    }
+                }
+            });
+
+            return promise;
+        }
     }
 
-    public <D, F> Promise<D, F> execute(
+    public <D, F extends Throwable> Promise<D, F> execute(
             final C competing,
             final SessionCallable<D, F, C> callable,
             final Converter<F> converter) {
-        AsyncTask<D, F> task = new AsyncTask<D, F>() {
+        synchronized (mSession) {
+            if (mSession.isActive()) {
+                return callable.call(mSession, competing);
+            }
 
-            private Promise<D, F> mPromise;
-            private final byte[] mLock = new byte[0];
-
-            @Override
-            protected void onStart() {
-                mSession.activate(new ActivateCallback() {
-                    @Override
-                    public void onSuccess(String sessionId) {
-                        synchronized (mLock) {
-                            if (isCanceled()) {
-                                return;
-                            }
-
-                            mPromise = callable.call(
-                                    mSession,
-                                    competing
-                            ).done(new DoneCallback<D>() {
-                                @Override
-                                public void onDone(D done) {
-                                    resolve(done);
-                                }
-                            }).fail(new FailCallback<F>() {
-                                @Override
-                                public void onFail(F e) {
-                                    reject(e);
-                                }
-                            });
+            final Promise[] callablePromise = new ProgressivePromise[1];
+            Cancelable cancelable = new AbstractCancelable() {
+                @Override
+                protected void doCancel() {
+                    synchronized (mSession) {
+                        if (callablePromise[0] != null) {
+                            callablePromise[0].cancel();
                         }
                     }
+                }
+            };
 
-                    @Override
-                    public void onFailure(ActivateException e) {
-                        reject(converter.convert(e));
-                    }
-                });
-            }
+            final DefaultPromise<D, F> promise = new DefaultPromise<>(cancelable);
+            mSession.activate(new ActivateCallback() {
+                @Override
+                public void onSuccess(String s) {
+                    synchronized (mSession) {
+                        if (promise.isCanceled()) {
+                            return;
+                        }
 
-            @Override
-            protected void onCancel() {
-                synchronized (mLock) {
-                    if (mPromise != null) {
-                        mPromise.cancel();
+                        callablePromise[0] = callable.call(
+                                mSession,
+                                competing
+                        ).done(new DoneCallback<D>() {
+                            @Override
+                            public void onDone(D done) {
+                                promise.resolve(done);
+                            }
+                        }).fail(new FailCallback<F>() {
+                            @Override
+                            public void onFail(F fail) {
+                                promise.reject(fail);
+                            }
+                        });
                     }
                 }
-            }
-        };
 
-        task.start();
-        return task.promise();
+                @Override
+                public void onFailure(ActivateException e) {
+                    synchronized (mSession) {
+                        promise.reject(converter.convert(e));
+                    }
+                }
+            });
+
+            return promise;
+        }
     }
 
-    public interface SessionProgressiveCallable<D, F, P, C extends Competing> {
-
-        ProgressivePromise<D, F, P> call(CompetitionSession session, C competing);
-    }
-
-    public interface SessionCallable<D, F, C extends Competing> {
+    public interface SessionCallable<D, F extends Throwable, C extends Competing> {
 
         Promise<D, F> call(CompetitionSession session, C competing);
+    }
+
+    public interface SessionProgressiveCallable<D, F extends Throwable, P, C extends Competing>
+            extends SessionCallable<D, F, C> {
+
+        ProgressivePromise<D, F, P> call(CompetitionSession session, C competing);
     }
 
     public interface Converter<F> {

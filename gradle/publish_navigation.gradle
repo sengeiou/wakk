@@ -19,7 +19,18 @@ project(':navigation') {
                     dependencyNode.appendNode('version', rootProject.ext.versions.commonsVersion)
                 }
             }
+        }
+    }
 
+    artifactoryPublish {
+        publications(publishing.publications.jarFramework)
+    }
+}
+
+project(':sal:navigation') {
+    artifactoryPublish.dependsOn('assembleRelease')
+    publishing {
+        publications {
             aarSal(MavenPublication) {
                 groupId = rootProject.ext.groupId
                 artifactId = "navigation-sal"
@@ -33,14 +44,14 @@ project(':navigation') {
 
                     def dependencyNode = dependenciesNode.appendNode('dependency')
                     dependencyNode.appendNode('groupId', 'com.ubtrobot.framework')
-                    dependencyNode.appendNode('artifactId', 'commons')
-                    dependencyNode.appendNode('version', rootProject.ext.versions.commonsVersion)
+                    dependencyNode.appendNode('artifactId', 'navigation')
+                    dependencyNode.appendNode('version', rootProject.ext.versions.navigationVersion)
                 }
             }
         }
     }
 
     artifactoryPublish {
-        publications(publishing.publications.jarFramework, publishing.publications.aarSal)
+        publications(publishing.publications.aarSal)
     }
 }

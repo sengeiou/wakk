@@ -19,7 +19,18 @@ project(':wakeup') {
                     dependencyNode.appendNode('version', rootProject.ext.versions.commonsVersion)
                 }
             }
+        }
+    }
 
+    artifactoryPublish {
+        publications(publishing.publications.jarFramework)
+    }
+}
+
+project(':sal:wakeup') {
+    artifactoryPublish.dependsOn('assembleRelease')
+    publishing {
+        publications {
             aarSal(MavenPublication) {
                 groupId = rootProject.ext.groupId
                 artifactId = "wakeup-sal"
@@ -33,14 +44,14 @@ project(':wakeup') {
 
                     def dependencyNode = dependenciesNode.appendNode('dependency')
                     dependencyNode.appendNode('groupId', 'com.ubtrobot.framework')
-                    dependencyNode.appendNode('artifactId', 'commons')
-                    dependencyNode.appendNode('version', rootProject.ext.versions.commonsVersion)
+                    dependencyNode.appendNode('artifactId', 'wakeup')
+                    dependencyNode.appendNode('version', rootProject.ext.versions.wakeupVersion)
                 }
             }
         }
     }
 
     artifactoryPublish {
-        publications(publishing.publications.jarFramework, publishing.publications.aarSal)
+        publications(publishing.publications.aarSal)
     }
 }

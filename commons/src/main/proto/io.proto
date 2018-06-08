@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package io;
+
+option java_package = "com.ubtrobot.io.ipc";
+option java_outer_classname = "IoProto";
+
+message FileInfo {
+
+    string name = 1;
+    string format = 2;
+    string remote_url = 3;
+    string local_uri = 4;
+}

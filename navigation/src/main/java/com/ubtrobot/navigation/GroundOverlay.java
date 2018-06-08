@@ -1,34 +1,48 @@
 package com.ubtrobot.navigation;
 
+import com.ubtrobot.io.FileInfo;
+
 /**
  * 地图地面叠层
  */
 public class GroundOverlay {
 
-    public static final GroundOverlay DEFAULT = new GroundOverlay("", "");
+    public static final GroundOverlay DEFAULT = new Builder().build();
 
-    private String image;
-    private String remoteImage;
+    private String name;
+    private String tag;
+    private int width;
+    private int height;
+    private Point originInImage;
+    private FileInfo image;
 
-    public GroundOverlay(String image, String remoteImage) {
-        if (image == null || remoteImage == null) {
-            throw new IllegalArgumentException("Argument image or remoteImage is null.");
-        }
-
-        this.image = image;
-        this.remoteImage = remoteImage;
+    private GroundOverlay(int width, int height) {
+        this.width = width;
+        this.height = height;
     }
 
-    public GroundOverlay(String remoteImage) {
-        this("", remoteImage);
+    public String getName() {
+        return name;
     }
 
-    public String getImage() {
+    public String getTag() {
+        return tag;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public Point getOriginInImage() {
+        return originInImage;
+    }
+
+    public FileInfo getImage() {
         return image;
-    }
-
-    public String getRemoteImage() {
-        return remoteImage;
     }
 
     @Override
@@ -36,24 +50,102 @@ public class GroundOverlay {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        GroundOverlay that = (GroundOverlay) o;
+        GroundOverlay overlay = (GroundOverlay) o;
 
-        if (image != null ? !image.equals(that.image) : that.image != null) return false;
-        return remoteImage != null ? remoteImage.equals(that.remoteImage) : that.remoteImage == null;
+        if (width != overlay.width) return false;
+        if (height != overlay.height) return false;
+        if (name != null ? !name.equals(overlay.name) : overlay.name != null) return false;
+        if (tag != null ? !tag.equals(overlay.tag) : overlay.tag != null) return false;
+        if (originInImage != null ? !originInImage.equals(overlay.originInImage) : overlay.originInImage != null)
+            return false;
+        return image != null ? image.equals(overlay.image) : overlay.image == null;
     }
 
     @Override
     public int hashCode() {
-        int result = image != null ? image.hashCode() : 0;
-        result = 31 * result + (remoteImage != null ? remoteImage.hashCode() : 0);
+        int result = name != null ? name.hashCode() : 0;
+        result = 31 * result + (tag != null ? tag.hashCode() : 0);
+        result = 31 * result + width;
+        result = 31 * result + height;
+        result = 31 * result + (originInImage != null ? originInImage.hashCode() : 0);
+        result = 31 * result + (image != null ? image.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
         return "GroundOverlay{" +
-                "image='" + image + '\'' +
-                ", remoteImage='" + remoteImage + '\'' +
+                "name='" + name + '\'' +
+                ", tag='" + tag + '\'' +
+                ", width=" + width +
+                ", height=" + height +
+                ", originInImage=" + originInImage +
+                ", image=" + image +
                 '}';
+    }
+
+    public static class Builder {
+
+        private String name;
+        private String tag;
+        private int width;
+        private int height;
+        private Point originInImage;
+        private FileInfo image;
+
+        public Builder setWidth(int width) {
+            if (width <= 0) {
+                throw new IllegalArgumentException("Argument width <= 0");
+            }
+
+            this.width = width;
+            return this;
+        }
+
+        public Builder setHeight(int height) {
+            if (height <= 0) {
+                throw new IllegalArgumentException("Argument height <= 0");
+            }
+
+            this.height = height;
+            return this;
+        }
+
+        public Builder setName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder setTag(String tag) {
+            this.tag = tag;
+            return this;
+        }
+
+        public Builder setOriginInImage(Point originInImage) {
+            if (originInImage == null) {
+                throw new IllegalArgumentException("Argument originInImage is null.");
+            }
+
+            this.originInImage = originInImage;
+            return this;
+        }
+
+        public Builder setImage(FileInfo image) {
+            if (image == null) {
+                throw new IllegalArgumentException("Argument image is null.");
+            }
+
+            this.image = image;
+            return this;
+        }
+
+        public GroundOverlay build() {
+            GroundOverlay overlay = new GroundOverlay(width, height);
+            overlay.name = name == null ? "" : name;
+            overlay.tag = tag == null ? "" : tag;
+            overlay.originInImage = originInImage;
+            overlay.image = image == null ? FileInfo.DEFAULT : image;
+            return overlay;
+        }
     }
 }

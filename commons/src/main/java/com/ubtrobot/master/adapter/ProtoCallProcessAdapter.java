@@ -16,7 +16,7 @@ public class ProtoCallProcessAdapter {
         mCallProcessAdapter = new CallProcessAdapter(handler);
     }
 
-    public <D, F, P> void onCall(
+    public <D, F extends Throwable, P> void onCall(
             final Responder responder,
             final CallProcessAdapter.ProgressiveCallable<D, F, P> callable,
             final DFPConverter<D, F, P> converter) {
@@ -52,14 +52,14 @@ public class ProtoCallProcessAdapter {
         );
     }
 
-    public <F> void onCall(
+    public <F extends Throwable> void onCall(
             final Responder responder,
             final CallProcessAdapter.Callable<Void, F> callable,
             final FConverter<F> converter) {
         onCall(responder, callable, (DFConverter<Void, F>) converter);
     }
 
-    public <D, F> void onCall(
+    public <D, F extends Throwable> void onCall(
             final Responder responder,
             final CallProcessAdapter.Callable<D, F> callable,
             final DFConverter<D, F> converter) {
@@ -85,7 +85,7 @@ public class ProtoCallProcessAdapter {
         );
     }
 
-    public static abstract class FConverter<F> implements DFConverter<Void, F> {
+    public static abstract class FConverter<F extends Throwable> implements DFConverter<Void, F> {
 
         @Override
         public Message convertDone(Void done) {

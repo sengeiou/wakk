@@ -1,26 +1,45 @@
 package com.ubtrobot.navigation;
 
+import android.text.TextUtils;
+
 /**
  * 地图标记物
  */
 public class Marker extends Location {
 
-    public static final Marker DEFAULT = new Marker.Builder("", LatLng.DEFAULT).build();
+    public static final Marker DEFAULT = new Marker.Builder("DEFAULT_ID", Point.DEFAULT).build();
 
+    private String id;
     private String title;
+    private String tag;
+    private String description;
 
-    protected Marker(String title, LatLng position) {
+    protected Marker(Point position) {
         super(position);
-        this.title = title;
     }
 
-    public Marker(Builder builder) {
+    private Marker(Builder builder) {
         super(builder);
-        title = builder.title;
+        id = builder.id;
+        title = builder.title == null ? "" : builder.title;
+        tag = builder.tag == null ? "" : builder.tag;
+        description = builder.description == null ? "" : builder.description;
+    }
+
+    public String getId() {
+        return id;
     }
 
     public String getTitle() {
         return title;
+    }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     @Override
@@ -31,37 +50,64 @@ public class Marker extends Location {
 
         Marker marker = (Marker) o;
 
-        return title != null ? title.equals(marker.title) : marker.title == null;
+        if (id != null ? !id.equals(marker.id) : marker.id != null) return false;
+        if (title != null ? !title.equals(marker.title) : marker.title != null) return false;
+        if (tag != null ? !tag.equals(marker.tag) : marker.tag != null) return false;
+        return description != null ? description.equals(marker.description) : marker.description == null;
     }
 
     @Override
     public int hashCode() {
         int result = super.hashCode();
+        result = 31 * result + (id != null ? id.hashCode() : 0);
         result = 31 * result + (title != null ? title.hashCode() : 0);
+        result = 31 * result + (tag != null ? tag.hashCode() : 0);
+        result = 31 * result + (description != null ? description.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
         return "Marker{" +
-                "title='" + title + '\'' +
+                "id='" + id + '\'' +
                 "position=" + getPosition() +
-                ", elevation=" + getElevation() +
+                ", z=" + getZ() +
                 ", rotation=" + getRotation() +
+                ", title='" + title + '\'' +
+                ", tag='" + tag + '\'' +
+                ", description='" + description + '\'' +
                 '}';
     }
 
     public static class Builder extends Location.GenericBuilder<Builder> {
 
-        private final String title;
+        private String id;
+        private String title;
+        private String tag;
+        private String description;
 
-        public Builder(String title, LatLng position) {
+        public Builder(String id, Point position) {
             super(position);
-
-            if (title == null) {
-                throw new IllegalArgumentException("Argument title is null.");
+            if (TextUtils.isEmpty(id)) {
+                throw new IllegalArgumentException("Argument id is an empty string.");
             }
+
+            this.id = id;
+        }
+
+        public Builder setTitle(String title) {
             this.title = title;
+            return this;
+        }
+
+        public Builder setTag(String tag) {
+            this.tag = tag;
+            return this;
+        }
+
+        public Builder setDescription(String description) {
+            this.description = description;
+            return this;
         }
 
         @Override

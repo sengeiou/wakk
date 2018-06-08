@@ -1,15 +1,1 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.ubtrobot.wakeup.sal" >
-
-    <uses-permission android:name="com.ubtrobot.master.permission.MASTER" />
-
-    <application>
-        <service
-            android:name="com.ubtrobot.wakeup.ipc.master.WakeupMasterService"
-            android:exported="true">
-            <meta-data
-                android:name="master.service"
-                android:resource="@xml/service_wakeup" />
-        </service>
-    </application>
-</manifest>
+<manifest package="com.ubtrobot.wakeup" />

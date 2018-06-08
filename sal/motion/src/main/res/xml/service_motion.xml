@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<service
+    name="motion"
+    level="system">
+    <call path="/joint/device/list" />
+    <call path="/joint/query-is-rotating" />
+    <call path="/joint/angle" />
+    <call path="/joint/rotate" />
+    <call path="/locomotor/device" />
+    <call path="/locomotor/locomote" />
+    <call path="/locomotor/query-is-locomoting" />
+    <call path="/motion/script/execute" />
+</service>

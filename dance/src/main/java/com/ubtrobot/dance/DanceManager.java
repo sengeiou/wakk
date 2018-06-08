@@ -57,6 +57,7 @@ public class DanceManager {
 
                 mDanceManager = this;
                 mDanceList = new DanceList(context);
+                getDanceList();
             }
         }
     }

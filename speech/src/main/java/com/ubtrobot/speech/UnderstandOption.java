@@ -8,8 +8,11 @@ import org.json.JSONObject;
 public class UnderstandOption {
 
     public static final UnderstandOption DEFAULT = new UnderstandOption.Builder().build();
-
+    public static final String LANGUAGE_CN = "cn";
+    public static final String LANGUAGE_EN = "en";
     private float timeout;
+    private String language;
+    private String seesionId;
     private JSONObject params;
 
     private UnderstandOption() {
@@ -19,6 +22,14 @@ public class UnderstandOption {
         return timeout;
     }
 
+    public String getLanguage() {
+        return language;
+    }
+
+    public String getSeesionId() {
+        return seesionId;
+    }
+
     public JSONObject getParams() {
         return params;
     }
@@ -26,7 +37,8 @@ public class UnderstandOption {
     public static class Builder {
 
         private float timeout = 15000;
-
+        private String language = "";
+        private String sessionId = String.valueOf(System.currentTimeMillis());
         private JSONObject params = new JSONObject();
 
         public Builder() {
@@ -38,10 +50,24 @@ public class UnderstandOption {
             return this;
         }
 
+        public Builder setSessionId(String sessionId) {
+            Preconditions.checkStringNotEmpty(sessionId,
+                    "UnderstandOption.Builder refuse null sessionId");
+            this.sessionId = sessionId;
+            return this;
+        }
+
         private void checkTimeout(float timeout) {
             if (timeout < 0) {
                 throw new IllegalArgumentException("Timeout value must not be < 0");
             }
+        }
+
+        public Builder setLanguage(String language) {
+            this.language = Preconditions.checkStringNotEmpty(language,
+                    "UnderstandOption.Builder refuse empty language");
+            return this;
+
         }
 
         public Builder appendStringParam(String key, String value) {
@@ -80,6 +106,8 @@ public class UnderstandOption {
         public UnderstandOption build() {
             UnderstandOption understandOption = new UnderstandOption();
             understandOption.timeout = timeout;
+            understandOption.language = language;
+            understandOption.seesionId = sessionId;
             understandOption.params = params;
             return understandOption;
         }

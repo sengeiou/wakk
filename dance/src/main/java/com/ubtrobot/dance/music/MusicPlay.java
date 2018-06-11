@@ -79,7 +79,7 @@ public class MusicPlay {
      * @return the duration of the file related to the path.
      */
     public int play(String path, OnMusicPlayListener listener, int rate, boolean effectByVolume){
-        LOGGER.d("Internal MediaPlayer play " + path);
+        LOGGER.w("Internal MediaPlayer play " + path);
         if(mPlayer.isPlaying()){
             mPlayer.stop();
         }

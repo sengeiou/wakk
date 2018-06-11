@@ -77,7 +77,9 @@ public class FiniteLoopSegmentPlayer<O> extends SegmentPlayer<O> {
 
     @Override
     protected void notifyLoopAborted(final PlayException e) {
-        mTaskSeries.rejectRunningTask(e);
+        if (mTaskSeries != null) {
+            mTaskSeries.rejectRunningTask(e);
+        }
     }
 
     private class PlayTask extends AsyncTask<Void, PlayException> implements Runnable {

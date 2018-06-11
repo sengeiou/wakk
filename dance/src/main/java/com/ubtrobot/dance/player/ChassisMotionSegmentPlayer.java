@@ -46,6 +46,10 @@ public class ChassisMotionSegmentPlayer extends
 
     @Override
     protected void onLoopStop() {
+        cancel();
+    }
+
+    private void cancel() {
         if (mProgressivePromise == null) {
             return;
         }
@@ -55,7 +59,7 @@ public class ChassisMotionSegmentPlayer extends
 
     @Override
     protected void onEnd() {
-
+        cancel();
     }
 
     public static List<ChassisMotionOption> parser(JSONObject optionJson) {

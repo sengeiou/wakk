@@ -8,11 +8,16 @@ import com.ubtrobot.motion.MotionManager;
 import com.ubtrobot.play.AbstractSegmentPlayer;
 import com.ubtrobot.play.PlayException;
 import com.ubtrobot.play.Segment;
+import com.ubtrobot.ulog.FwLoggerFactory;
+import com.ubtrobot.ulog.Logger;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class ArmMotionSegmentPlayer extends AbstractSegmentPlayer<ArmMotionSegmentPlayer.ArmMotionOption> {
+public class ArmMotionSegmentPlayer extends AbstractSegmentPlayer<
+        ArmMotionSegmentPlayer.ArmMotionOption> {
+
+    private static final Logger LOGGER = FwLoggerFactory.getLogger("ArmMotionSegmentPlayer");
 
     private MotionManager mMotionManager;
     private Promise<Void, ExecuteException> mExecutePromise;
@@ -36,11 +41,13 @@ public class ArmMotionSegmentPlayer extends AbstractSegmentPlayer<ArmMotionSegme
                 option.getId()).done(new DoneCallback<Void>() {
             @Override
             public void onDone(Void aVoid) {
+                LOGGER.w("Arm motion onDone...");
                 mExecutePromise = null;
             }
         }).fail(new FailCallback<ExecuteException>() {
             @Override
             public void onFail(ExecuteException e) {
+                LOGGER.w("Arm motion onFail:" + e.toString());
                 notifyLoopAborted(new PlayException.Factory().from(e.getCode(), e.getMessage()));
                 mExecutePromise = null;
             }
@@ -49,13 +56,27 @@ public class ArmMotionSegmentPlayer extends AbstractSegmentPlayer<ArmMotionSegme
 
     @Override
     protected void onLoopStop() {
-        mMotionManager.executeScript("reset");
-
-        if (mExecutePromise == null) {
-            return;
+        LOGGER.w("Arm motion onLoopStop...");
+        if (mExecutePromise != null) {
+            LOGGER.w("Arm motion mExecutePromise is not null...");
+            mExecutePromise.cancel();
+            mExecutePromise = null;
         }
-        mExecutePromise.cancel();
-        mExecutePromise = null;
+
+        LOGGER.w("Arm motion executeScript reset...");
+        mMotionManager.executeScript("reset").done(new DoneCallback<Void>() {
+            @Override
+            public void onDone(Void aVoid) {
+                LOGGER.w("Arm motion executeScript reset onDone...");
+            }
+        }).fail(new FailCallback<ExecuteException>() {
+            @Override
+            public void onFail(ExecuteException e) {
+                LOGGER.e("Arm motion executeScript reset onFail:" + e);
+                notifyLoopAborted(new PlayException.Factory().
+                        forbidden(e.getMessage(), e.getDetail()));
+            }
+        });
     }
 
     @Override

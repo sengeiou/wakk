@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package power;
+
+option java_package = "com.ubtrobot.power.ipc";
+option java_outer_classname = "PowerProto";
+
+message ShutdownOption {
+
+    int64 waitSecondsToStartup = 1;
+}

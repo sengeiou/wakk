@@ -157,7 +157,7 @@ public class DanceManager {
         private Context mContext;
         private String mType;
 
-        public TrackPlayerFactory(Context context, String type) {
+        private TrackPlayerFactory(Context context, String type) {
             mContext = context;
             this.mType = type;
         }

@@ -13,7 +13,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class MusicSegmentPlayer extends AbstractSegmentPlayer<MusicSegmentPlayer.MusicOption>
-        implements MusicPlay.OnMusicPlayListener{
+        implements MusicPlay.OnMusicPlayListener {
 
     private static final Logger LOGGER = FwLoggerFactory.getLogger("MusicSegmentPlayer");
 
@@ -26,12 +26,13 @@ public class MusicSegmentPlayer extends AbstractSegmentPlayer<MusicSegmentPlayer
 
     @Override
     protected void onLoopStart(MusicOption option) {
-        LOGGER.i("Music Start:" + option.toString());
+        LOGGER.w("Music Start:" + option.toString());
         mPlay.play(option.getPath(), this, 10, false);
     }
 
     @Override
     protected void onLoopStop() {
+        LOGGER.w("Music stp.");
         notifyLoopStopped();
         mPlay.stop();
     }
@@ -43,12 +44,13 @@ public class MusicSegmentPlayer extends AbstractSegmentPlayer<MusicSegmentPlayer
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-        LOGGER.i("Music: onCompletion()");
+        LOGGER.w("Music: onCompletion()");
+        notifyLoopStopped();
     }
 
     @Override
     public void onWaveFormDataCapture(Visualizer visualizer, byte[] waveform, int samplingRate) {
-        LOGGER.i("Music: onWaveFormDataCapture()");
+        LOGGER.w("Music: onWaveFormDataCapture()");
     }
 
     @Override

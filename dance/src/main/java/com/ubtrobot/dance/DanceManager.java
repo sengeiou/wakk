@@ -42,6 +42,7 @@ public class DanceManager {
 
     private static volatile DanceManager mDanceManager;
 
+    private Context mContext;
     private DanceList mDanceList;
 
     private AsyncTaskParallel<PlayException> mTaskParallel;
@@ -49,43 +50,42 @@ public class DanceManager {
             AsyncTaskParallel.DoneOrFail<Object, PlayException>>> mProgressivePromise;
 
     public DanceManager(Context context) {
-        if (mDanceManager == null) {
-            synchronized (this) {
-                if (mDanceManager != null) {
-                    return;
-                }
+        if (mDanceManager != null) {
+            return;
+        }
 
-                mDanceManager = this;
-                mDanceList = new DanceList(context);
-                getDanceList();
+        synchronized (this) {
+            if (mDanceManager != null) {
+                return;
             }
+
+            mContext = context.getApplicationContext();
+            mDanceList = new DanceList(context);
+            mDanceManager = this;
+            getDanceList();
         }
     }
 
     public List<Dance> getDanceList() {
+        System.out.println("-----length:" + mDanceList.all().size());
         return mDanceList.all();
     }
 
-    public Dance getDance(String danceName) {
-        return mDanceList.get(danceName);
-    }
-
-    public Promise<Void, PlayException> play(String danceName) {
-        if (!checkTrack()) {
-            LOGGER.w("Dance underprepared.");
-        }
-
-        return null;
-    }
 
     private boolean checkTrack() {
         // TODO 跳舞前的环境检查
-        return false;
+        return true;
     }
 
     public ProgressivePromise<Void, PlayException,
             Map.Entry<String, AsyncTaskParallel.DoneOrFail<Object, PlayException>>>
-    play(final Context context, final Dance dance) {
+    play(String danceCategory) {
+        if (!checkTrack()) {
+            LOGGER.w("Dance underprepared.");
+        }
+
+        final Dance dance = mDanceList.get(danceCategory);
+
         if (mTaskParallel != null) {
             LOGGER.w("Cancel dance: dance is running.");
             mProgressivePromise.cancel();
@@ -93,18 +93,39 @@ public class DanceManager {
         }
 
         mTaskParallel = new AsyncTaskParallel<>();
-        final String mainType = dance.getMainType();
-        final List<Track> tracks = dance.getTracks();
 
-        for (final Track track : tracks) {
-            final String type = track.getType();
-            mTaskParallel.put(type, new AsyncTask<Object, PlayException>() {
+        addTask(dance);
+
+        mTaskParallel.start();
+        mProgressivePromise = mTaskParallel.promise().done(new DoneCallback<Void>() {
+            @Override
+            public void onDone(Void aVoid) {
+                if (mTaskParallel == null) {
+                    return;
+                }
+
+                Iterator<String> iterator = mTaskParallel.getDoneOrFailMap().keySet().iterator();
+                while (iterator.hasNext()) {
+                    if (dance.getMainType().equals(iterator.next())) {
+                        mTaskParallel.cancel();
+                        mTaskParallel = null;
+                    }
+                }
+            }
+        });
+
+        return mProgressivePromise;
+    }
+
+    private void addTask(Dance dance) {
+        for (final Track track : dance.getTracks()) {
+            mTaskParallel.put(track.getType(), new AsyncTask<Object, PlayException>() {
                 Promise promise;
 
                 @Override
                 protected void onStart() {
                     TrackPlayer player = new TrackPlayer(track,
-                            new TrackPlayerFactory(context, type));
+                            new TrackPlayerFactory(mContext, track.getType()));
                     promise = player.play().done(new DoneCallback() {
                         @Override
                         public void onDone(Object o) {
@@ -125,26 +146,6 @@ public class DanceManager {
                 }
             });
         }
-
-        mTaskParallel.start();
-        mProgressivePromise = mTaskParallel.promise().done(new DoneCallback<Void>() {
-            @Override
-            public void onDone(Void aVoid) {
-                if (mTaskParallel == null) {
-                    return;
-                }
-
-                Iterator<String> iterator = mTaskParallel.getDoneOrFailMap().keySet().iterator();
-                while (iterator.hasNext()) {
-                    if (mainType.equals(iterator.next())) {
-                        mTaskParallel.cancel();
-                        mTaskParallel = null;
-                    }
-                }
-            }
-        });
-
-        return mProgressivePromise;
     }
 
     public ProgressivePromise<Void, PlayException, Map.Entry<String,

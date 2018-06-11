@@ -31,13 +31,13 @@ public class DanceList {
         return dances == null ? Collections.<Dance>emptyList() : dances;
     }
 
-    public Dance get(String danceName) {
+    public Dance get(String danceCategory) {
         for (Dance dance : all()) {
-            if (dance.getName().equals(danceName)) {
+            if (dance.getCategory().equals(danceCategory)) {
                 return dance;
             }
         }
-        LOGGER.e("Dance name:" + danceName);
+        LOGGER.e("Dance category:" + danceCategory);
         throw new DanceNotFoundException();
     }
 

@@ -1,0 +1,15 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.ubtrobot.sensor.sal">
+
+    <uses-permission android:name="com.ubtrobot.master.permission.MASTER" />
+
+    <application>
+        <service
+            android:name="com.ubtrobot.sensor.ipc.master.SensorSystemService"
+            android:exported="true">
+            <meta-data
+                android:name="master.service"
+                android:resource="@xml/service_sensor" />
+        </service>
+    </application>
+</manifest>

@@ -53,6 +53,7 @@ ext {
             upgradeVersion         : '0.5.0-SNAPSHOT',
             upgradeSalImplVersion  : '0.5.0-SNAPSHOT',
             wakeupVersion          : '0.5.0-SNAPSHOT',
+            sensorVersion          : '0.5.0-SNAPSHOT',
             initializationVersion  : '0.5.0-SNAPSHOT',
             playVersion            : '0.5.0-SNAPSHOT',
 
@@ -126,6 +127,7 @@ apply from: 'gradle/publish_motion.gradle'
 apply from: 'gradle/publish_navigation.gradle'
 apply from: 'gradle/publish_speech.gradle'
 apply from: 'gradle/publish_upgrade.gradle'
+apply from: 'gradle/publish_sensor.gradle'
 apply from: 'gradle/publish_wakeup.gradle'
 apply from: 'gradle/publish_initialization.gradle'
 apply from: 'gradle/publish_play.gradle'

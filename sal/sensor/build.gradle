@@ -1,5 +1,4 @@
 apply plugin: 'com.android.library'
-apply plugin: 'com.google.protobuf'
 
 android {
     def sdk = rootProject.ext.sdk
@@ -20,28 +19,9 @@ android {
     }
 }
 
-protobuf {
-    protoc {
-        artifact = rootProject.ext.protoc
-    }
-
-    plugins {
-        java {
-            artifact = rootProject.ext.protoc
-        }
-    }
-
-    generateProtoTasks {
-        all().each { task ->
-            task.plugins {
-                java {}
-            }
-        }
-    }
-}
-
 dependencies {
     api project(':commons')
+    api project(':sensor')
 
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
@@ -51,20 +31,4 @@ dependencies {
     testImplementation deps.junit
     androidTestImplementation deps.espressoCore
     androidTestImplementation deps.runner
-}
-
-task jarFramework(
-        type: Jar,
-        dependsOn: ['assembleRelease']) {
-    archiveName = "sensor.jar"
-
-    exclude('**/R.class')
-    exclude('**/R$*.class')
-    exclude('**/BuildConfig.class')
-    exclude('**/BuildConfig$*.class')
-    exclude('android/')
-
-    exclude('com/ubtrobot/commons/')
-
-    from 'build/intermediates/classes/release'
 }

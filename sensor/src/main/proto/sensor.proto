@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package sensor;
+
+option java_package = "com.ubtrobot.sensor.ipc";
+option java_outer_classname = "SensorProto";
+
+message SensorEvent {
+    string sensor_id = 1;
+    int64 timestamp = 2;
+    repeated float value = 3;
+}

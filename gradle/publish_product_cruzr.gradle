@@ -64,6 +64,11 @@ project(':product:cruzr') {
 
                     dependencyNode = dependenciesNode.appendNode('dependency')
                     dependencyNode.appendNode('groupId', 'com.ubtrobot.framework')
+                    dependencyNode.appendNode('artifactId', 'power')
+                    dependencyNode.appendNode('version', rootProject.ext.versions.powerVersion)
+
+                    dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.ubtrobot.framework')
                     dependencyNode.appendNode('artifactId', 'wakeup')
                     dependencyNode.appendNode('version', rootProject.ext.versions.wakeupVersion)
                 }

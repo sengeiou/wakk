@@ -68,11 +68,12 @@ public class Sensor {
         public void
         onReceive(MasterContext context, String action, final SensorProto.SensorEvent event) {
             synchronized (mListenerList) {
+                final SensorEvent sensorEvent = SensorConverters.toSensorEventPojo(event);
+
                 mListenerList.forEach(new Consumer<SensorListener>() {
                     @Override
                     public void accept(SensorListener listener) {
-                        listener.onSensorChanged(Sensor.this,
-                                SensorConverters.toSensorEventPojo(event));
+                        listener.onSensorChanged(Sensor.this, sensorEvent);
                     }
                 });
             }

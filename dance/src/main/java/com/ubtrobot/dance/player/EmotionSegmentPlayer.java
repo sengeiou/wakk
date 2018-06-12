@@ -1,5 +1,7 @@
 package com.ubtrobot.dance.player;
 
+import android.util.Log;
+
 import com.ubtrobot.async.DoneCallback;
 import com.ubtrobot.async.FailCallback;
 import com.ubtrobot.async.Promise;
@@ -51,6 +53,11 @@ public class EmotionSegmentPlayer extends AbstractSegmentPlayer<EmotionSegmentPl
 
     @Override
     protected void onLoopStop() {
+        LOGGER.w("Method onLoopStop: 表情");
+        cancel();
+    }
+
+    private void cancel() {
         mEmotionManager.dismiss();
 
         if (mExpressPromise == null) {
@@ -63,7 +70,8 @@ public class EmotionSegmentPlayer extends AbstractSegmentPlayer<EmotionSegmentPl
 
     @Override
     protected void onEnd() {
-
+        LOGGER.w("Method onEnd: 表情");
+        cancel();
     }
 
     public static EmotionOption parser(JSONObject optionJson) {

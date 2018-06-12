@@ -1,5 +1,7 @@
 package com.ubtrobot.dance.player;
 
+import android.util.Log;
+
 import com.ubtrobot.async.DoneCallback;
 import com.ubtrobot.async.FailCallback;
 import com.ubtrobot.async.Promise;
@@ -57,6 +59,10 @@ public class ArmMotionSegmentPlayer extends AbstractSegmentPlayer<
     @Override
     protected void onLoopStop() {
         LOGGER.w("Arm motion onLoopStop...");
+        cancel();
+    }
+
+    private void cancel() {
         if (mExecutePromise != null) {
             LOGGER.w("Arm motion mExecutePromise is not null...");
             mExecutePromise.cancel();
@@ -81,7 +87,8 @@ public class ArmMotionSegmentPlayer extends AbstractSegmentPlayer<
 
     @Override
     protected void onEnd() {
-
+        Log.i("cj", "onEnd: 动作");
+        cancel();
     }
 
     private static final class ArmMotionOptionKey {

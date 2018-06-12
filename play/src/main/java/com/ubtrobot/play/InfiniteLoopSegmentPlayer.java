@@ -2,6 +2,7 @@ package com.ubtrobot.play;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import com.ubtrobot.async.AbstractCancelable;
 import com.ubtrobot.async.DefaultPromise;
@@ -35,8 +36,8 @@ public class InfiniteLoopSegmentPlayer<O> extends SegmentPlayer<O> {
             @Override
             protected void doCancel() {
                 mHandler.removeCallbacks(mRunnable);
-
-                onLoopStop();
+                Log.i("cj", "doCancel: 被取消");
+//                onLoopStop();
                 onEnd();
             }
         });

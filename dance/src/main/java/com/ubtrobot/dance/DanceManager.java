@@ -1,6 +1,9 @@
 package com.ubtrobot.dance;
 
+import android.content.ContentResolver;
 import android.content.Context;
+import android.net.Uri;
+import android.os.Bundle;
 
 import com.ubtrobot.async.AsyncTask;
 import com.ubtrobot.async.AsyncTaskParallel;
@@ -40,6 +43,8 @@ public class DanceManager {
 
     private static final Logger LOGGER = FwLoggerFactory.getLogger("DanceManager");
 
+    private static final String ARM_STATE_URI = "content://com.ubtechinc.settings.provider/CruiserSettings";
+
     private static volatile DanceManager mDanceManager;
 
     private Context mContext;
@@ -77,8 +82,22 @@ public class DanceManager {
 
 
     private boolean checkTrack() {
-        // TODO 跳舞前的环境检查
-        return true;
+        ContentResolver cr = mContext.getContentResolver();
+        Uri uri = Uri.parse(ARM_STATE_URI);
+        String info = null;
+        Bundle bundle = cr.call(uri,
+                "getSettings", "cruiser_hand_motion_state", null);
+        if (bundle != null) {
+            info = bundle.getString("value");
+        }
+
+        if (info != null) {
+            return true;
+        }
+
+        // todo 底盘 cruiser_chassis_motion_state
+
+        return false;
     }
 
     public ProgressivePromise<Void, PlayException,
@@ -115,8 +134,6 @@ public class DanceManager {
             @Override
             public void onFail(PlayException e) {
                 LOGGER.w("Parallel dance: onFail");
-                mProgressivePromise = null;
-                mTaskParallel = null;
             }
         }).progress(new ProgressCallback<Map.Entry<String,
                 AsyncTaskParallel.DoneOrFail<Object, PlayException>>>() {

@@ -12,6 +12,7 @@ import com.ubtrobot.master.adapter.ProtoCallProcessAdapter;
 import com.ubtrobot.master.adapter.ProtoParamParser;
 import com.ubtrobot.master.annotation.Call;
 import com.ubtrobot.master.service.MasterSystemService;
+import com.ubtrobot.power.BatteryProperties;
 import com.ubtrobot.power.ipc.PowerConstants;
 import com.ubtrobot.power.ipc.PowerConverters;
 import com.ubtrobot.power.ipc.PowerProto;
@@ -134,6 +135,32 @@ public class PowerSystemService extends MasterSystemService {
                     }
                 },
                 new ProtoCallProcessAdapter.FConverter<AccessServiceException>() {
+                    @Override
+                    public CallException convertFail(AccessServiceException e) {
+                        return new CallException(e.getCode(), e.getMessage());
+                    }
+                }
+        );
+    }
+
+    @Call(path = PowerConstants.CALL_PATH_GET_BATTERY_PROPERTIES)
+    public void onGetBatteryProperties(Request request, Responder responder) {
+        mCallProcessor.onCall(
+                responder,
+                new CallProcessAdapter.Callable<BatteryProperties, AccessServiceException>() {
+
+                    @Override
+                    public Promise<BatteryProperties, AccessServiceException>
+                    call() throws CallException {
+                        return mService.getBatteryProperties();
+                    }
+                },
+                new ProtoCallProcessAdapter.DFConverter<BatteryProperties, AccessServiceException>() {
+                    @Override
+                    public Message convertDone(BatteryProperties properties) {
+                        return PowerConverters.toBatteryPropertiesProto(properties);
+                    }
+
                     @Override
                     public CallException convertFail(AccessServiceException e) {
                         return new CallException(e.getCode(), e.getMessage());

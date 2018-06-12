@@ -6,4 +6,5 @@
     <call path="/power/query-is-sleeping" />
     <call path="/power/wake-up" />
     <call path="/power/shutdown" />
+    <call path="/power/battery-properties" />
 </service>

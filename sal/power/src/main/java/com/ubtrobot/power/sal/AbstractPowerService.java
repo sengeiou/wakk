@@ -4,11 +4,22 @@ import com.ubtrobot.async.AsyncTask;
 import com.ubtrobot.async.DefaultPromise;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.exception.AccessServiceException;
+import com.ubtrobot.master.Master;
+import com.ubtrobot.master.context.ContextRunnable;
+import com.ubtrobot.master.param.ProtoParam;
+import com.ubtrobot.power.BatteryProperties;
 import com.ubtrobot.power.ShutdownOption;
+import com.ubtrobot.power.ipc.PowerConstants;
+import com.ubtrobot.power.ipc.PowerConverters;
+import com.ubtrobot.power.ipc.master.PowerSystemService;
+import com.ubtrobot.ulog.FwLoggerFactory;
+import com.ubtrobot.ulog.Logger;
 
 import java.util.LinkedList;
 
 public abstract class AbstractPowerService implements PowerService {
+
+    private static final Logger LOGGER = FwLoggerFactory.getLogger("AbstractPowerService");
 
     private static final String OP_SLEEP = "sleep";
     private static final String OP_WAKE_UP = "wake-up";
@@ -198,6 +209,44 @@ public abstract class AbstractPowerService implements PowerService {
         public Operation(String name) {
             this.name = name;
             this.promise = new DefaultPromise<>();
+        }
+    }
+
+    @Override
+    public Promise<BatteryProperties, AccessServiceException> getBatteryProperties() {
+        AsyncTask<BatteryProperties, AccessServiceException> task
+                = createGettingBatteryPropertiesTask();
+        if (task == null) {
+            throw new IllegalStateException("createGettingBatteryPropertiesTask returns null.");
+        }
+
+        task.start();
+        return task.promise();
+    }
+
+    protected abstract AsyncTask<BatteryProperties, AccessServiceException>
+    createGettingBatteryPropertiesTask();
+
+    protected void notifyBatteryChanged(final BatteryProperties properties) {
+        if (properties == null) {
+            throw new IllegalArgumentException("Argument properties is null.");
+        }
+
+        boolean powerServiceStarted = Master.get().execute(
+                PowerSystemService.class,
+                new ContextRunnable<PowerSystemService>() {
+                    @Override
+                    public void run(PowerSystemService powerSystemService) {
+                        powerSystemService.publish(
+                                PowerConstants.ACTION_BATTERY_CHANGE,
+                                ProtoParam.create(PowerConverters.toBatteryPropertiesProto(properties))
+                        );
+                    }
+                }
+        );
+
+        if (!powerServiceStarted) {
+            LOGGER.e("Publish sensor event failed. Pls start SensorSystemService first.");
         }
     }
 }

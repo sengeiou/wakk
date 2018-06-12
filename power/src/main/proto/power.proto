@@ -6,6 +6,14 @@ option java_package = "com.ubtrobot.power.ipc";
 option java_outer_classname = "PowerProto";
 
 message ShutdownOption {
+    int64 wait_seconds_to_startup = 1;
+}
 
-    int64 waitSecondsToStartup = 1;
+message BatteryProperties {
+    int32 level = 1;
+    bool charger_ac_online = 2;
+    bool charging_station_online = 3;
+    int32 charging_voltage = 4;
+    bool full = 5;
+    int32 temperature = 6;
 }

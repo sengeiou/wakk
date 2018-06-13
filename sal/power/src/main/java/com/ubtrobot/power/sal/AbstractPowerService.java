@@ -24,22 +24,22 @@ public abstract class AbstractPowerService implements PowerService {
     private static final String OP_SLEEP = "sleep";
     private static final String OP_WAKE_UP = "wake-up";
 
-    private final LinkedList<Operation> mOperationQueue = new LinkedList<>();
+    private final LinkedList<SleepWakeUpOperation> mSleepWakeUpOperationQueue = new LinkedList<>();
 
     private DefaultPromise<Void, AccessServiceException> mShutdownPromise;
 
     @Override
     public Promise<Boolean, AccessServiceException> sleep() {
-        synchronized (mOperationQueue) {
-            Operation operation = new Operation(OP_SLEEP) {
+        synchronized (mSleepWakeUpOperationQueue) {
+            SleepWakeUpOperation operation = new SleepWakeUpOperation(OP_SLEEP) {
                 @Override
                 public void run() {
                     startSleeping();
                 }
             };
-            mOperationQueue.add(operation);
+            mSleepWakeUpOperationQueue.add(operation);
 
-            if (mOperationQueue.size() == 1) {
+            if (mSleepWakeUpOperationQueue.size() == 1) {
                 operateNextLocked();
             }
             return operation.promise;
@@ -49,15 +49,15 @@ public abstract class AbstractPowerService implements PowerService {
     protected abstract void startSleeping();
 
     private void operateNextLocked() {
-        final Operation operation = mOperationQueue.peek();
+        final SleepWakeUpOperation operation = mSleepWakeUpOperationQueue.peek();
         if (operation != null) {
             operation.run();
         }
     }
 
     protected boolean resolveSleeping(boolean sleepingPrevious) {
-        synchronized (mOperationQueue) {
-            Operation operation = nextMatchedOperationLocked(OP_SLEEP);
+        synchronized (mSleepWakeUpOperationQueue) {
+            SleepWakeUpOperation operation = nextMatchedOperationLocked(OP_SLEEP);
             if (operation == null) {
                 return false;
             }
@@ -68,10 +68,10 @@ public abstract class AbstractPowerService implements PowerService {
         }
     }
 
-    private Operation nextMatchedOperationLocked(String operation) {
-        Operation first = mOperationQueue.peek();
+    private SleepWakeUpOperation nextMatchedOperationLocked(String operation) {
+        SleepWakeUpOperation first = mSleepWakeUpOperationQueue.peek();
         if (first != null && first.name.equals(operation)) {
-            return mOperationQueue.poll();
+            return mSleepWakeUpOperationQueue.poll();
         }
 
         return null;
@@ -82,8 +82,8 @@ public abstract class AbstractPowerService implements PowerService {
             throw new IllegalArgumentException("Argument e is null.");
         }
 
-        synchronized (mOperationQueue) {
-            Operation operation = nextMatchedOperationLocked(OP_SLEEP);
+        synchronized (mSleepWakeUpOperationQueue) {
+            SleepWakeUpOperation operation = nextMatchedOperationLocked(OP_SLEEP);
             if (operation == null) {
                 return false;
             }
@@ -109,16 +109,16 @@ public abstract class AbstractPowerService implements PowerService {
 
     @Override
     public Promise<Boolean, AccessServiceException> wakeUp() {
-        synchronized (mOperationQueue) {
-            Operation operation = new Operation(OP_WAKE_UP) {
+        synchronized (mSleepWakeUpOperationQueue) {
+            SleepWakeUpOperation operation = new SleepWakeUpOperation(OP_WAKE_UP) {
                 @Override
                 public void run() {
                     startWakingUp();
                 }
             };
-            mOperationQueue.add(operation);
+            mSleepWakeUpOperationQueue.add(operation);
 
-            if (mOperationQueue.size() == 1) {
+            if (mSleepWakeUpOperationQueue.size() == 1) {
                 operateNextLocked();
             }
             return operation.promise;
@@ -128,8 +128,8 @@ public abstract class AbstractPowerService implements PowerService {
     protected abstract void startWakingUp();
 
     protected boolean resolveWakingUp(boolean wakingPrevious) {
-        synchronized (mOperationQueue) {
-            Operation operation = nextMatchedOperationLocked(OP_WAKE_UP);
+        synchronized (mSleepWakeUpOperationQueue) {
+            SleepWakeUpOperation operation = nextMatchedOperationLocked(OP_WAKE_UP);
             if (operation == null) {
                 return false;
             }
@@ -145,8 +145,8 @@ public abstract class AbstractPowerService implements PowerService {
             throw new IllegalArgumentException("Argument e is null.");
         }
 
-        synchronized (mOperationQueue) {
-            Operation operation = nextMatchedOperationLocked(OP_WAKE_UP);
+        synchronized (mSleepWakeUpOperationQueue) {
+            SleepWakeUpOperation operation = nextMatchedOperationLocked(OP_WAKE_UP);
             if (operation == null) {
                 return false;
             }
@@ -201,17 +201,6 @@ public abstract class AbstractPowerService implements PowerService {
         }
     }
 
-    private abstract static class Operation implements Runnable {
-
-        String name;
-        final DefaultPromise<Boolean, AccessServiceException> promise;
-
-        public Operation(String name) {
-            this.name = name;
-            this.promise = new DefaultPromise<>();
-        }
-    }
-
     @Override
     public Promise<BatteryProperties, AccessServiceException> getBatteryProperties() {
         AsyncTask<BatteryProperties, AccessServiceException> task
@@ -247,6 +236,17 @@ public abstract class AbstractPowerService implements PowerService {
 
         if (!powerServiceStarted) {
             LOGGER.e("Publish sensor event failed. Pls start SensorSystemService first.");
+        }
+    }
+
+    private abstract static class SleepWakeUpOperation implements Runnable {
+
+        String name;
+        final DefaultPromise<Boolean, AccessServiceException> promise;
+
+        public SleepWakeUpOperation(String name) {
+            this.name = name;
+            this.promise = new DefaultPromise<>();
         }
     }
 }

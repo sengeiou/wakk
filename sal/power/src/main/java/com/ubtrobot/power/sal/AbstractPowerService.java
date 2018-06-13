@@ -1,5 +1,7 @@
 package com.ubtrobot.power.sal;
 
+import android.os.Bundle;
+
 import com.ubtrobot.async.AsyncTask;
 import com.ubtrobot.async.DefaultPromise;
 import com.ubtrobot.async.Promise;
@@ -27,6 +29,7 @@ public abstract class AbstractPowerService implements PowerService {
     private final LinkedList<SleepWakeUpOperation> mSleepWakeUpOperationQueue = new LinkedList<>();
 
     private DefaultPromise<Void, AccessServiceException> mShutdownPromise;
+    private ShutdownOption mShutdownOption;
 
     @Override
     public Promise<Boolean, AccessServiceException> sleep() {
@@ -158,21 +161,30 @@ public abstract class AbstractPowerService implements PowerService {
     }
 
     @Override
-    public Promise<Void, AccessServiceException> shutdown(ShutdownOption shutdownOption) {
+    public Promise<Void, AccessServiceException> shutdown(ShutdownOption option) {
         synchronized (this) {
-            DefaultPromise<Void, AccessServiceException> ret = mShutdownPromise;
+            DefaultPromise<Void, AccessServiceException> shutdownPromise;
             if (mShutdownPromise == null) {
-                mShutdownPromise = new DefaultPromise<>();
-                ret = mShutdownPromise;
+                shutdownPromise = new DefaultPromise<>();
+                mShutdownPromise = shutdownPromise;
+                mShutdownOption = option;
 
-                startShutdown();
+                startShutdown(option);
+                return shutdownPromise;
             }
 
-            return ret;
+            if (mShutdownOption.equals(option)) {
+                return mShutdownPromise;
+            }
+
+            shutdownPromise = new DefaultPromise<>();
+            shutdownPromise.reject(new AccessServiceException.Factory().
+                    forbidden("Already shutdowning.", new Bundle())); // 采用更好的错误消息
+            return shutdownPromise;
         }
     }
 
-    protected abstract void startShutdown();
+    protected abstract void startShutdown(ShutdownOption option);
 
     protected boolean resolveShutdown() {
         synchronized (this) {
@@ -197,6 +209,7 @@ public abstract class AbstractPowerService implements PowerService {
 
             mShutdownPromise.reject(e);
             mShutdownPromise = null;
+            mShutdownOption = null;
             return true;
         }
     }

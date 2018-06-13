@@ -14,6 +14,21 @@ public class ShutdownOption {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ShutdownOption option = (ShutdownOption) o;
+
+        return waitSecondsToStartup == option.waitSecondsToStartup;
+    }
+
+    @Override
+    public int hashCode() {
+        return (int) (waitSecondsToStartup ^ (waitSecondsToStartup >>> 32));
+    }
+
+    @Override
     public String toString() {
         return "ShutdownOption{" +
                 "waitSecondsToStartup=" + waitSecondsToStartup +

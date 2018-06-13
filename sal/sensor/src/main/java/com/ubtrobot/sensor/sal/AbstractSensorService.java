@@ -17,6 +17,7 @@ import com.ubtrobot.ulog.FwLoggerFactory;
 import com.ubtrobot.ulog.Logger;
 
 import java.util.List;
+import java.util.Map;
 
 public abstract class AbstractSensorService implements SensorService {
 
@@ -86,6 +87,21 @@ public abstract class AbstractSensorService implements SensorService {
 
     protected abstract AsyncTask<Boolean, AccessServiceException>
     createGettingIfSensorEnableTask(String sensorId);
+
+    @Override
+    public Promise<Void, SensorException>
+    control(String sensorId, String command, Map<String, String> options) {
+        AsyncTask<Void, SensorException> task = createControllingSensorTask(sensorId, command, options);
+        if (task == null) {
+            throw new IllegalStateException("createControllingSensorTask returns null.");
+        }
+
+        task.start();
+        return task.promise();
+    }
+
+    protected abstract AsyncTask<Void, SensorException>
+    createControllingSensorTask(String sensorId, String command, Map<String, String> options);
 
     @Override
     public Promise<Boolean, SensorException> disableSensor(String sensorId) {

@@ -16,6 +16,7 @@ import com.ubtrobot.sensor.SensorDevice;
 import com.ubtrobot.sensor.SensorException;
 import com.ubtrobot.sensor.ipc.SensorConstants;
 import com.ubtrobot.sensor.ipc.SensorConverters;
+import com.ubtrobot.sensor.ipc.SensorProto;
 import com.ubtrobot.sensor.sal.AbstractSensorService;
 import com.ubtrobot.sensor.sal.SensorFactory;
 import com.ubtrobot.sensor.sal.SensorService;
@@ -125,6 +126,32 @@ public class SensorSystemService extends MasterSystemService {
 
                     @Override
                     public CallException convertFail(AccessServiceException e) {
+                        return new CallException(e.getCode(), e.getMessage());
+                    }
+                }
+        );
+    }
+
+    @Call(path = SensorConstants.CALL_PATH_CONTROL_SENSOR)
+    public void onControlSensor(Request request, Responder responder) {
+        final SensorProto.ControlOptions options = ProtoParamParser.parseParam(request,
+                SensorProto.ControlOptions.class, responder);
+        if (options == null) {
+            return;
+        }
+
+        mCallProcessor.onCall(
+                responder,
+                new CallProcessAdapter.Callable<Void, SensorException>() {
+                    @Override
+                    public Promise<Void, SensorException> call() throws CallException {
+                        return mService.control(options.getSensorId(), options.getCommand(),
+                                options.getOptionMap());
+                    }
+                },
+                new ProtoCallProcessAdapter.FConverter<SensorException>() {
+                    @Override
+                    public CallException convertFail(SensorException e) {
                         return new CallException(e.getCode(), e.getMessage());
                     }
                 }

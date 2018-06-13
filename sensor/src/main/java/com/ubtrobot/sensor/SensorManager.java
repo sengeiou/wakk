@@ -10,6 +10,7 @@ import com.ubtrobot.master.context.MasterContext;
 import com.ubtrobot.sensor.ipc.SensorConstants;
 
 import java.util.List;
+import java.util.Map;
 
 public class SensorManager {
 
@@ -37,6 +38,15 @@ public class SensorManager {
 
     public Promise<Boolean, AccessServiceException> isSensorEnable(String sensorId) {
         return mSensorList.get(sensorId).isEnable();
+    }
+
+    public Promise<Void, SensorException> controlSensor(String sensorId, String command) {
+        return controlSensor(sensorId, command, null);
+    }
+
+    public Promise<Void, SensorException>
+    controlSensor(String sensorId, String command, Map<String, String> options) {
+        return mSensorList.get(sensorId).control(command, options);
     }
 
     public Promise<Boolean, SensorException> disableSensor(String sensorId) {

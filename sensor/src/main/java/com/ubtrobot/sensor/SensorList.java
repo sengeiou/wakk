@@ -32,7 +32,7 @@ public class SensorList {
                             SensorConstants.CALL_PATH_GET_SENSOR_LIST, DeviceProto.DeviceList.class);
                     LinkedList<Sensor> sensors = new LinkedList<>();
                     for (DeviceProto.Device device : deviceList.getDeviceList()) {
-                        sensors.add(new Sensor(masterContext,
+                        sensors.add(new Sensor(masterContext, sensorService,
                                 SensorConverters.toSensorDevicePojo(device)));
                     }
 

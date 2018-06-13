@@ -3,24 +3,34 @@ package com.ubtrobot.sensor;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.google.protobuf.BoolValue;
+import com.google.protobuf.StringValue;
 import com.ubtrobot.async.Consumer;
 import com.ubtrobot.async.ListenerList;
+import com.ubtrobot.async.Promise;
+import com.ubtrobot.exception.AccessServiceException;
+import com.ubtrobot.master.adapter.ProtoCallAdapter;
 import com.ubtrobot.master.adapter.ProtoEventReceiver;
 import com.ubtrobot.master.context.MasterContext;
 import com.ubtrobot.sensor.ipc.SensorConstants;
 import com.ubtrobot.sensor.ipc.SensorConverters;
 import com.ubtrobot.sensor.ipc.SensorProto;
+import com.ubtrobot.transport.message.CallException;
 
 public class Sensor {
 
     private final MasterContext mMasterContext;
+    private final ProtoCallAdapter mSensorService;
+
     private final SensorDevice mDevice;
 
     private final ListenerList<SensorListener> mListenerList;
     private final SensorEventReceiver mSensorEventReceiver;
 
-    Sensor(MasterContext masterContext, SensorDevice device) {
+    Sensor(MasterContext masterContext, ProtoCallAdapter sensorService, SensorDevice device) {
         mMasterContext = masterContext;
+        mSensorService = sensorService;
+
         mDevice = device;
 
         mListenerList = new ListenerList<>(new Handler(Looper.getMainLooper()));
@@ -33,6 +43,41 @@ public class Sensor {
 
     public SensorDevice getDevice() {
         return mDevice;
+    }
+
+    public Promise<Boolean, AccessServiceException> enable() {
+        return callSensorService(SensorConstants.CALL_PATH_ENABLE_SENSOR);
+    }
+
+    private Promise<Boolean, AccessServiceException> callSensorService(String path) {
+        return mSensorService.call(
+                path,
+                StringValue.newBuilder().setValue(getId()).build(),
+                new ProtoCallAdapter.DFProtoConverter<Boolean, BoolValue, AccessServiceException>() {
+                    @Override
+                    public Class<BoolValue> doneProtoClass() {
+                        return BoolValue.class;
+                    }
+
+                    @Override
+                    public Boolean convertDone(BoolValue disablePrevious) throws Exception {
+                        return disablePrevious.getValue();
+                    }
+
+                    @Override
+                    public AccessServiceException convertFail(CallException e) {
+                        return new AccessServiceException.Factory().from(e);
+                    }
+                }
+        );
+    }
+
+    public Promise<Boolean, AccessServiceException> isEnable() {
+        return callSensorService(SensorConstants.CALL_PATH_QUERY_SENSOR_IS_ENABLE);
+    }
+
+    public Promise<Boolean, AccessServiceException> disable() {
+        return callSensorService(SensorConstants.CALL_PATH_DISABLE_SENSOR);
     }
 
     public void registerSensorListener(SensorListener listener) {

@@ -57,4 +57,46 @@ public abstract class AbstractSensorService implements SensorService {
             LOGGER.e("Publish sensor event failed. Pls start SensorSystemService first.");
         }
     }
+
+    @Override
+    public Promise<Boolean, AccessServiceException> enableSensor(String sensorId) {
+        AsyncTask<Boolean, AccessServiceException> task = createEnablingSensorTask(sensorId);
+        if (task == null) {
+            throw new IllegalStateException("createEnablingSensorTask returns null.");
+        }
+
+        task.start();
+        return task.promise();
+    }
+
+    protected abstract AsyncTask<Boolean, AccessServiceException>
+    createEnablingSensorTask(String sensorId);
+
+    @Override
+    public Promise<Boolean, AccessServiceException> isSensorEnable(String sensorId) {
+        AsyncTask<Boolean, AccessServiceException> task = createGettingIfSensorEnableTask(sensorId);
+        if (task == null) {
+            throw new IllegalStateException("createGettingIfSensorEnableTask returns null.");
+        }
+
+        task.start();
+        return task.promise();
+    }
+
+    protected abstract AsyncTask<Boolean, AccessServiceException>
+    createGettingIfSensorEnableTask(String sensorId);
+
+    @Override
+    public Promise<Boolean, AccessServiceException> disableSensor(String sensorId) {
+        AsyncTask<Boolean, AccessServiceException> task = createDisablingSensorTask(sensorId);
+        if (task == null) {
+            throw new IllegalStateException("createDisablingSensorTask returns null.");
+        }
+
+        task.start();
+        return task.promise();
+    }
+
+    protected abstract AsyncTask<Boolean, AccessServiceException>
+    createDisablingSensorTask(String sensorId);
 }

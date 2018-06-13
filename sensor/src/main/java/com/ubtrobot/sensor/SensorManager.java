@@ -3,6 +3,8 @@ package com.ubtrobot.sensor;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.ubtrobot.async.Promise;
+import com.ubtrobot.exception.AccessServiceException;
 import com.ubtrobot.master.adapter.ProtoCallAdapter;
 import com.ubtrobot.master.context.MasterContext;
 import com.ubtrobot.sensor.ipc.SensorConstants;
@@ -27,6 +29,18 @@ public class SensorManager {
 
     public Sensor getSensor(String sensorId) {
         return mSensorList.get(sensorId);
+    }
+
+    public Promise<Boolean, AccessServiceException> enableSensor(String sensorId) {
+        return mSensorList.get(sensorId).enable();
+    }
+
+    public Promise<Boolean, AccessServiceException> isSensorEnable(String sensorId) {
+        return mSensorList.get(sensorId).isEnable();
+    }
+
+    public Promise<Boolean, AccessServiceException> disableSensor(String sensorId) {
+        return mSensorList.get(sensorId).disable();
     }
 
     public void registerSensorListener(String sensorId, SensorListener listener) {

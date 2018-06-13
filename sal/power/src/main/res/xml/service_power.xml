@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<service
+    name="power"
+    level="system">
+    <call path="/power/sleep" />
+    <call path="/power/query-is-sleeping" />
+    <call path="/power/wake-up" />
+    <call path="/power/shutdown" />
+    <call path="/power/battery-properties" />
+</service>

@@ -8,6 +8,7 @@ import com.ubtrobot.master.context.ContextRunnable;
 import com.ubtrobot.master.param.ProtoParam;
 import com.ubtrobot.sensor.SensorDevice;
 import com.ubtrobot.sensor.SensorEvent;
+import com.ubtrobot.sensor.SensorException;
 import com.ubtrobot.sensor.ipc.SensorConstants;
 import com.ubtrobot.sensor.ipc.SensorConverters;
 import com.ubtrobot.sensor.ipc.SensorProto;
@@ -16,6 +17,7 @@ import com.ubtrobot.ulog.FwLoggerFactory;
 import com.ubtrobot.ulog.Logger;
 
 import java.util.List;
+import java.util.Map;
 
 public abstract class AbstractSensorService implements SensorService {
 
@@ -57,4 +59,61 @@ public abstract class AbstractSensorService implements SensorService {
             LOGGER.e("Publish sensor event failed. Pls start SensorSystemService first.");
         }
     }
+
+    @Override
+    public Promise<Boolean, SensorException> enableSensor(String sensorId) {
+        AsyncTask<Boolean, SensorException> task = createEnablingSensorTask(sensorId);
+        if (task == null) {
+            throw new IllegalStateException("createEnablingSensorTask returns null.");
+        }
+
+        task.start();
+        return task.promise();
+    }
+
+    protected abstract AsyncTask<Boolean, SensorException>
+    createEnablingSensorTask(String sensorId);
+
+    @Override
+    public Promise<Boolean, AccessServiceException> isSensorEnable(String sensorId) {
+        AsyncTask<Boolean, AccessServiceException> task = createGettingIfSensorEnableTask(sensorId);
+        if (task == null) {
+            throw new IllegalStateException("createGettingIfSensorEnableTask returns null.");
+        }
+
+        task.start();
+        return task.promise();
+    }
+
+    protected abstract AsyncTask<Boolean, AccessServiceException>
+    createGettingIfSensorEnableTask(String sensorId);
+
+    @Override
+    public Promise<Void, SensorException>
+    control(String sensorId, String command, Map<String, String> options) {
+        AsyncTask<Void, SensorException> task = createControllingSensorTask(sensorId, command, options);
+        if (task == null) {
+            throw new IllegalStateException("createControllingSensorTask returns null.");
+        }
+
+        task.start();
+        return task.promise();
+    }
+
+    protected abstract AsyncTask<Void, SensorException>
+    createControllingSensorTask(String sensorId, String command, Map<String, String> options);
+
+    @Override
+    public Promise<Boolean, SensorException> disableSensor(String sensorId) {
+        AsyncTask<Boolean, SensorException> task = createDisablingSensorTask(sensorId);
+        if (task == null) {
+            throw new IllegalStateException("createDisablingSensorTask returns null.");
+        }
+
+        task.start();
+        return task.promise();
+    }
+
+    protected abstract AsyncTask<Boolean, SensorException>
+    createDisablingSensorTask(String sensorId);
 }

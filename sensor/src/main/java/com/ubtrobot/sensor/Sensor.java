@@ -2,6 +2,7 @@ package com.ubtrobot.sensor;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.StringValue;
@@ -9,6 +10,7 @@ import com.ubtrobot.async.Consumer;
 import com.ubtrobot.async.ListenerList;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.exception.AccessServiceException;
+import com.ubtrobot.master.adapter.CallAdapter;
 import com.ubtrobot.master.adapter.ProtoCallAdapter;
 import com.ubtrobot.master.adapter.ProtoEventReceiver;
 import com.ubtrobot.master.context.MasterContext;
@@ -16,6 +18,9 @@ import com.ubtrobot.sensor.ipc.SensorConstants;
 import com.ubtrobot.sensor.ipc.SensorConverters;
 import com.ubtrobot.sensor.ipc.SensorProto;
 import com.ubtrobot.transport.message.CallException;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class Sensor {
 
@@ -90,6 +95,32 @@ public class Sensor {
                     @Override
                     public AccessServiceException convertFail(CallException e) {
                         return new AccessServiceException.Factory().from(e);
+                    }
+                }
+        );
+    }
+
+    public Promise<Void, SensorException> control(String command) {
+        return control(command, null);
+    }
+
+    public Promise<Void, SensorException> control(String command, Map<String, String> options) {
+        if (TextUtils.isEmpty(command)) {
+            throw new IllegalStateException("Illegal argument command. empty string.");
+        }
+
+        if (options == null) {
+            options = new HashMap<>();
+        }
+
+        return mSensorService.call(
+                SensorConstants.CALL_PATH_CONTROL_SENSOR,
+                SensorProto.ControlOptions.newBuilder().setSensorId(getId())
+                        .setCommand(command).putAllOption(options).build(),
+                new CallAdapter.FConverter<SensorException>() {
+                    @Override
+                    public SensorException convertFail(CallException e) {
+                        return new SensorException.Factory().from(e);
                     }
                 }
         );

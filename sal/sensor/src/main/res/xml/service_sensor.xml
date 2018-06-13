@@ -5,5 +5,6 @@
     <call path="/sensor/device/list" />
     <call path="/sensor/query-is-enable" />
     <call path="/sensor/enable" />
+    <call path="/sensor/control" />
     <call path="/sensor/disable" />
 </service>

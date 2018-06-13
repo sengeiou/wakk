@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.ubtrobot.async.AsyncTask;
 import com.ubtrobot.async.AsyncTaskParallel;
@@ -26,6 +27,8 @@ import com.ubtrobot.play.PlayerFactory;
 import com.ubtrobot.play.Segment;
 import com.ubtrobot.play.Track;
 import com.ubtrobot.play.TrackPlayer;
+import com.ubtrobot.speech.SpeechManager;
+import com.ubtrobot.speech.SynthesizeException;
 import com.ubtrobot.ulog.FwLoggerFactory;
 import com.ubtrobot.ulog.Logger;
 
@@ -49,6 +52,7 @@ public class DanceManager {
 
     private Context mContext;
     private DanceList mDanceList;
+    private SpeechManager mSpeechManager;
 
     private String mCurrentCategory;
 
@@ -66,9 +70,9 @@ public class DanceManager {
                 return;
             }
 
+            mDanceManager = this;
             mContext = context.getApplicationContext();
             mDanceList = new DanceList(context);
-            mDanceManager = this;
             getDanceList();
         }
     }
@@ -82,6 +86,7 @@ public class DanceManager {
 
 
     private boolean checkTrack() {
+        String armUsable = "false";
         ContentResolver cr = mContext.getContentResolver();
         Uri uri = Uri.parse(ARM_STATE_URI);
         String info = null;
@@ -91,7 +96,7 @@ public class DanceManager {
             info = bundle.getString("value");
         }
 
-        if (info != null) {
+        if (armUsable.equals(info)) {
             return true;
         }
 
@@ -104,7 +109,23 @@ public class DanceManager {
             Map.Entry<String, AsyncTaskParallel.DoneOrFail<Object, PlayException>>>
     play(String danceCategory) {
         if (!checkTrack()) {
-            LOGGER.w("Dance underprepared.");
+            LOGGER.w("Arm motion off.");
+            // 手臂动作已关闭，我暂时不能为您跳舞
+            if (mSpeechManager == null) {
+                mSpeechManager = new SpeechManager(Master.get().getGlobalContext());
+            }
+
+            mSpeechManager.synthesize("手臂动作已关闭，我暂时不能为您跳舞").done(new DoneCallback<Void>() {
+                @Override
+                public void onDone(Void aVoid) {
+                }
+            }).fail(new FailCallback<SynthesizeException>() {
+                @Override
+                public void onFail(SynthesizeException e) {
+                    LOGGER.e("Speech synthesize: arm motion off fail." + e);
+                }
+            });
+            return null;
         }
 
         final Dance dance = mDanceList.get(danceCategory);

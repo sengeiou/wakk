@@ -8,6 +8,7 @@ import com.ubtrobot.master.context.ContextRunnable;
 import com.ubtrobot.master.param.ProtoParam;
 import com.ubtrobot.sensor.SensorDevice;
 import com.ubtrobot.sensor.SensorEvent;
+import com.ubtrobot.sensor.SensorException;
 import com.ubtrobot.sensor.ipc.SensorConstants;
 import com.ubtrobot.sensor.ipc.SensorConverters;
 import com.ubtrobot.sensor.ipc.SensorProto;
@@ -59,8 +60,8 @@ public abstract class AbstractSensorService implements SensorService {
     }
 
     @Override
-    public Promise<Boolean, AccessServiceException> enableSensor(String sensorId) {
-        AsyncTask<Boolean, AccessServiceException> task = createEnablingSensorTask(sensorId);
+    public Promise<Boolean, SensorException> enableSensor(String sensorId) {
+        AsyncTask<Boolean, SensorException> task = createEnablingSensorTask(sensorId);
         if (task == null) {
             throw new IllegalStateException("createEnablingSensorTask returns null.");
         }
@@ -69,7 +70,7 @@ public abstract class AbstractSensorService implements SensorService {
         return task.promise();
     }
 
-    protected abstract AsyncTask<Boolean, AccessServiceException>
+    protected abstract AsyncTask<Boolean, SensorException>
     createEnablingSensorTask(String sensorId);
 
     @Override
@@ -87,8 +88,8 @@ public abstract class AbstractSensorService implements SensorService {
     createGettingIfSensorEnableTask(String sensorId);
 
     @Override
-    public Promise<Boolean, AccessServiceException> disableSensor(String sensorId) {
-        AsyncTask<Boolean, AccessServiceException> task = createDisablingSensorTask(sensorId);
+    public Promise<Boolean, SensorException> disableSensor(String sensorId) {
+        AsyncTask<Boolean, SensorException> task = createDisablingSensorTask(sensorId);
         if (task == null) {
             throw new IllegalStateException("createDisablingSensorTask returns null.");
         }
@@ -97,6 +98,6 @@ public abstract class AbstractSensorService implements SensorService {
         return task.promise();
     }
 
-    protected abstract AsyncTask<Boolean, AccessServiceException>
+    protected abstract AsyncTask<Boolean, SensorException>
     createDisablingSensorTask(String sensorId);
 }

@@ -13,6 +13,7 @@ import com.ubtrobot.master.adapter.ProtoParamParser;
 import com.ubtrobot.master.annotation.Call;
 import com.ubtrobot.master.service.MasterSystemService;
 import com.ubtrobot.sensor.SensorDevice;
+import com.ubtrobot.sensor.SensorException;
 import com.ubtrobot.sensor.ipc.SensorConstants;
 import com.ubtrobot.sensor.ipc.SensorConverters;
 import com.ubtrobot.sensor.sal.AbstractSensorService;
@@ -81,20 +82,20 @@ public class SensorSystemService extends MasterSystemService {
 
         mCallProcessor.onCall(
                 responder,
-                new CallProcessAdapter.Callable<Boolean, AccessServiceException>() {
+                new CallProcessAdapter.Callable<Boolean, SensorException>() {
                     @Override
-                    public Promise<Boolean, AccessServiceException> call() throws CallException {
+                    public Promise<Boolean, SensorException> call() throws CallException {
                         return mService.enableSensor(sensorId);
                     }
                 },
-                new ProtoCallProcessAdapter.DFConverter<Boolean, AccessServiceException>() {
+                new ProtoCallProcessAdapter.DFConverter<Boolean, SensorException>() {
                     @Override
                     public Message convertDone(Boolean disablePrevious) {
                         return BoolValue.newBuilder().setValue(disablePrevious).build();
                     }
 
                     @Override
-                    public CallException convertFail(AccessServiceException e) {
+                    public CallException convertFail(SensorException e) {
                         return new CallException(e.getCode(), e.getMessage());
                     }
                 }
@@ -139,20 +140,20 @@ public class SensorSystemService extends MasterSystemService {
 
         mCallProcessor.onCall(
                 responder,
-                new CallProcessAdapter.Callable<Boolean, AccessServiceException>() {
+                new CallProcessAdapter.Callable<Boolean, SensorException>() {
                     @Override
-                    public Promise<Boolean, AccessServiceException> call() throws CallException {
+                    public Promise<Boolean, SensorException> call() throws CallException {
                         return mService.disableSensor(sensorId);
                     }
                 },
-                new ProtoCallProcessAdapter.DFConverter<Boolean, AccessServiceException>() {
+                new ProtoCallProcessAdapter.DFConverter<Boolean, SensorException>() {
                     @Override
                     public Message convertDone(Boolean enablePrevious) {
                         return BoolValue.newBuilder().setValue(enablePrevious).build();
                     }
 
                     @Override
-                    public CallException convertFail(AccessServiceException e) {
+                    public CallException convertFail(SensorException e) {
                         return new CallException(e.getCode(), e.getMessage());
                     }
                 }

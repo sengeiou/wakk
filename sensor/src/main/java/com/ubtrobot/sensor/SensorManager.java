@@ -31,7 +31,7 @@ public class SensorManager {
         return mSensorList.get(sensorId);
     }
 
-    public Promise<Boolean, AccessServiceException> enableSensor(String sensorId) {
+    public Promise<Boolean, SensorException> enableSensor(String sensorId) {
         return mSensorList.get(sensorId).enable();
     }
 
@@ -39,7 +39,7 @@ public class SensorManager {
         return mSensorList.get(sensorId).isEnable();
     }
 
-    public Promise<Boolean, AccessServiceException> disableSensor(String sensorId) {
+    public Promise<Boolean, SensorException> disableSensor(String sensorId) {
         return mSensorList.get(sensorId).disable();
     }
 

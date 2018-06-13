@@ -45,13 +45,36 @@ public class Sensor {
         return mDevice;
     }
 
-    public Promise<Boolean, AccessServiceException> enable() {
-        return callSensorService(SensorConstants.CALL_PATH_ENABLE_SENSOR);
+    public Promise<Boolean, SensorException> enable() {
+        return enableOrDisableSensor(SensorConstants.CALL_PATH_ENABLE_SENSOR);
     }
 
-    private Promise<Boolean, AccessServiceException> callSensorService(String path) {
+    private Promise<Boolean, SensorException> enableOrDisableSensor(String path) {
         return mSensorService.call(
                 path,
+                StringValue.newBuilder().setValue(getId()).build(),
+                new ProtoCallAdapter.DFProtoConverter<Boolean, BoolValue, SensorException>() {
+                    @Override
+                    public Class<BoolValue> doneProtoClass() {
+                        return BoolValue.class;
+                    }
+
+                    @Override
+                    public Boolean convertDone(BoolValue ret) throws Exception {
+                        return ret.getValue();
+                    }
+
+                    @Override
+                    public SensorException convertFail(CallException e) {
+                        return new SensorException.Factory().from(e);
+                    }
+                }
+        );
+    }
+
+    public Promise<Boolean, AccessServiceException> isEnable() {
+        return mSensorService.call(
+                SensorConstants.CALL_PATH_QUERY_SENSOR_IS_ENABLE,
                 StringValue.newBuilder().setValue(getId()).build(),
                 new ProtoCallAdapter.DFProtoConverter<Boolean, BoolValue, AccessServiceException>() {
                     @Override
@@ -60,8 +83,8 @@ public class Sensor {
                     }
 
                     @Override
-                    public Boolean convertDone(BoolValue disablePrevious) throws Exception {
-                        return disablePrevious.getValue();
+                    public Boolean convertDone(BoolValue enable) throws Exception {
+                        return enable.getValue();
                     }
 
                     @Override
@@ -72,12 +95,8 @@ public class Sensor {
         );
     }
 
-    public Promise<Boolean, AccessServiceException> isEnable() {
-        return callSensorService(SensorConstants.CALL_PATH_QUERY_SENSOR_IS_ENABLE);
-    }
-
-    public Promise<Boolean, AccessServiceException> disable() {
-        return callSensorService(SensorConstants.CALL_PATH_DISABLE_SENSOR);
+    public Promise<Boolean, SensorException> disable() {
+        return enableOrDisableSensor(SensorConstants.CALL_PATH_DISABLE_SENSOR);
     }
 
     public void registerSensorListener(SensorListener listener) {

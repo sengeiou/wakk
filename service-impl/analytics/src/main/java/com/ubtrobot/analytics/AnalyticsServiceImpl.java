@@ -33,6 +33,7 @@ public class AnalyticsServiceImpl implements Analytics {
     private MemEventStorage mMemStorage;
     private EventStorage mDiskStorage;
     private EventReporter mReporter;
+    private boolean mEnable = true;
 
     public AnalyticsServiceImpl(Context context, Executor executor,
                                 String appId, String appKey, String deviceId) {
@@ -60,7 +61,7 @@ public class AnalyticsServiceImpl implements Analytics {
 
     @Override
     public void enable(boolean enable) {
-
+        mEnable = enable;
     }
 
     @Override
@@ -75,6 +76,9 @@ public class AnalyticsServiceImpl implements Analytics {
 
     @Override
     public void recordEvent(Event event) {
+        if (!mEnable) {
+            return;
+        }
         doRecordEvent(event);
     }
 

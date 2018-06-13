@@ -1,13 +1,17 @@
-package com.ubtrobot.analytics;
+package com.ubtrobot.analytics.mobile;
 
 import android.app.Activity;
-import android.content.ContentResolver;
 import android.content.Context;
 
+import com.ubtrobot.analytics.Analytics;
+import com.ubtrobot.analytics.AnalyticsServiceImpl;
+import com.ubtrobot.analytics.Event;
+import com.ubtrobot.analytics.Strategy;
 import com.ubtrobot.analytics.ipc.AnalyticsConstants;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 public class AnalyticsKit {
 
@@ -16,31 +20,44 @@ public class AnalyticsKit {
     private AnalyticsKit() {
     }
 
-    public static void initialize(Context context) {
+    public static void initialize(Context context, Executor executor,
+                                  String appId, String appKey, String deviceId) {
         if (sAnalytics != null) {
             return;
         }
 
-        synchronized (AnalyticsKit.class) {
+        synchronized (com.ubtrobot.analytics.AnalyticsKit.class) {
             if (sAnalytics != null) {
                 return;
             }
-
-            ContentResolver resolver = context.getContentResolver();
-            sAnalytics = new ProviderAnalyticsProxy(resolver);
+            sAnalytics = new AnalyticsServiceImpl(context, executor, appId, appKey, deviceId);
         }
+    }
+
+    public static void setStrategy(Strategy strategy) {
+        if (strategy == null) {
+            throw new IllegalArgumentException("Strategy is null.");
+        }
+
+        checkAnalytics();
+        sAnalytics.setStrategy(strategy);
     }
 
     private static void checkAnalytics() {
         if (sAnalytics == null) {
             throw new IllegalStateException(
-                    "Please call com.ubtrobot.analytics.AnalyticsKit.initialize");
+                    "Please call com.ubtrobot.analytics.mobile.AnalyticsKit.initialize");
         }
     }
 
     public static Strategy getStrategy() {
         checkAnalytics();
         return sAnalytics.getStrategy();
+    }
+
+    public static void enable(boolean enable) {
+        checkAnalytics();
+        sAnalytics.enable(enable);
     }
 
     public static void recordEvent(String eventId) {
@@ -118,5 +135,4 @@ public class AnalyticsKit {
 
         return segmentation;
     }
-
 }

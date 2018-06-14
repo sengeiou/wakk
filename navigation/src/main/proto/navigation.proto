@@ -10,7 +10,7 @@ import "google/protobuf/any.proto";
 message GroundOverlay {
 
     string name = 1;
-    string tag = 2;
+    string type = 2;
     int32 width = 3;
     int32 height = 4;
     Point origin_In_Image = 5;

@@ -230,6 +230,18 @@ public class NavMap {
             return this;
         }
 
+        public Builder addMarker(int index, Marker marker) {
+            if (index < 0 || index > markerList.size()) {
+                throw new IllegalArgumentException("Index out of bounds.");
+            }
+            if (marker == null) {
+                throw new IllegalArgumentException("Argument marker is null.");
+            }
+
+            markerList.add(index, marker);
+            return this;
+        }
+
         public Builder setMarker(int index, Marker marker) {
             if (index < 0 || index >= markerList.size()) {
                 throw new IllegalArgumentException("Index out of bounds.");
@@ -279,6 +291,18 @@ public class NavMap {
             return this;
         }
 
+        public Builder addPolyline(int index, Polyline polyline) {
+            if (index < 0 || index > polylineList.size()) {
+                throw new IllegalArgumentException("Index out of bounds.");
+            }
+            if (polyline == null) {
+                throw new IllegalArgumentException("Argument polyline is null.");
+            }
+
+            polylineList.add(index, polyline);
+            return this;
+        }
+
         public Builder setPolyline(int index, Polyline polyline) {
             if (index < 0 || index >= polylineList.size()) {
                 throw new IllegalArgumentException("Index out of bounds.");
@@ -325,6 +349,18 @@ public class NavMap {
             }
 
             groundOverlayList.add(overlay);
+            return this;
+        }
+
+        public Builder addGroundOverlay(int index, GroundOverlay overlay) {
+            if (index < 0 || index > groundOverlayList.size()) {
+                throw new IllegalArgumentException("Index out of bounds.");
+            }
+            if (overlay == null) {
+                throw new IllegalArgumentException("Argument overlay is null.");
+            }
+
+            groundOverlayList.add(index, overlay);
             return this;
         }
 

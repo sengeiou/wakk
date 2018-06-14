@@ -90,6 +90,10 @@ public class Marker extends Location {
                 '}';
     }
 
+    public Builder toMarkerBuilder() {
+        return new Builder(this);
+    }
+
     public static class Builder extends Location.GenericBuilder<Builder> {
 
         private String id;
@@ -105,6 +109,18 @@ public class Marker extends Location {
             }
 
             this.id = id;
+        }
+
+        public Builder(Marker marker) {
+            super(marker.getPosition());
+            setZ(marker.getZ());
+            setRotation(marker.getRotation());
+
+            id = marker.id;
+            title = marker.title;
+            description = marker.getDescription();
+            tagList.addAll(marker.getTagList());
+            extension = marker.getExtension();
         }
 
         public Builder setTitle(String title) {
@@ -142,6 +158,18 @@ public class Marker extends Location {
             }
 
             tagList.add(tag);
+            return this;
+        }
+
+        public Builder addTag(int index, String tag) {
+            if (index < 0 || index > tagList.size()) {
+                throw new IllegalArgumentException("Index out of bounds.");
+            }
+            if (tag == null) {
+                throw new IllegalArgumentException("Argument tag is null.");
+            }
+
+            tagList.add(index, tag);
             return this;
         }
 

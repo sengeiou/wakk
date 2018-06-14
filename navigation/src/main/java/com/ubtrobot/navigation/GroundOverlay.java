@@ -10,7 +10,7 @@ public class GroundOverlay {
     public static final GroundOverlay DEFAULT = new Builder().build();
 
     private String name;
-    private String tag;
+    private String type;
     private int width;
     private int height;
     private Point originInImage;
@@ -25,8 +25,8 @@ public class GroundOverlay {
         return name;
     }
 
-    public String getTag() {
-        return tag;
+    public String getType() {
+        return type;
     }
 
     public int getWidth() {
@@ -55,7 +55,7 @@ public class GroundOverlay {
         if (width != overlay.width) return false;
         if (height != overlay.height) return false;
         if (name != null ? !name.equals(overlay.name) : overlay.name != null) return false;
-        if (tag != null ? !tag.equals(overlay.tag) : overlay.tag != null) return false;
+        if (type != null ? !type.equals(overlay.type) : overlay.type != null) return false;
         if (originInImage != null ? !originInImage.equals(overlay.originInImage) : overlay.originInImage != null)
             return false;
         return image != null ? image.equals(overlay.image) : overlay.image == null;
@@ -64,7 +64,7 @@ public class GroundOverlay {
     @Override
     public int hashCode() {
         int result = name != null ? name.hashCode() : 0;
-        result = 31 * result + (tag != null ? tag.hashCode() : 0);
+        result = 31 * result + (type != null ? type.hashCode() : 0);
         result = 31 * result + width;
         result = 31 * result + height;
         result = 31 * result + (originInImage != null ? originInImage.hashCode() : 0);
@@ -76,7 +76,7 @@ public class GroundOverlay {
     public String toString() {
         return "GroundOverlay{" +
                 "name='" + name + '\'' +
-                ", tag='" + tag + '\'' +
+                ", type='" + type + '\'' +
                 ", width=" + width +
                 ", height=" + height +
                 ", originInImage=" + originInImage +
@@ -84,14 +84,30 @@ public class GroundOverlay {
                 '}';
     }
 
+    public Builder toBuilder() {
+        return new Builder(this);
+    }
+
     public static class Builder {
 
         private String name;
-        private String tag;
+        private String type;
         private int width;
         private int height;
         private Point originInImage;
         private FileInfo image;
+
+        public Builder() {
+        }
+
+        public Builder(GroundOverlay groundOverlay) {
+            name = groundOverlay.name;
+            type = groundOverlay.type;
+            width = groundOverlay.width;
+            height = groundOverlay.height;
+            originInImage = groundOverlay.originInImage;
+            image = groundOverlay.image;
+        }
 
         public Builder setWidth(int width) {
             if (width <= 0) {
@@ -116,8 +132,8 @@ public class GroundOverlay {
             return this;
         }
 
-        public Builder setTag(String tag) {
-            this.tag = tag;
+        public Builder setType(String type) {
+            this.type = type;
             return this;
         }
 
@@ -142,7 +158,7 @@ public class GroundOverlay {
         public GroundOverlay build() {
             GroundOverlay overlay = new GroundOverlay(width, height);
             overlay.name = name == null ? "" : name;
-            overlay.tag = tag == null ? "" : tag;
+            overlay.type = type == null ? "" : type;
             overlay.originInImage = originInImage;
             overlay.image = image == null ? FileInfo.DEFAULT : image;
             return overlay;

@@ -29,6 +29,30 @@ public class FileInfo {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        FileInfo fileInfo = (FileInfo) o;
+
+        if (name != null ? !name.equals(fileInfo.name) : fileInfo.name != null) return false;
+        if (format != null ? !format.equals(fileInfo.format) : fileInfo.format != null)
+            return false;
+        if (remoteUrl != null ? !remoteUrl.equals(fileInfo.remoteUrl) : fileInfo.remoteUrl != null)
+            return false;
+        return localUri != null ? localUri.equals(fileInfo.localUri) : fileInfo.localUri == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = name != null ? name.hashCode() : 0;
+        result = 31 * result + (format != null ? format.hashCode() : 0);
+        result = 31 * result + (remoteUrl != null ? remoteUrl.hashCode() : 0);
+        result = 31 * result + (localUri != null ? localUri.hashCode() : 0);
+        return result;
+    }
+
+    @Override
     public String toString() {
         return "FileInfo{" +
                 "name='" + name + '\'' +
@@ -38,12 +62,26 @@ public class FileInfo {
                 '}';
     }
 
+    public Builder toBuilder() {
+        return new Builder(this);
+    }
+
     public static class Builder {
 
         private String name;
         private String format;
         private String remoteUrl;
         private String localUri;
+
+        public Builder() {
+        }
+
+        public Builder(FileInfo fileInfo) {
+            name = fileInfo.name;
+            format = fileInfo.format;
+            remoteUrl = fileInfo.remoteUrl;
+            localUri = fileInfo.localUri;
+        }
 
         public Builder setName(String name) {
             this.name = name;

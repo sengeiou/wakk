@@ -45,7 +45,7 @@ public class NavigationConverters {
     private static NavigationProto.GroundOverlay toGroundOverlayProto(GroundOverlay groundOverlay) {
         return NavigationProto.GroundOverlay.newBuilder().
                 setName(groundOverlay.getName()).
-                setTag(groundOverlay.getTag()).
+                setType(groundOverlay.getType()).
                 setWidth(groundOverlay.getWidth()).
                 setHeight(groundOverlay.getHeight()).
                 setOriginInImage(toPointProto(groundOverlay.getOriginInImage())).
@@ -123,7 +123,7 @@ public class NavigationConverters {
                 setWidth(groundOverlay.getWidth()).
                 setHeight(groundOverlay.getHeight()).
                 setName(groundOverlay.getName()).
-                setTag(groundOverlay.getTag()).
+                setType(groundOverlay.getType()).
                 setOriginInImage(toPointPojo(groundOverlay.getOriginInImage())).
                 setImage(IoConverters.toFileInfoPojo(groundOverlay.getImage().unpack(IoProto.FileInfo.class))).
                 build();

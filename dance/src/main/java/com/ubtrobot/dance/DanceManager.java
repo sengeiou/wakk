@@ -3,8 +3,9 @@ package com.ubtrobot.dance;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
+import android.os.LocaleList;
 
 import com.ubtrobot.async.AsyncTask;
 import com.ubtrobot.async.AsyncTaskParallel;
@@ -34,6 +35,7 @@ import com.ubtrobot.ulog.Logger;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 
@@ -48,16 +50,16 @@ public class DanceManager {
 
     private static final String ARM_STATE_URI = "content://com.ubtechinc.settings.provider/CruiserSettings";
 
+    private static volatile Context mContext;
     private static volatile DanceManager mDanceManager;
+    private static volatile DanceList mDanceList;
 
-    private Context mContext;
-    private DanceList mDanceList;
     private SpeechManager mSpeechManager;
 
     private String mCurrentCategory;
 
     private static AsyncTaskParallel<PlayException> mTaskParallel;
-    private ProgressivePromise<Void, PlayException, Map.Entry<String,
+    private static ProgressivePromise<Void, PlayException, Map.Entry<String,
             AsyncTaskParallel.DoneOrFail<Object, PlayException>>> mProgressivePromise;
 
     public DanceManager(Context context) {
@@ -73,7 +75,6 @@ public class DanceManager {
             mDanceManager = this;
             mContext = context.getApplicationContext();
             mDanceList = new DanceList(context);
-            getDanceList();
         }
     }
 
@@ -84,9 +85,8 @@ public class DanceManager {
         return mDanceList.all();
     }
 
-
     private boolean checkTrack() {
-        String armUsable = "false";
+        String armUsable = "true";
         ContentResolver cr = mContext.getContentResolver();
         Uri uri = Uri.parse(ARM_STATE_URI);
         String info = null;
@@ -100,8 +100,6 @@ public class DanceManager {
             return true;
         }
 
-        // todo 底盘 cruiser_chassis_motion_state
-
         return false;
     }
 
@@ -110,21 +108,7 @@ public class DanceManager {
     play(String danceCategory) {
         if (!checkTrack()) {
             LOGGER.w("Arm motion off.");
-            // 手臂动作已关闭，我暂时不能为您跳舞
-            if (mSpeechManager == null) {
-                mSpeechManager = new SpeechManager(Master.get().getGlobalContext());
-            }
-
-            mSpeechManager.synthesize("手臂动作已关闭，我暂时不能为您跳舞").done(new DoneCallback<Void>() {
-                @Override
-                public void onDone(Void aVoid) {
-                }
-            }).fail(new FailCallback<SynthesizeException>() {
-                @Override
-                public void onFail(SynthesizeException e) {
-                    LOGGER.e("Speech synthesize: arm motion off fail." + e);
-                }
-            });
+            ttsArmForbidden();
             return null;
         }
 
@@ -133,8 +117,11 @@ public class DanceManager {
 
         if (mTaskParallel != null) {
             LOGGER.w("Cancel dance: dance is running.");
-            mProgressivePromise.cancel();
+            if (mProgressivePromise != null) {
+                mProgressivePromise.cancel();
+            }
             mProgressivePromise = null;
+            mTaskParallel = null;
         }
 
         mTaskParallel = new AsyncTaskParallel<>();
@@ -143,6 +130,7 @@ public class DanceManager {
             mTaskParallel.put(track.getType(), new ParallelAsyncTask(track));
         }
 
+        ttsDance();
         mTaskParallel.start();
         mProgressivePromise = mTaskParallel.promise().done(new DoneCallback<Void>() {
             @Override
@@ -179,6 +167,47 @@ public class DanceManager {
         return mProgressivePromise;
     }
 
+    private void ttsArmForbidden() {
+        String armMotionOff = "The arm is forbidden now, I can't dance for you.";
+
+        if (Language.causedByZh()) {
+            armMotionOff = "手臂动作已关闭，我暂时不能为您跳舞";
+        } else if (Language.causedByEn()) {
+            armMotionOff = "The arm is forbidden now, I can't dance for you.";
+        }
+
+        tts(armMotionOff);
+    }
+
+    private void ttsDance() {
+        String dance = "I'm going to start dancing. Keep a distance of one meter with me";
+
+        if (Language.causedByZh()) {
+            dance = "我要开始跳舞了，请跟我保持一些距离";
+        } else if (Language.causedByEn()) {
+            dance = "I'm going to start dancing. Keep a distance of one meter with me";
+        }
+
+        tts(dance);
+    }
+
+    private void tts(String ttsInfo) {
+        if (mSpeechManager == null) {
+            mSpeechManager = new SpeechManager(Master.get().getGlobalContext());
+        }
+
+        mSpeechManager.synthesize(ttsInfo).done(new DoneCallback<Void>() {
+            @Override
+            public void onDone(Void aVoid) {
+            }
+        }).fail(new FailCallback<SynthesizeException>() {
+            @Override
+            public void onFail(SynthesizeException e) {
+                LOGGER.e("Speech synthesize: arm motion off fail." + e);
+            }
+        });
+    }
+
     public String getCurrentDance() {
         return mCurrentCategory;
     }
@@ -210,7 +239,7 @@ public class DanceManager {
     }
 
     public String getRandomDance() {
-        int danceIndex = Math.abs(new Random().nextInt()) % mDanceManager.getDanceList().size();
+        int danceIndex = Math.abs(new Random().nextInt()) % mDanceList.all().size();
         if (mCurrentCategory != null && mCurrentCategory.length() > 1) {
             if (danceIndex == getCurrentDanceIndex()) {
                 danceIndex = (danceIndex + 1) % mDanceList.all().size();
@@ -290,4 +319,33 @@ public class DanceManager {
             }
         }
     }
+
+    private static class Language {
+
+        private static final String ZH = "zh";
+        private static final String EN = "en";
+
+        private static String getCurrentLanguage() {
+            return getLocale().getLanguage();
+        }
+
+        private static Locale getLocale() {
+            Locale locale;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                locale = LocaleList.getDefault().get(0);
+            } else {
+                locale = Locale.getDefault();
+            }
+            return locale;
+        }
+
+        private static boolean causedByZh() {
+            return ZH.toLowerCase().equals(getCurrentLanguage().toLowerCase());
+        }
+
+        private static boolean causedByEn() {
+            return EN.toLowerCase().equals(getCurrentLanguage().toLowerCase());
+        }
+    }
+
 }

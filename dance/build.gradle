@@ -24,6 +24,7 @@ dependencies {
     implementation project(':motion')
     implementation project(':emotion')
     implementation project(':play')
+    implementation project(':speech')
 
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 

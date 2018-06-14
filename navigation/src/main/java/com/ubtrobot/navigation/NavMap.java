@@ -2,11 +2,14 @@ package com.ubtrobot.navigation;
 
 import android.text.TextUtils;
 
+import com.ubtrobot.cache.CachedField;
 import com.ubtrobot.io.FileInfo;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 导航地图
@@ -15,16 +18,66 @@ public class NavMap {
 
     private String id;
     private String name;
-    private String tag;
     private float scale;
     private List<GroundOverlay> groundOverlayList;
     private List<Marker> markerList;
     private List<Polyline> polylineList;
     private FileInfo navFile;
+    private String extension;
+
+    private final CachedField<Map<String, Marker>> mIdMarkerMap;
+    private final CachedField<Map<String, List<Marker>>> mTagMarkerMap;
+    private final CachedField<Map<String, Polyline>> mIdPolylineMap;
 
     private NavMap(String id, float scale) {
         this.id = id;
         this.scale = scale;
+
+        mIdMarkerMap = new CachedField<>(new CachedField.FieldGetter<Map<String, Marker>>() {
+            @Override
+            public Map<String, Marker> get() {
+                HashMap<String, Marker> markerMap = new HashMap<>();
+                for (Marker marker : markerList) {
+                    markerMap.put(marker.getId(), marker);
+                }
+                return markerMap;
+            }
+        });
+        mTagMarkerMap = new CachedField<>(new CachedField.FieldGetter<Map<String, List<Marker>>>() {
+            @Override
+            public Map<String, List<Marker>> get() {
+                HashMap<String, List<Marker>> markerMap = new HashMap<>();
+                for (Marker marker : markerList) {
+                    for (String markerTag : marker.getTagList()) {
+                        List<Marker> markers = markerMap.get(markerTag);
+                        if (markers == null) {
+                            markers = new LinkedList<>();
+                            markerMap.put(markerTag, markers);
+                        }
+
+                        markers.add(marker);
+                    }
+                }
+
+                HashMap<String, List<Marker>> ret = new HashMap<>();
+                for (Map.Entry<String, List<Marker>> entry : markerMap.entrySet()) {
+                    ret.put(entry.getKey(), Collections.unmodifiableList(entry.getValue()));
+                }
+                return ret;
+            }
+        });
+        mIdPolylineMap = new CachedField<>(new CachedField.FieldGetter<Map<String, Polyline>>() {
+            @Override
+            public Map<String, Polyline> get() {
+                HashMap<String, Polyline> polylineMap = new HashMap<>();
+                for (Polyline polyline : polylineList) {
+                    polylineMap.put(polyline.getId(), polyline);
+                }
+
+                return polylineMap;
+            }
+        });
+
     }
 
     public String getId() {
@@ -33,10 +86,6 @@ public class NavMap {
 
     public String getName() {
         return name;
-    }
-
-    public String getTag() {
-        return tag;
     }
 
     public float getScale() {
@@ -51,14 +100,12 @@ public class NavMap {
         return markerList;
     }
 
-    public Marker getMarker(String id) {
-        for (Marker marker : markerList) {
-            if (marker.getId().equals(id)) {
-                return marker;
-            }
-        }
+    public List<Marker> getMarkerList(String tag) {
+        return mTagMarkerMap.get().get(tag);
+    }
 
-        return null;
+    public Marker getMarker(String id) {
+        return mIdMarkerMap.get().get(id);
     }
 
     public List<Polyline> getPolylineList() {
@@ -66,17 +113,15 @@ public class NavMap {
     }
 
     public Polyline getPolyline(String id) {
-        for (Polyline polyline : polylineList) {
-            if (polyline.getId().equals(id)) {
-                return polyline;
-            }
-        }
-
-        return null;
+        return mIdPolylineMap.get().get(id);
     }
 
     public FileInfo getNavFile() {
         return navFile;
+    }
+
+    public String getExtension() {
+        return extension;
     }
 
     public Builder toBuilder() {
@@ -88,12 +133,12 @@ public class NavMap {
         return "NavMap{" +
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
-                ", tag='" + tag + '\'' +
                 ", scale=" + scale +
                 ", groundOverlayList=" + groundOverlayList +
                 ", markerList=" + markerList +
                 ", polylineList=" + polylineList +
                 ", navFile=" + navFile +
+                ", extension='" + extension + '\'' +
                 '}';
     }
 
@@ -101,9 +146,9 @@ public class NavMap {
 
         private String id;
         private String name;
-        private String tag;
         private float scale;
         private FileInfo navFile;
+        private String extension;
 
         private List<GroundOverlay> groundOverlayList = new LinkedList<>();
         private LinkedList<Marker> markerList = new LinkedList<>();
@@ -116,9 +161,9 @@ public class NavMap {
 
             id = map.getId();
             name = map.getName();
-            tag = map.getTag();
             scale = map.scale;
             navFile = map.getNavFile();
+            extension = map.getExtension();
 
             groundOverlayList.addAll(map.getGroundOverlayList());
             markerList.addAll(map.getMarkerList());
@@ -143,11 +188,6 @@ public class NavMap {
             return this;
         }
 
-        public Builder setTag(String tag) {
-            this.tag = tag;
-            return this;
-        }
-
         public Builder setNavFile(FileInfo navFile) {
             if (navFile == null) {
                 throw new IllegalArgumentException("Argument navFile is null.");
@@ -157,11 +197,26 @@ public class NavMap {
             return this;
         }
 
-        public Builder addMarkers(List<Marker> markers) {
+        public Builder setExtension(String extension) {
+            this.extension = extension;
+            return this;
+        }
+
+        public Builder addMarkerList(List<Marker> markers) {
             if (markers == null) {
                 throw new IllegalArgumentException("Argument markers is null.");
             }
 
+            markerList.addAll(markers);
+            return this;
+        }
+
+        public Builder setMarkerList(List<Marker> markers) {
+            if (markers == null) {
+                throw new IllegalArgumentException("Argument markers is null.");
+            }
+
+            markerList.clear();
             markerList.addAll(markers);
             return this;
         }
@@ -245,11 +300,21 @@ public class NavMap {
             return this;
         }
 
-        public Builder addGroundOverlays(List<GroundOverlay> overlays) {
+        public Builder addGroundOverlayList(List<GroundOverlay> overlays) {
             if (overlays == null) {
                 throw new IllegalArgumentException("Argument overlays is null.");
             }
 
+            groundOverlayList.addAll(overlays);
+            return this;
+        }
+
+        public Builder setGroundOverlayList(List<GroundOverlay> overlays) {
+            if (overlays == null) {
+                throw new IllegalArgumentException("Argument overlays is null.");
+            }
+
+            groundOverlayList.clear();
             groundOverlayList.addAll(overlays);
             return this;
         }
@@ -287,8 +352,8 @@ public class NavMap {
         public NavMap build() {
             NavMap navMap = new NavMap(id, scale);
             navMap.name = name == null ? "" : name;
-            navMap.tag = tag == null ? "" : tag;
             navMap.navFile = navFile == null ? FileInfo.DEFAULT : navFile;
+            navMap.extension = extension == null ? "" : extension;
             navMap.groundOverlayList = Collections.unmodifiableList(groundOverlayList);
             navMap.markerList = Collections.unmodifiableList(markerList);
             navMap.polylineList = Collections.unmodifiableList(polylineList);
@@ -301,9 +366,9 @@ public class NavMap {
             return "Builder{" +
                     "id='" + id + '\'' +
                     ", name='" + name + '\'' +
-                    ", tag='" + tag + '\'' +
                     ", scale=" + scale +
                     ", navFile=" + navFile +
+                    ", extension='" + extension + '\'' +
                     ", groundOverlayList=" + groundOverlayList +
                     ", markerList=" + markerList +
                     ", polylineList=" + polylineList +

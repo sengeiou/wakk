@@ -1,18 +1,21 @@
 package com.ubtrobot.navigation;
 
-import android.text.TextUtils;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * 地图标记物
  */
 public class Marker extends Location {
 
-    public static final Marker DEFAULT = new Marker.Builder("DEFAULT_ID", Point.DEFAULT).build();
+    public static final Marker DEFAULT = new Marker.Builder("", Point.DEFAULT).build();
 
     private String id;
     private String title;
-    private String tag;
     private String description;
+    private List<String> tagList;
+    private String extension;
 
     protected Marker(Point position) {
         super(position);
@@ -22,8 +25,10 @@ public class Marker extends Location {
         super(builder);
         id = builder.id;
         title = builder.title == null ? "" : builder.title;
-        tag = builder.tag == null ? "" : builder.tag;
         description = builder.description == null ? "" : builder.description;
+
+        tagList = Collections.unmodifiableList(builder.tagList);
+        extension = builder.extension == null ? "" : builder.extension;
     }
 
     public String getId() {
@@ -34,12 +39,16 @@ public class Marker extends Location {
         return title;
     }
 
-    public String getTag() {
-        return tag;
-    }
-
     public String getDescription() {
         return description;
+    }
+
+    public List<String> getTagList() {
+        return tagList;
+    }
+
+    public String getExtension() {
+        return extension;
     }
 
     @Override
@@ -52,8 +61,11 @@ public class Marker extends Location {
 
         if (id != null ? !id.equals(marker.id) : marker.id != null) return false;
         if (title != null ? !title.equals(marker.title) : marker.title != null) return false;
-        if (tag != null ? !tag.equals(marker.tag) : marker.tag != null) return false;
-        return description != null ? description.equals(marker.description) : marker.description == null;
+        if (description != null ? !description.equals(marker.description) : marker.description != null)
+            return false;
+        if (tagList != null ? !tagList.equals(marker.tagList) : marker.tagList != null)
+            return false;
+        return extension != null ? extension.equals(marker.extension) : marker.extension == null;
     }
 
     @Override
@@ -61,8 +73,9 @@ public class Marker extends Location {
         int result = super.hashCode();
         result = 31 * result + (id != null ? id.hashCode() : 0);
         result = 31 * result + (title != null ? title.hashCode() : 0);
-        result = 31 * result + (tag != null ? tag.hashCode() : 0);
         result = 31 * result + (description != null ? description.hashCode() : 0);
+        result = 31 * result + (tagList != null ? tagList.hashCode() : 0);
+        result = 31 * result + (extension != null ? extension.hashCode() : 0);
         return result;
     }
 
@@ -70,12 +83,10 @@ public class Marker extends Location {
     public String toString() {
         return "Marker{" +
                 "id='" + id + '\'' +
-                "position=" + getPosition() +
-                ", z=" + getZ() +
-                ", rotation=" + getRotation() +
                 ", title='" + title + '\'' +
-                ", tag='" + tag + '\'' +
                 ", description='" + description + '\'' +
+                ", tagList=" + tagList +
+                ", extension='" + extension + '\'' +
                 '}';
     }
 
@@ -83,13 +94,14 @@ public class Marker extends Location {
 
         private String id;
         private String title;
-        private String tag;
         private String description;
+        private LinkedList<String> tagList = new LinkedList<>();
+        private String extension;
 
         public Builder(String id, Point position) {
             super(position);
-            if (TextUtils.isEmpty(id)) {
-                throw new IllegalArgumentException("Argument id is an empty string.");
+            if (id == null) {
+                throw new IllegalArgumentException("Argument id is null.");
             }
 
             this.id = id;
@@ -100,14 +112,66 @@ public class Marker extends Location {
             return this;
         }
 
-        public Builder setTag(String tag) {
-            this.tag = tag;
-            return this;
-        }
-
         public Builder setDescription(String description) {
             this.description = description;
             return this;
+        }
+
+        public Builder addTagList(List<String> tagList) {
+            if (tagList == null) {
+                throw new IllegalArgumentException("Argument tagList is null.");
+            }
+
+            this.tagList.addAll(tagList);
+            return this;
+        }
+
+        public Builder setTagList(List<String> tagList) {
+            if (tagList == null) {
+                throw new IllegalArgumentException("Argument tagList is null.");
+            }
+
+            this.tagList.clear();
+            this.tagList.addAll(tagList);
+            return this;
+        }
+
+        public Builder addTag(String tag) {
+            if (tag == null) {
+                throw new IllegalArgumentException("Argument tag is null.");
+            }
+
+            tagList.add(tag);
+            return this;
+        }
+
+        public Builder setTag(int index, String tag) {
+            if (index < 0 || index >= tagList.size()) {
+                throw new IllegalArgumentException("Index out of bounds.");
+            }
+            if (tag == null) {
+                throw new IllegalArgumentException("Argument tag is null.");
+            }
+
+            tagList.set(index, tag);
+            return this;
+        }
+
+        public Builder removeTag(int index) {
+            if (index < 0 || index >= tagList.size()) {
+                throw new IllegalArgumentException("Index out of bounds.");
+            }
+
+            tagList.remove(index);
+            return this;
+        }
+
+        public void setExtension(String extension) {
+            if (extension == null) {
+                throw new IllegalArgumentException("Argument extension is null.");
+            }
+
+            this.extension = extension;
         }
 
         @Override

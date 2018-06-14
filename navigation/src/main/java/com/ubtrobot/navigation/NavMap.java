@@ -19,6 +19,7 @@ public class NavMap {
     private float scale;
     private List<GroundOverlay> groundOverlayList;
     private List<Marker> markerList;
+    private List<Polyline> polylineList;
     private FileInfo navFile;
 
     private NavMap(String id, float scale) {
@@ -60,6 +61,20 @@ public class NavMap {
         return null;
     }
 
+    public List<Polyline> getPolylineList() {
+        return polylineList;
+    }
+
+    public Polyline getPolyline(String id) {
+        for (Polyline polyline : polylineList) {
+            if (polyline.getId().equals(id)) {
+                return polyline;
+            }
+        }
+
+        return null;
+    }
+
     public FileInfo getNavFile() {
         return navFile;
     }
@@ -77,6 +92,7 @@ public class NavMap {
                 ", scale=" + scale +
                 ", groundOverlayList=" + groundOverlayList +
                 ", markerList=" + markerList +
+                ", polylineList=" + polylineList +
                 ", navFile=" + navFile +
                 '}';
     }
@@ -91,6 +107,7 @@ public class NavMap {
 
         private List<GroundOverlay> groundOverlayList = new LinkedList<>();
         private LinkedList<Marker> markerList = new LinkedList<>();
+        private LinkedList<Polyline> polylineList = new LinkedList<>();
 
         public Builder(NavMap map) {
             if (map == null) {
@@ -104,7 +121,8 @@ public class NavMap {
             navFile = map.getNavFile();
 
             groundOverlayList.addAll(map.getGroundOverlayList());
-            this.markerList.addAll(map.getMarkerList());
+            markerList.addAll(map.getMarkerList());
+            polylineList.addAll(map.getPolylineList());
         }
 
         public Builder(String id, float scale) {
@@ -178,6 +196,55 @@ public class NavMap {
             return this;
         }
 
+        public Builder addPolylineList(List<Polyline> polylineList) {
+            if (polylineList == null) {
+                throw new IllegalArgumentException("Argument polylineList is null.");
+            }
+
+            this.polylineList.addAll(polylineList);
+            return this;
+        }
+
+        public Builder setPolylineList(List<Polyline> polylineList) {
+            if (polylineList == null) {
+                throw new IllegalArgumentException("Argument polylineList is null.");
+            }
+
+            this.polylineList.clear();
+            this.polylineList.addAll(polylineList);
+            return this;
+        }
+
+        public Builder addPolyline(Polyline polyline) {
+            if (polyline == null) {
+                throw new IllegalArgumentException("Argument polyline is null.");
+            }
+
+            polylineList.add(polyline);
+            return this;
+        }
+
+        public Builder setPolyline(int index, Polyline polyline) {
+            if (index < 0 || index >= polylineList.size()) {
+                throw new IllegalArgumentException("Index out of bounds.");
+            }
+            if (polyline == null) {
+                throw new IllegalArgumentException("Argument polyline is null.");
+            }
+
+            polylineList.set(index, polyline);
+            return this;
+        }
+
+        public Builder removePolyline(int index) {
+            if (index < 0 || index >= polylineList.size()) {
+                throw new IllegalArgumentException("Index out of bounds.");
+            }
+
+            polylineList.remove(index);
+            return this;
+        }
+
         public Builder addGroundOverlays(List<GroundOverlay> overlays) {
             if (overlays == null) {
                 throw new IllegalArgumentException("Argument overlays is null.");
@@ -224,6 +291,7 @@ public class NavMap {
             navMap.navFile = navFile == null ? FileInfo.DEFAULT : navFile;
             navMap.groundOverlayList = Collections.unmodifiableList(groundOverlayList);
             navMap.markerList = Collections.unmodifiableList(markerList);
+            navMap.polylineList = Collections.unmodifiableList(polylineList);
 
             return navMap;
         }
@@ -238,6 +306,7 @@ public class NavMap {
                     ", navFile=" + navFile +
                     ", groundOverlayList=" + groundOverlayList +
                     ", markerList=" + markerList +
+                    ", polylineList=" + polylineList +
                     '}';
         }
     }

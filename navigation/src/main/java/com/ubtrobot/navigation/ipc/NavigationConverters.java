@@ -12,6 +12,7 @@ import com.ubtrobot.navigation.NavMap;
 import com.ubtrobot.navigation.NavigateOption;
 import com.ubtrobot.navigation.Navigator;
 import com.ubtrobot.navigation.Point;
+import com.ubtrobot.navigation.Polyline;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -32,6 +33,10 @@ public class NavigationConverters {
 
         for (Marker marker : map.getMarkerList()) {
             builder.addMarker(toMarkerProto(marker));
+        }
+
+        for (Polyline polyline : map.getPolylineList()) {
+            builder.addPolyline(toPolylineProto(polyline));
         }
 
         return builder.build();
@@ -66,6 +71,29 @@ public class NavigationConverters {
                 build();
     }
 
+    private static NavigationProto.Polyline toPolylineProto(Polyline polyline) {
+        NavigationProto.Polyline.Builder builder = NavigationProto.Polyline.newBuilder()
+                .setId(polyline.getId()).setName(polyline.getName())
+                .setDescription(polyline.getDescription()).setExtension(polyline.getExtension());
+
+        for (Location location : polyline.getLocationList()) {
+            builder.addLocation(toLocationProto(location));
+        }
+
+        return builder.build();
+    }
+
+    private static Polyline toPolylinePojo(NavigationProto.Polyline polyline) {
+        Polyline.Builder builder = new Polyline.Builder(polyline.getId())
+                .setName(polyline.getName()).setDescription(polyline.getDescription())
+                .setExtension(polyline.getExtension());
+        for (NavigationProto.Location location : polyline.getLocationList()) {
+            builder.addLocation(toLocationPojo(location));
+        }
+
+        return builder.build();
+    }
+
     public static NavMap toNavMapPojo(NavigationProto.NavMap mapProto)
             throws InvalidProtocolBufferException {
         NavMap.Builder builder = new NavMap.Builder(mapProto.getId(), mapProto.getScale()).
@@ -78,6 +106,10 @@ public class NavigationConverters {
 
         for (NavigationProto.Marker marker : mapProto.getMarkerList()) {
             builder.addMarker(toMarkerPojo(marker));
+        }
+
+        for (NavigationProto.Polyline polyline : mapProto.getPolylineList()) {
+            builder.addPolyline(toPolylinePojo(polyline));
         }
 
         return builder.build();

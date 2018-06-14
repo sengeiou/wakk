@@ -43,7 +43,8 @@ message NavMap {
 
     repeated GroundOverlay ground_overlay = 5;
     repeated Marker marker = 6;
-    google.protobuf.Any navFile = 7;
+    repeated Polyline polyline = 7;
+    google.protobuf.Any navFile = 8;
 }
 
 message NavMapList {
@@ -56,6 +57,14 @@ message Location {
     Point position = 1;
     int32 z = 2;
     float rotation = 3;
+}
+
+message Polyline {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    repeated Location location = 4;
+    string extension = 5;
 }
 
 message LocateOption {

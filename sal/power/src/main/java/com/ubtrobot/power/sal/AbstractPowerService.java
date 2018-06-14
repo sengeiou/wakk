@@ -4,12 +4,16 @@ import android.os.Bundle;
 
 import com.ubtrobot.async.AsyncTask;
 import com.ubtrobot.async.DefaultPromise;
+import com.ubtrobot.async.InterruptibleAsyncTask;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.exception.AccessServiceException;
 import com.ubtrobot.master.Master;
+import com.ubtrobot.master.competition.InterruptibleTaskHelper;
 import com.ubtrobot.master.context.ContextRunnable;
 import com.ubtrobot.master.param.ProtoParam;
 import com.ubtrobot.power.BatteryProperties;
+import com.ubtrobot.power.ChargeException;
+import com.ubtrobot.power.ConnectOption;
 import com.ubtrobot.power.ShutdownOption;
 import com.ubtrobot.power.ipc.PowerConstants;
 import com.ubtrobot.power.ipc.PowerConverters;
@@ -18,10 +22,15 @@ import com.ubtrobot.ulog.FwLoggerFactory;
 import com.ubtrobot.ulog.Logger;
 
 import java.util.LinkedList;
+import java.util.Set;
 
 public abstract class AbstractPowerService implements PowerService {
 
     private static final Logger LOGGER = FwLoggerFactory.getLogger("AbstractPowerService");
+
+    private static final String TASK_RECEIVER_CHARGING_STATION_CONNECTION = "charging-station-connection";
+    private static final String TASK_NAME_CONNECT = "connect";
+    private static final String TASK_NAME_DISCONNECT = "disconnect";
 
     private static final String OP_SLEEP = "sleep";
     private static final String OP_WAKE_UP = "wake-up";
@@ -30,6 +39,8 @@ public abstract class AbstractPowerService implements PowerService {
 
     private DefaultPromise<Void, AccessServiceException> mShutdownPromise;
     private ShutdownOption mShutdownOption;
+
+    private final InterruptibleTaskHelper mInterruptibleTaskHelper = new InterruptibleTaskHelper();
 
     @Override
     public Promise<Boolean, AccessServiceException> sleep() {
@@ -250,6 +261,109 @@ public abstract class AbstractPowerService implements PowerService {
         if (!powerServiceStarted) {
             LOGGER.e("Publish sensor event failed. Pls start SensorSystemService first.");
         }
+    }
+
+    @Override
+    public Promise<Boolean, ChargeException> connectToChargingStation(final ConnectOption option) {
+        return mInterruptibleTaskHelper.start(
+                TASK_RECEIVER_CHARGING_STATION_CONNECTION,
+                TASK_NAME_CONNECT,
+                new InterruptibleAsyncTask<Boolean, ChargeException>() {
+                    @Override
+                    protected void onStart() {
+                        startConnectingToChargingStation(option);
+                    }
+
+                    @Override
+                    protected void onCancel() {
+                        stopConnectingToChargingStation();
+                    }
+                },
+                new InterruptibleTaskHelper.InterruptedExceptionCreator<ChargeException>() {
+                    @Override
+                    public ChargeException createInterruptedException(Set<String> interrupters) {
+                        return new ChargeException.Factory().interrupted("Interrupted by "
+                                + interrupters + ".");
+                    }
+                }
+        );
+    }
+
+    protected abstract void startConnectingToChargingStation(ConnectOption option);
+
+    protected abstract void stopConnectingToChargingStation();
+
+    protected boolean resolveConnectingToChargingStation(boolean disconnectedPrevious) {
+        return mInterruptibleTaskHelper.resolve(TASK_RECEIVER_CHARGING_STATION_CONNECTION,
+                TASK_NAME_CONNECT, disconnectedPrevious);
+    }
+
+    protected boolean rejectConnectingToChargingStation(ChargeException e) {
+        if (e == null) {
+            throw new IllegalArgumentException("Argument e is null.");
+        }
+
+        return mInterruptibleTaskHelper.reject(TASK_RECEIVER_CHARGING_STATION_CONNECTION,
+                TASK_NAME_CONNECT, e);
+    }
+
+    @Override
+    public Promise<Boolean, AccessServiceException> isConnectedToChargingStation() {
+        AsyncTask<Boolean, AccessServiceException> task =
+                createGettingIfConnectedToChargingStationTask();
+        if (task == null) {
+            throw new IllegalStateException("createGettingIfConnectedToChargingStationTask returns null.");
+        }
+
+        task.start();
+        return task.promise();
+    }
+
+    protected abstract AsyncTask<Boolean, AccessServiceException>
+    createGettingIfConnectedToChargingStationTask();
+
+    @Override
+    public Promise<Boolean, ChargeException> disconnectFromChargingStation() {
+        return mInterruptibleTaskHelper.start(
+                TASK_RECEIVER_CHARGING_STATION_CONNECTION,
+                TASK_NAME_DISCONNECT,
+                new InterruptibleAsyncTask<Boolean, ChargeException>() {
+                    @Override
+                    protected void onStart() {
+                        startDisconnectingFromChargingStation();
+                    }
+
+                    @Override
+                    protected void onCancel() {
+                        stopDisconnectingFromChargingStation();
+                    }
+                },
+                new InterruptibleTaskHelper.InterruptedExceptionCreator<ChargeException>() {
+                    @Override
+                    public ChargeException createInterruptedException(Set<String> interrupters) {
+                        return new ChargeException.Factory().interrupted("Interrupted by "
+                                + interrupters + ".");
+                    }
+                }
+        );
+    }
+
+    protected abstract void startDisconnectingFromChargingStation();
+
+    protected abstract void stopDisconnectingFromChargingStation();
+
+    protected boolean resolveDisconnectingFromChargingStation(boolean connectedPrevious) {
+        return mInterruptibleTaskHelper.resolve(TASK_RECEIVER_CHARGING_STATION_CONNECTION,
+                TASK_NAME_DISCONNECT, connectedPrevious);
+    }
+
+    protected boolean rejectDisconnectingFromChargingStation(ChargeException e) {
+        if (e == null) {
+            throw new IllegalArgumentException("Argument e is null.");
+        }
+
+        return mInterruptibleTaskHelper.reject(TASK_RECEIVER_CHARGING_STATION_CONNECTION,
+                TASK_NAME_DISCONNECT, e);
     }
 
     private abstract static class SleepWakeUpOperation implements Runnable {

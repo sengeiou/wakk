@@ -25,7 +25,7 @@ public class NavigationConverters {
     public static NavigationProto.NavMap toNavMapProto(NavMap map) {
         NavigationProto.NavMap.Builder builder = NavigationProto.NavMap.newBuilder().
                 setId(map.getId()).setName(map.getName()).
-                setTag(map.getTag()).setScale(map.getScale()).
+                setExtension(map.getExtension()).setScale(map.getScale()).
                 setNavFile(Any.pack(IoConverters.toFileInfoProto(map.getNavFile())));
         for (GroundOverlay groundOverlay : map.getGroundOverlayList()) {
             builder.addGroundOverlay(toGroundOverlayProto(groundOverlay));
@@ -45,7 +45,7 @@ public class NavigationConverters {
     private static NavigationProto.GroundOverlay toGroundOverlayProto(GroundOverlay groundOverlay) {
         return NavigationProto.GroundOverlay.newBuilder().
                 setName(groundOverlay.getName()).
-                setTag(groundOverlay.getTag()).
+                setType(groundOverlay.getType()).
                 setWidth(groundOverlay.getWidth()).
                 setHeight(groundOverlay.getHeight()).
                 setOriginInImage(toPointProto(groundOverlay.getOriginInImage())).
@@ -60,15 +60,17 @@ public class NavigationConverters {
     }
 
     private static NavigationProto.Marker toMarkerProto(Marker marker) {
-        return NavigationProto.Marker.newBuilder().
+        NavigationProto.Marker.Builder builder = NavigationProto.Marker.newBuilder().
                 setId(marker.getId()).
                 setTitle(marker.getTitle()).
-                setTag(marker.getTag()).
                 setDescription(marker.getDescription()).
                 setPosition(toPointProto(marker.getPosition())).
                 setZ(marker.getZ()).
-                setRotation(marker.getRotation()).
-                build();
+                setRotation(marker.getRotation());
+        for (String tag : marker.getTagList()) {
+            builder.addTag(tag);
+        }
+        return builder.build();
     }
 
     private static NavigationProto.Polyline toPolylineProto(Polyline polyline) {
@@ -97,7 +99,7 @@ public class NavigationConverters {
     public static NavMap toNavMapPojo(NavigationProto.NavMap mapProto)
             throws InvalidProtocolBufferException {
         NavMap.Builder builder = new NavMap.Builder(mapProto.getId(), mapProto.getScale()).
-                setName(mapProto.getName()).setTag(mapProto.getTag()).
+                setName(mapProto.getName()).setExtension(mapProto.getExtension()).
                 setNavFile(IoConverters.toFileInfoPojo(mapProto.getNavFile().
                         unpack(IoProto.FileInfo.class)));
         for (NavigationProto.GroundOverlay groundOverlay : mapProto.getGroundOverlayList()) {
@@ -121,7 +123,7 @@ public class NavigationConverters {
                 setWidth(groundOverlay.getWidth()).
                 setHeight(groundOverlay.getHeight()).
                 setName(groundOverlay.getName()).
-                setTag(groundOverlay.getTag()).
+                setType(groundOverlay.getType()).
                 setOriginInImage(toPointPojo(groundOverlay.getOriginInImage())).
                 setImage(IoConverters.toFileInfoPojo(groundOverlay.getImage().unpack(IoProto.FileInfo.class))).
                 build();
@@ -132,13 +134,15 @@ public class NavigationConverters {
     }
 
     private static Marker toMarkerPojo(NavigationProto.Marker marker) {
-        return new Marker.Builder(marker.getId(), toPointPojo(marker.getPosition())).
+        Marker.Builder builder = new Marker.Builder(marker.getId(), toPointPojo(marker.getPosition())).
                 setTitle(marker.getTitle()).
-                setTag(marker.getTag()).
                 setDescription(marker.getDescription()).
                 setZ(marker.getZ()).
-                setRotation(marker.getRotation()).
-                build();
+                setRotation(marker.getRotation());
+        for (String tag : marker.getTagList()) {
+            builder.addTag(tag);
+        }
+        return builder.build();
     }
 
     public static NavigationProto.NavMapList toNavMapListProto(List<NavMap> maps) {

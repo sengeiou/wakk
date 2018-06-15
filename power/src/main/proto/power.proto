@@ -17,3 +17,7 @@ message BatteryProperties {
     bool full = 5;
     int32 temperature = 6;
 }
+
+message  ConnectOption {
+    int32 timeout = 1;
+}

@@ -37,6 +37,32 @@ public class Polyline {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Polyline polyline = (Polyline) o;
+
+        if (id != null ? !id.equals(polyline.id) : polyline.id != null) return false;
+        if (name != null ? !name.equals(polyline.name) : polyline.name != null) return false;
+        if (description != null ? !description.equals(polyline.description) : polyline.description != null)
+            return false;
+        if (locationList != null ? !locationList.equals(polyline.locationList) : polyline.locationList != null)
+            return false;
+        return extension != null ? extension.equals(polyline.extension) : polyline.extension == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (description != null ? description.hashCode() : 0);
+        result = 31 * result + (locationList != null ? locationList.hashCode() : 0);
+        result = 31 * result + (extension != null ? extension.hashCode() : 0);
+        return result;
+    }
+
+    @Override
     public String toString() {
         return "Polyline{" +
                 "id='" + id + '\'' +
@@ -45,6 +71,10 @@ public class Polyline {
                 ", locationList=" + locationList +
                 ", extension='" + extension + '\'' +
                 '}';
+    }
+
+    public Builder toBuilder() {
+        return new Builder(this);
     }
 
     public static class Builder {
@@ -57,6 +87,14 @@ public class Polyline {
 
         public Builder(String id) {
             this.id = id;
+        }
+
+        public Builder(Polyline polyline) {
+            id = polyline.id;
+            name = polyline.name;
+            description = polyline.description;
+            locationList.addAll(polyline.locationList);
+            extension = polyline.extension;
         }
 
         public Builder setName(String name) {
@@ -94,6 +132,18 @@ public class Polyline {
             }
 
             locationList.add(location);
+            return this;
+        }
+
+        public Builder addLocation(int index, Location location) {
+            if (index < 0 || index > locationList.size()) {
+                throw new IllegalArgumentException("Index out of bounds.");
+            }
+            if (location == null) {
+                throw new IllegalArgumentException("Argument location is null.");
+            }
+
+            locationList.add(index, location);
             return this;
         }
 

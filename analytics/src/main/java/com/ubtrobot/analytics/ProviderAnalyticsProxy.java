@@ -23,24 +23,12 @@ public class ProviderAnalyticsProxy implements Analytics {
 
     @Override
     public void enable(boolean enable) {
-        checkProviderInstalled(mUri, mContentResolver);
-
-        Bundle bundle = new Bundle();
-        bundle.putBoolean(AnalyticsConstants.KEY_ENABLE, enable);
-        mContentResolver.call(mUri, AnalyticsConstants.CALL_METHOD_ENABLE, null, bundle);
+        throw new UnsupportedOperationException("Robot nonsupport enable(boolean enable).");
     }
 
     @Override
     public void setStrategy(Strategy strategy) {
-        if (strategy == null) {
-            return;
-        }
-
-        checkProviderInstalled(mUri, mContentResolver);
-
-        Bundle bundle = new Bundle();
-        bundle.putParcelable(AnalyticsConstants.KEY_STRATEGY, strategy);
-        mContentResolver.call(mUri, AnalyticsConstants.CALL_METHOD_SET_STRATEGY, null, bundle);
+        throw new UnsupportedOperationException("Robot nonsupport setStrategy(Strategy strategy).");
     }
 
     @Override
@@ -48,7 +36,8 @@ public class ProviderAnalyticsProxy implements Analytics {
         checkProviderInstalled(mUri, mContentResolver);
 
         Strategy strategy = null;
-        Bundle bundle = mContentResolver.call(mUri, AnalyticsConstants.CALL_METHOD_GET_STRATEGY, null, null);
+        Bundle bundle = mContentResolver.call(mUri,
+                AnalyticsConstants.CALL_METHOD_GET_STRATEGY, null, null);
 
         if (bundle != null) {
             bundle.setClassLoader(getClass().getClassLoader());

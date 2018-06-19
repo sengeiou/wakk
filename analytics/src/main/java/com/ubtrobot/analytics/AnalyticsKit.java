@@ -38,14 +38,8 @@ public class AnalyticsKit {
                 return;
             }
 
-            Class<Analytics> cls = getDelegateAnalyticsCls(AnalyticsConstants.DELEGATE_ANALYTICS_SERVICE_NAME);
-
-            if (cls != null) {
-                sAnalytics = new AnalyticsDelegate(cls);
-            } else {
-                ContentResolver resolver = context.getContentResolver();
-                sAnalytics = new ProviderAnalyticsProxy(resolver);
-            }
+            ContentResolver resolver = context.getContentResolver();
+            sAnalytics = new ProviderAnalyticsProxy(resolver);
         }
     }
 
@@ -55,38 +49,9 @@ public class AnalyticsKit {
         }
     }
 
-    private static Class<Analytics> getDelegateAnalyticsCls(String analyticsServiceName) {
-        if (analyticsServiceName == null || analyticsServiceName.length() == 0) {
-            return null;
-        }
-
-        Class<Analytics> cls;
-        try {
-            cls = (Class<Analytics>) Class.forName(analyticsServiceName);
-        } catch (ClassNotFoundException e) {
-            cls = null;
-        }
-
-        return cls;
-    }
-
-    public static void setStrategy(Strategy strategy) {
-        if (strategy == null) {
-            throw new IllegalArgumentException("Strategy is null.");
-        }
-
-        checkAnalytics();
-        sAnalytics.setStrategy(strategy);
-    }
-
     public static Strategy getStrategy() {
         checkAnalytics();
         return sAnalytics.getStrategy();
-    }
-
-    public static void enable(boolean enable) {
-        checkAnalytics();
-        sAnalytics.enable(enable);
     }
 
     public static void recordEvent(String eventId) {

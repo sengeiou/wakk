@@ -52,7 +52,6 @@ ext {
             speechVersion          : '0.5.0-SNAPSHOT',
             upgradeVersion         : '0.5.0-SNAPSHOT',
             upgradeSalImplVersion  : '0.5.0-SNAPSHOT',
-            wakeupVersion          : '0.5.0-SNAPSHOT',
             sensorVersion          : '0.5.0-SNAPSHOT',
             powerVersion           : '0.5.0-SNAPSHOT',
             initializationVersion  : '0.5.0-SNAPSHOT',
@@ -129,7 +128,6 @@ apply from: 'gradle/publish_speech.gradle'
 apply from: 'gradle/publish_upgrade.gradle'
 apply from: 'gradle/publish_sensor.gradle'
 apply from: 'gradle/publish_power.gradle'
-apply from: 'gradle/publish_wakeup.gradle'
 apply from: 'gradle/publish_initialization.gradle'
 
 apply from: 'gradle/publish_product_cruzr.gradle'

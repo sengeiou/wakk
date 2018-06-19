@@ -1,0 +1,48 @@
+project(':dance') {
+    artifactoryPublish.dependsOn('jarFramework')
+    publishing {
+        publications {
+            jarFramework(MavenPublication) {
+                groupId = rootProject.ext.groupId
+                artifactId = "dance"
+                version = rootProject.ext.versions.danceVersion
+
+                rootProject.ext.isSnapshot = version.toUpperCase().endsWith("-SNAPSHOT")
+
+                artifact("$buildDir/libs/dance.jar")
+                pom.withXml {
+                    def dependenciesNode = asNode().appendNode('dependencies')
+
+                    def dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.ubtrobot.framework')
+                    dependencyNode.appendNode('artifactId', 'commons')
+                    dependencyNode.appendNode('version', rootProject.ext.versions.commonsVersion)
+
+                    dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.ubtrobot.framework')
+                    dependencyNode.appendNode('artifactId', 'play')
+                    dependencyNode.appendNode('version', rootProject.ext.versions.playVersion)
+
+                    dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.ubtrobot.framework')
+                    dependencyNode.appendNode('artifactId', 'emotion')
+                    dependencyNode.appendNode('version', rootProject.ext.versions.emotionVersion)
+
+                    dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.ubtrobot.framework')
+                    dependencyNode.appendNode('artifactId', 'speech')
+                    dependencyNode.appendNode('version', rootProject.ext.versions.speechVersion)
+
+                    dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.ubtrobot.framework')
+                    dependencyNode.appendNode('artifactId', 'motion')
+                    dependencyNode.appendNode('version', rootProject.ext.versions.motionVersion)
+                }
+            }
+        }
+    }
+
+    artifactoryPublish {
+        publications(publishing.publications.jarFramework)
+    }
+}

@@ -35,3 +35,23 @@ dependencies {
     androidTestImplementation deps.espressoCore
     androidTestImplementation deps.runner
 }
+
+task jarFramework(
+        type: Jar,
+        dependsOn: ['assembleRelease']) {
+    archiveName = "dance.jar"
+
+    exclude('**/R.class')
+    exclude('**/R$*.class')
+    exclude('**/BuildConfig.class')
+    exclude('**/BuildConfig$*.class')
+    exclude('android/')
+
+    exclude('com/ubtrobot/commons/')
+    exclude('com/ubtrobot/emotion/')
+    exclude('com/ubtrobot/motion/')
+    exclude('com/ubtrobot/play/')
+    exclude('com/ubtrobot/speech/')
+
+    from 'build/intermediates/classes/release'
+}

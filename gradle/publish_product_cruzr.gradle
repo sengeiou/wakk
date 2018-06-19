@@ -71,6 +71,11 @@ project(':product:cruzr') {
                     dependencyNode.appendNode('groupId', 'com.ubtrobot.framework')
                     dependencyNode.appendNode('artifactId', 'play')
                     dependencyNode.appendNode('version', rootProject.ext.versions.playVersion)
+
+                    dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.ubtrobot.framework')
+                    dependencyNode.appendNode('artifactId', 'dance')
+                    dependencyNode.appendNode('version', rootProject.ext.versions.playVersion)
                 }
             }
         }

@@ -83,9 +83,6 @@ public class DanceManager {
     }
 
     public List<Dance> getDanceList() {
-        if (mDanceList.all().size() <= 0) {
-            throw new IllegalStateException("Pleases add dance.json");
-        }
         return mDanceList.all();
     }
 

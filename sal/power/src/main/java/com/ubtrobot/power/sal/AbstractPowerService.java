@@ -1,7 +1,5 @@
 package com.ubtrobot.power.sal;
 
-import android.os.Bundle;
-
 import com.ubtrobot.async.AsyncTask;
 import com.ubtrobot.async.DefaultPromise;
 import com.ubtrobot.async.InterruptibleAsyncTask;
@@ -14,7 +12,6 @@ import com.ubtrobot.master.param.ProtoParam;
 import com.ubtrobot.power.BatteryProperties;
 import com.ubtrobot.power.ChargeException;
 import com.ubtrobot.power.ConnectOption;
-import com.ubtrobot.power.ShutdownOption;
 import com.ubtrobot.power.ipc.PowerConstants;
 import com.ubtrobot.power.ipc.PowerConverters;
 import com.ubtrobot.power.ipc.master.PowerSystemService;
@@ -38,7 +35,6 @@ public abstract class AbstractPowerService implements PowerService {
     private final LinkedList<SleepWakeUpOperation> mSleepWakeUpOperationQueue = new LinkedList<>();
 
     private DefaultPromise<Void, AccessServiceException> mShutdownPromise;
-    private ShutdownOption mShutdownOption;
 
     private final InterruptibleTaskHelper mInterruptibleTaskHelper = new InterruptibleTaskHelper();
 
@@ -172,30 +168,21 @@ public abstract class AbstractPowerService implements PowerService {
     }
 
     @Override
-    public Promise<Void, AccessServiceException> shutdown(ShutdownOption option) {
+    public Promise<Void, AccessServiceException> shutdown() {
         synchronized (this) {
-            DefaultPromise<Void, AccessServiceException> shutdownPromise;
+            DefaultPromise<Void, AccessServiceException> ret = mShutdownPromise;
             if (mShutdownPromise == null) {
-                shutdownPromise = new DefaultPromise<>();
-                mShutdownPromise = shutdownPromise;
-                mShutdownOption = option;
+                mShutdownPromise = new DefaultPromise<>();
+                ret = mShutdownPromise;
 
-                startShutdown(option);
-                return shutdownPromise;
+                startShutdown();
             }
 
-            if (mShutdownOption.equals(option)) {
-                return mShutdownPromise;
-            }
-
-            shutdownPromise = new DefaultPromise<>();
-            shutdownPromise.reject(new AccessServiceException.Factory().
-                    forbidden("Already shutdowning.", new Bundle())); // 采用更好的错误消息
-            return shutdownPromise;
+            return ret;
         }
     }
 
-    protected abstract void startShutdown(ShutdownOption option);
+    protected abstract void startShutdown();
 
     protected boolean resolveShutdown() {
         synchronized (this) {
@@ -220,7 +207,6 @@ public abstract class AbstractPowerService implements PowerService {
 
             mShutdownPromise.reject(e);
             mShutdownPromise = null;
-            mShutdownOption = null;
             return true;
         }
     }

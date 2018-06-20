@@ -138,18 +138,12 @@ public class PowerSystemService extends MasterSystemService {
 
     @Call(path = PowerConstants.CALL_PATH_SHUTDOWN)
     public void onShutdown(Request request, Responder responder) {
-        final PowerProto.ShutdownOption shutdownOption;
-        if ((shutdownOption = ProtoParamParser.parseParam(
-                request, PowerProto.ShutdownOption.class, responder)) == null) {
-            return;
-        }
-
         mCallProcessor.onCall(
                 responder,
                 new CallProcessAdapter.Callable<Void, AccessServiceException>() {
                     @Override
                     public Promise<Void, AccessServiceException> call() throws CallException {
-                        return mService.shutdown(PowerConverters.toShutdownOptionPojo(shutdownOption));
+                        return mService.shutdown();
                     }
                 },
                 new ProtoCallProcessAdapter.FConverter<AccessServiceException>() {

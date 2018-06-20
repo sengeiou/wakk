@@ -107,13 +107,8 @@ public class PowerManager {
     }
 
     public Promise<Void, AccessServiceException> shutdown() {
-        return shutdown(ShutdownOption.DEFAULT);
-    }
-
-    public Promise<Void, AccessServiceException> shutdown(ShutdownOption option) {
         return mService.call(
                 PowerConstants.CALL_PATH_SHUTDOWN,
-                PowerConverters.toShutdownOptionProto(option),
                 new CallAdapter.FConverter<AccessServiceException>() {
                     @Override
                     public AccessServiceException convertFail(CallException e) {

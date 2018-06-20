@@ -5,7 +5,6 @@ import com.ubtrobot.exception.AccessServiceException;
 import com.ubtrobot.power.BatteryProperties;
 import com.ubtrobot.power.ChargeException;
 import com.ubtrobot.power.ConnectOption;
-import com.ubtrobot.power.ShutdownOption;
 
 public interface PowerService {
 
@@ -15,7 +14,7 @@ public interface PowerService {
 
     Promise<Boolean, AccessServiceException> wakeUp();
 
-    Promise<Void, AccessServiceException> shutdown(ShutdownOption shutdownOption);
+    Promise<Void, AccessServiceException> shutdown();
 
     Promise<BatteryProperties, AccessServiceException> getBatteryProperties();
 

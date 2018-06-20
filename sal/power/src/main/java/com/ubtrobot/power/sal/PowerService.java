@@ -16,6 +16,10 @@ public interface PowerService {
 
     Promise<Void, AccessServiceException> shutdown();
 
+    Promise<Void, AccessServiceException> scheduleStartup(int waitSecondsToStartup);
+
+    Promise<Boolean, AccessServiceException> cancelStartupSchedule();
+
     Promise<BatteryProperties, AccessServiceException> getBatteryProperties();
 
     Promise<Boolean, ChargeException> connectToChargingStation(ConnectOption option);

@@ -212,6 +212,33 @@ public abstract class AbstractPowerService implements PowerService {
     }
 
     @Override
+    public Promise<Void, AccessServiceException> scheduleStartup(int waitSecondsToStartup) {
+        AsyncTask<Void, AccessServiceException> task = createSchedulingStartupTask(waitSecondsToStartup);
+        if (task == null) {
+            throw new IllegalStateException("createSchedulingStartupTask returns null.");
+        }
+
+        task.start();
+        return task.promise();
+    }
+
+    protected abstract AsyncTask<Void, AccessServiceException>
+    createSchedulingStartupTask(int waitSecondsToStartup);
+
+    @Override
+    public Promise<Boolean, AccessServiceException> cancelStartupSchedule() {
+        AsyncTask<Boolean, AccessServiceException> task = createCancelingStartupScheduleTask();
+        if (task == null) {
+            throw new IllegalStateException("createCancelingStartupScheduleTask returns null.");
+        }
+
+        task.start();
+        return task.promise();
+    }
+
+    protected abstract AsyncTask<Boolean, AccessServiceException> createCancelingStartupScheduleTask();
+
+    @Override
     public Promise<BatteryProperties, AccessServiceException> getBatteryProperties() {
         AsyncTask<BatteryProperties, AccessServiceException> task
                 = createGettingBatteryPropertiesTask();

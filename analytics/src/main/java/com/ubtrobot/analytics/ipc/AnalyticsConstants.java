@@ -20,7 +20,6 @@ public class AnalyticsConstants {
     public static final String CUSTOM_EVENT = "custom_event";
     public static final String SHUTDOWN_EVENT_ID = "shutdown_event_id";
     public static final String SHUTDOWN_EVENT = "shutdown_event";
-    public static final String IS_SHUTDOWN = "isShutdown";
 
     public static final String EVENT_TYPE_ACTIVITY = "activity";                // 页面的类型：activity
     public static final String EVENT_TYPE_FRAGMENT = "fragment";                // 页面类型：fragment

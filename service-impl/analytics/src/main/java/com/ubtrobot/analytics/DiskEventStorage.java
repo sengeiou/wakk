@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -46,17 +45,31 @@ public class DiskEventStorage implements EventStorage {
 
     @Override
     public void writeEvents(List<Event> events) throws IOException {
+        LinkedList<EventTable> eventTables = new LinkedList<>();
+        for (Event event : events) {
+            eventTables.add(new EventTable().setEvent(event));
+        }
+        writeEventTables(eventTables);
+    }
+
+    public void writeEventTables(List<EventTable> events) throws IOException {
         synchronized (this) {
             SQLiteDatabase db = mHelper.getWritableDatabase();
             db.beginTransaction();
             try {
-                for (Event event : events) {
+                for (EventTable eventTable : events) {
+                    Event event = eventTable.getEvent();
                     ContentValues values = new ContentValues();
                     values.put(Scheme.EVENT_COLUMN_EVENT_ID, event.getEventId());
                     values.put(Scheme.EVENT_COLUMN_CATEGORY, event.getCategory());
+                    values.put(Scheme.EVENT_COLUMN_DURATION, event.getDuration());
                     values.put(Scheme.EVENT_COLUMN_RECORDED_AT, event.getRecordedAt());
-                    values.put(Scheme.EVENT_COLUMN_SEGMENTATION, mGson.toJson(event.getSegmentation()));
-                    values.put(Scheme.EVENT_COLUMN_CUSTOM_SEGMENTATION, mGson.toJson(event.getCustomSegmentation()));
+                    values.put(Scheme.EVENT_COLUMN_SEGMENTATION,
+                            mGson.toJson(event.getSegmentation()));
+                    values.put(Scheme.EVENT_COLUMN_CUSTOM_SEGMENTATION,
+                            mGson.toJson(event.getCustomSegmentation()));
+
+                    values.put(Scheme.EVENT_COLUMN_RAN_SHUTDOWN, eventTable.getRanShutdown());
 
                     db.insert(Scheme.TABLE_EVENT, null, values);
                 }
@@ -102,7 +115,7 @@ public class DiskEventStorage implements EventStorage {
                     Scheme.EVENT_COLUMN_ID + " asc", count + "");
             try {
                 while (cursor.moveToNext()) {
-                    events.add(getEvent(cursor));
+                    events.add(getEventTable(cursor).getEvent());
                 }
             } finally {
                 cursor.close();
@@ -112,20 +125,27 @@ public class DiskEventStorage implements EventStorage {
         }
     }
 
-    private Event getEvent(Cursor cursor) {
+    private EventTable getEventTable(Cursor cursor) {
         String eventId = cursor.getString(cursor.getColumnIndex(Scheme.EVENT_COLUMN_EVENT_ID));
         String category = cursor.getString(cursor.getColumnIndex(Scheme.EVENT_COLUMN_CATEGORY));
+        long duration = cursor.getLong(cursor.getColumnIndex(Scheme.EVENT_COLUMN_DURATION));
         long recordAt = cursor.getLong(cursor.getColumnIndex(Scheme.EVENT_COLUMN_RECORDED_AT));
         String segmentation = cursor.getString(
                 cursor.getColumnIndex(Scheme.EVENT_COLUMN_SEGMENTATION));
         String customSegmentation = cursor.getString(
                 cursor.getColumnIndex(Scheme.EVENT_COLUMN_CUSTOM_SEGMENTATION));
 
-        return new Event.Builder(eventId, category)
-                .setRecordedAt(recordAt)
-                .setSegmentation(readJson(segmentation))
-                .setCustomSegmentation(readJson(customSegmentation))
-                .build();
+        Event event = new Event.Builder(eventId, category).
+                setDuration(duration * 1000).
+                setRecordedAt(recordAt * 1000).
+                setSegmentation(readJson(segmentation)).
+                setCustomSegmentation(readJson(customSegmentation)).
+                build();
+
+        int ranShutdown = cursor.getInt(
+                cursor.getColumnIndex(Scheme.EVENT_COLUMN_RAN_SHUTDOWN));
+
+        return new EventTable().setEvent(event).setRanShutdown(ranShutdown);
     }
 
     private Map<String, String> readJson(String jsonString) {
@@ -166,10 +186,10 @@ public class DiskEventStorage implements EventStorage {
         }
     }
 
-    public List<Event> readShutdownEvents(int count) throws IOException {
+    public List<EventTable> readShutdownEvents(int count) throws IOException {
         synchronized (this) {
             SQLiteDatabase db = mHelper.getReadableDatabase();
-            LinkedList<Event> events = new LinkedList<>();
+            LinkedList<EventTable> events = new LinkedList<>();
             Cursor cursor = db.query(Scheme.TABLE_EVENT, null,
                     Scheme.EVENT_COLUMN_CATEGORY + " == ?",
                     new String[]{AnalyticsConstants.SHUTDOWN_EVENT},
@@ -177,7 +197,7 @@ public class DiskEventStorage implements EventStorage {
                     Scheme.EVENT_COLUMN_ID + " asc", count + "");
             try {
                 while (cursor.moveToNext()) {
-                    events.add(getEvent(cursor));
+                    events.add(getEventTable(cursor));
                 }
             } finally {
                 cursor.close();
@@ -187,24 +207,20 @@ public class DiskEventStorage implements EventStorage {
         }
     }
 
-    public void updateEvent(Event event) throws IOException {
+    public void updateShutdownEventDuration(Event event) throws IOException {
         synchronized (this) {
             SQLiteDatabase db = mHelper.getWritableDatabase();
             String sql = String.format("SELECT * FROM %s where %s = '%s' ORDER BY %s DESC LIMIT 1",
                     Scheme.TABLE_EVENT, Scheme.EVENT_COLUMN_CATEGORY,
                     AnalyticsConstants.SHUTDOWN_EVENT, Scheme.EVENT_COLUMN_RECORDED_AT);
-            long recordedAt = -1;
             Cursor cursor = db.rawQuery(sql, null);
+            EventTable exitEvent = null;
             if (cursor.moveToFirst()) {
-                Event existEvent = getEvent(cursor);
-                Log.i(TAG, "select event: " + existEvent.toString());
-                String isShutdown = existEvent.getCustomSegmentation().
-                        get(AnalyticsConstants.IS_SHUTDOWN);
-                boolean isUpdate = TextUtils.isEmpty(isShutdown) || isShutdown.equals("false");
-                recordedAt = isUpdate ? existEvent.getRecordedAt() : -1;
+                exitEvent = getEventTable(cursor);
             }
 
-            if (recordedAt <= 0) {
+            if (exitEvent == null || exitEvent.causedByRanShutdown()) {
+                Log.i(TAG, "写入开机时长事件");
                 writeEvent(event);
                 return;
             }
@@ -213,10 +229,9 @@ public class DiskEventStorage implements EventStorage {
                     "UPDATE %s SET %s = '%s', %s = '%s' WHERE %s = '%s' AND %s = '%s'",
                     Scheme.TABLE_EVENT,
                     Scheme.EVENT_COLUMN_RECORDED_AT, event.getRecordedAt(),
-                    Scheme.EVENT_COLUMN_CUSTOM_SEGMENTATION,
-                    mGson.toJson(event.getCustomSegmentation()),
-                    Scheme.EVENT_COLUMN_RECORDED_AT, recordedAt,
-                    Scheme.EVENT_COLUMN_CATEGORY, AnalyticsConstants.SHUTDOWN_EVENT);
+                    Scheme.EVENT_COLUMN_DURATION, event.getDuration(),
+                    Scheme.EVENT_COLUMN_RECORDED_AT, exitEvent.getEvent().getRecordedAt(),
+                    Scheme.EVENT_COLUMN_DURATION, exitEvent.getEvent().getDuration());
             Log.i("cj", "update sql: " + updateSql);
             db.execSQL(updateSql);
         }
@@ -231,11 +246,12 @@ public class DiskEventStorage implements EventStorage {
         static final String EVENT_COLUMN_ID = "id";
         static final String EVENT_COLUMN_EVENT_ID = "event_id";
         static final String EVENT_COLUMN_CATEGORY = "category";
+        static final String EVENT_COLUMN_DURATION = "duration";
         static final String EVENT_COLUMN_RECORDED_AT = "recorded_at";
         static final String EVENT_COLUMN_SEGMENTATION = "segmentation";
         static final String EVENT_COLUMN_CUSTOM_SEGMENTATION = "custom_segmentation";
+        static final String EVENT_COLUMN_RAN_SHUTDOWN = "ran_shutdown";
     }
-
 
     private static class UAnalyticsDBHelper extends SQLiteOpenHelper {
 
@@ -249,9 +265,11 @@ public class DiskEventStorage implements EventStorage {
                     + Scheme.EVENT_COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                     + Scheme.EVENT_COLUMN_EVENT_ID + " VARCHAR(32),"
                     + Scheme.EVENT_COLUMN_CATEGORY + " VARCHAR(32),"
+                    + Scheme.EVENT_COLUMN_DURATION + " INTEGER,"
                     + Scheme.EVENT_COLUMN_RECORDED_AT + " INTEGER,"
                     + Scheme.EVENT_COLUMN_SEGMENTATION + " VARCHAR,"
-                    + Scheme.EVENT_COLUMN_CUSTOM_SEGMENTATION + " VARCHAR"
+                    + Scheme.EVENT_COLUMN_CUSTOM_SEGMENTATION + " VARCHAR,"
+                    + Scheme.EVENT_COLUMN_RAN_SHUTDOWN + " INTEGER"
                     + ")";
 
             sqLiteDatabase.execSQL(createTable);
@@ -262,4 +280,5 @@ public class DiskEventStorage implements EventStorage {
             // Nothing
         }
     }
+
 }

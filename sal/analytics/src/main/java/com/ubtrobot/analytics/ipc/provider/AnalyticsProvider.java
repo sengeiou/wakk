@@ -34,8 +34,7 @@ public class AnalyticsProvider extends ContentProvider {
         Application application = (Application) context.getApplicationContext();
 
         if (!(application instanceof AnalyticsFactory)) {
-//            throw new IllegalStateException("Your application implements com.ubtrobot.analytics.sal.AnalyticsFactory.");
-            return null;
+            throw new IllegalStateException("Your application implements com.ubtrobot.analytics.sal.AnalyticsFactory.");
         }
 
         AnalyticsFactory factory = (AnalyticsFactory) application;

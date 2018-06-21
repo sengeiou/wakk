@@ -3,7 +3,6 @@ package com.ubtrobot.analytics;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.text.TextUtils;
 
 import com.ubtrobot.analytics.ipc.AnalyticsConstants;
 
@@ -54,36 +53,25 @@ public class AnalyticsKit {
 
     public static void recordEvent(
             String eventId, long duration, Map<String, String> segmentation) {
+        if (eventId == null || eventId.length() <= 0 ||
+                eventId.length() > AnalyticsConstants.ID_MAX_LENGTH) {
+            throw new IllegalArgumentException("Argument need 0 < eventId.length <= 64.");
+        }
         if (duration < 0) {
             throw new IllegalArgumentException("Argument duration < 0.");
         }
 
-        String startTimeMillisKey = "startTimeMillis";
-        segmentation = segmentation == null ? new HashMap<String, String>() : segmentation;
+        checkAnalytics();
 
-        if (!TextUtils.isEmpty(segmentation.get(startTimeMillisKey))) {
-            throw new IllegalArgumentException("Argument segmentation key exist startTimeMillis.");
-        }
-
-        long currentTimeMillis = System.currentTimeMillis();
-        long startTimeMillis = currentTimeMillis - duration;
-        segmentation.put("startTimeMillis", String.valueOf(startTimeMillis / 1000));
-
-        recordEvent(eventId, segmentation);
+        sAnalytics.recordEvent(new Event.Builder(
+                eventId, AnalyticsConstants.CUSTOM_EVENT).
+                setCustomSegmentation(segmentation).
+                setDuration(duration).
+                build());
     }
 
     public static void recordEvent(String eventId, Map<String, String> segmentation) {
-        checkAnalytics();
-
-        if (eventId == null || eventId.length() <= 0 ||
-                eventId.length() > AnalyticsConstants.ID_MAX_LENGTH) {
-            throw new IllegalArgumentException("Illegal id argument. 0 < id.length <= 64.");
-        }
-
-        Event event = new Event.Builder(eventId, AnalyticsConstants.CUSTOM_EVENT).
-                setCustomSegmentation(segmentation).build();
-
-        sAnalytics.recordEvent(event);
+        recordEvent(eventId, 0, segmentation);
     }
 
     public static void recordActivityStart(Activity activity) {

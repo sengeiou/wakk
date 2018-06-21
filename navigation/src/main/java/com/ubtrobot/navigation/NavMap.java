@@ -1,7 +1,5 @@
 package com.ubtrobot.navigation;
 
-import android.text.TextUtils;
-
 import com.ubtrobot.cache.CachedField;
 import com.ubtrobot.io.FileInfo;
 
@@ -171,12 +169,16 @@ public class NavMap {
         }
 
         public Builder(String id, float scale) {
-            if (TextUtils.isEmpty(id) || scale <= 0) {
-                throw new IllegalArgumentException("Argument id is an empty string or scale <= 0.");
+            if (scale <= 0) {
+                throw new IllegalArgumentException("Argument scale <= 0.");
             }
 
             this.id = id;
             this.scale = scale;
+        }
+
+        public Builder(float scale) {
+            this(null, scale);
         }
 
         public Builder setName(String name) {
@@ -386,7 +388,7 @@ public class NavMap {
         }
 
         public NavMap build() {
-            NavMap navMap = new NavMap(id, scale);
+            NavMap navMap = new NavMap(id == null ? "" : id, scale);
             navMap.name = name == null ? "" : name;
             navMap.navFile = navFile == null ? FileInfo.DEFAULT : navFile;
             navMap.extension = extension == null ? "" : extension;

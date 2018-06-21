@@ -4,6 +4,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.google.protobuf.BoolValue;
+import com.google.protobuf.Int32Value;
 import com.ubtrobot.async.Consumer;
 import com.ubtrobot.async.ListenerList;
 import com.ubtrobot.async.Promise;
@@ -107,14 +108,48 @@ public class PowerManager {
     }
 
     public Promise<Void, AccessServiceException> shutdown() {
-        return shutdown(ShutdownOption.DEFAULT);
-    }
-
-    public Promise<Void, AccessServiceException> shutdown(ShutdownOption option) {
         return mService.call(
                 PowerConstants.CALL_PATH_SHUTDOWN,
-                PowerConverters.toShutdownOptionProto(option),
                 new CallAdapter.FConverter<AccessServiceException>() {
+                    @Override
+                    public AccessServiceException convertFail(CallException e) {
+                        return new AccessServiceException.Factory().from(e);
+                    }
+                }
+        );
+    }
+
+    public Promise<Void, AccessServiceException> scheduleStartup(int waitSecondsToStartup) {
+        if (waitSecondsToStartup <= 0) {
+            throw new IllegalArgumentException("Argument waitSecondsToStartup <= 0.");
+        }
+
+        return mService.call(
+                PowerConstants.CALL_PATH_SCHEDULE_STARTUP,
+                Int32Value.newBuilder().setValue(waitSecondsToStartup).build(),
+                new CallAdapter.FConverter<AccessServiceException>() {
+                    @Override
+                    public AccessServiceException convertFail(CallException e) {
+                        return new AccessServiceException.Factory().from(e);
+                    }
+                }
+        );
+    }
+
+    public Promise<Boolean, AccessServiceException> cancelStartupSchedule() {
+        return mService.call(
+                PowerConstants.CALL_PATH_CANCEL_STARTUP,
+                new ProtoCallAdapter.DFProtoConverter<Boolean, BoolValue, AccessServiceException>() {
+                    @Override
+                    public Class<BoolValue> doneProtoClass() {
+                        return BoolValue.class;
+                    }
+
+                    @Override
+                    public Boolean convertDone(BoolValue taskScheduled) throws Exception {
+                        return taskScheduled.getValue();
+                    }
+
                     @Override
                     public AccessServiceException convertFail(CallException e) {
                         return new AccessServiceException.Factory().from(e);

@@ -31,7 +31,7 @@ public class AnalyticsServiceImpl implements Analytics {
     private Executor mExecutor;
     private Strategy mStrategy;
     private MemEventStorage mMemStorage;
-    private EventStorage mDiskStorage;
+    private DiskEventStorage mDiskStorage;
     private EventReporter mReporter;
     private boolean mEnable = true;
 
@@ -267,5 +267,4 @@ public class AnalyticsServiceImpl implements Analytics {
             }
         }
     }
-
 }

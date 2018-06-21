@@ -14,10 +14,12 @@ public class PlatformAnalyticsService implements AnalyticsService {
     private static final String TAG = "PlatformAnalyticsService";
 
     private AnalyticsServiceImpl mAnalyticsService;
+    private ShutdownAnalyticsService mShutdownAnalyticsService;
 
     public PlatformAnalyticsService(Context context, Executor executor,
                                     String appId, String appKey, String deviceId) {
         mAnalyticsService = new AnalyticsServiceImpl(context, executor, appId, appKey, deviceId);
+        mShutdownAnalyticsService = new ShutdownAnalyticsService(context, appId, appKey, deviceId);
     }
 
     @Override
@@ -39,4 +41,10 @@ public class PlatformAnalyticsService implements AnalyticsService {
     public void recordEvent(Event event) {
         mAnalyticsService.recordEvent(event);
     }
+
+    @Override
+    public void reportShutdownEvent() {
+        mShutdownAnalyticsService.reportShutdownEvent();
+    }
+
 }

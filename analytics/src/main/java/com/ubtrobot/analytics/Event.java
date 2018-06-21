@@ -131,6 +131,15 @@ public class Event implements Parcelable {
             return this;
         }
 
+        public Builder toBuild(Event event) {
+            this.eventId = event.getEventId();
+            this.category = event.getCategory();
+            this.recordedAt = event.getRecordedAt();
+            this.segmentation = event.getSegmentation();
+            this.customSegmentation = event.getCustomSegmentation();
+            return this;
+        }
+
         public Event build() {
             Event event = new Event(eventId, category);
             event.recordedAt = recordedAt;

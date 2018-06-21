@@ -3,6 +3,7 @@ package com.ubtrobot.analytics;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.text.TextUtils;
 
 import com.ubtrobot.analytics.ipc.AnalyticsConstants;
 
@@ -45,6 +46,30 @@ public class AnalyticsKit {
 
     public static void recordEvent(String eventId) {
         recordEvent(eventId, null);
+    }
+
+    public static void recordEvent(String eventId, long duration) {
+        recordEvent(eventId, duration, null);
+    }
+
+    public static void recordEvent(
+            String eventId, long duration, Map<String, String> segmentation) {
+        if (duration < 0) {
+            throw new IllegalArgumentException("Argument duration < 0.");
+        }
+
+        String startTimeMillisKey = "startTimeMillis";
+        segmentation = segmentation == null ? new HashMap<String, String>() : segmentation;
+
+        if (!TextUtils.isEmpty(segmentation.get(startTimeMillisKey))) {
+            throw new IllegalArgumentException("Argument segmentation key exist startTimeMillis.");
+        }
+
+        long currentTimeMillis = System.currentTimeMillis();
+        long startTimeMillis = currentTimeMillis - duration;
+        segmentation.put("startTimeMillis", String.valueOf(startTimeMillis / 1000));
+
+        recordEvent(eventId, segmentation);
     }
 
     public static void recordEvent(String eventId, Map<String, String> segmentation) {

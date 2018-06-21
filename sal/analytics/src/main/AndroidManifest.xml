@@ -12,5 +12,11 @@
             android:exported="true"
             android:permission="com.ubtrobot.analytics.permissions.ANALYTICS" />
 
+        <receiver android:name="com.ubtrobot.analytics.receiver.ShutdownReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.ACTION_SHUTDOWN" />
+                <category android:name="android.intent.category.HOME" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>

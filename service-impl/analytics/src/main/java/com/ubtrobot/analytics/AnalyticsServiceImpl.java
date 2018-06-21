@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 public class AnalyticsServiceImpl implements Analytics {
 
-    private static final String TAG = "AnalyticsServiceImpl";
+    private static final String TAG = "Analytics";
 
     private static final int COUNT_PER_SAVE = 5;
     private static final int COUNT_PER_REPORT = 8;
@@ -148,6 +148,11 @@ public class AnalyticsServiceImpl implements Analytics {
         synchronized (mReportLock) {
             do {
                 List<Event> events = getEventListDiskStorage();
+                Log.i(TAG, "/--------上报-------");
+                for (Event event : events) {
+                    Log.i(TAG, event.toString());
+                }
+                Log.i(TAG, "---------------/");
                 if (events.size() < COUNT_PER_REPORT) {
                     return;
                 }

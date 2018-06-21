@@ -55,7 +55,6 @@ public class Segment<O> {
     }
 
     public static class Builder<O> extends GenericBuilder<O, Builder<O>> {
-
     }
 
     protected static class GenericBuilder<O, T extends GenericBuilder<O, T>> {
@@ -66,6 +65,17 @@ public class Segment<O> {
         private long duration;
         private boolean blank;
         private O option;
+
+        @SuppressWarnings("unchecked")
+        public T setSegment(Segment<O> segment) {
+            this.name = segment.getName();
+            this.description = segment.getDescription();
+            this.loops = segment.getLoops();
+            this.duration = segment.getDuration();
+            this.blank = segment.isBlank();
+            this.option = segment.getOption();
+            return (T) this;
+        }
 
         @SuppressWarnings("unchecked")
         public T setName(String name) {

@@ -1,0 +1,57 @@
+apply plugin: 'com.android.library'
+
+android {
+    def sdk = rootProject.ext.sdk
+    compileSdkVersion sdk.compileSdkVersion
+
+    defaultConfig {
+        minSdkVersion sdk.minSdkVersion
+        targetSdkVersion sdk.targetSdkVersion
+
+        testInstrumentationRunner "android.support.play.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    implementation project(':commons')
+    implementation project(':motion')
+    implementation project(':emotion')
+    implementation project(':play')
+    implementation project(':speech')
+
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+
+    def deps = rootProject.ext.deps
+    implementation deps.appcompat
+
+    testImplementation deps.junit
+    androidTestImplementation deps.espressoCore
+    androidTestImplementation deps.runner
+}
+
+task jarFramework(
+        type: Jar,
+        dependsOn: ['assembleRelease']) {
+    archiveName = "dance.jar"
+
+    exclude('**/R.class')
+    exclude('**/R$*.class')
+    exclude('**/BuildConfig.class')
+    exclude('**/BuildConfig$*.class')
+    exclude('android/')
+
+    exclude('com/ubtrobot/commons/')
+    exclude('com/ubtrobot/emotion/')
+    exclude('com/ubtrobot/motion/')
+    exclude('com/ubtrobot/play/')
+    exclude('com/ubtrobot/speech/')
+
+    from 'build/intermediates/classes/release'
+}

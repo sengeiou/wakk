@@ -1,14 +1,22 @@
 package com.ubtrobot.speech;
 
 import android.os.Handler;
+import android.os.Looper;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.TextUtils;
 
 import com.google.protobuf.BoolValue;
+import com.google.protobuf.Int32Value;
+import com.ubtrobot.async.Consumer;
+import com.ubtrobot.async.ListenerList;
 import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.master.adapter.ProtoCallAdapter;
+import com.ubtrobot.master.adapter.ProtoEventReceiver;
 import com.ubtrobot.master.competition.Competing;
 import com.ubtrobot.master.competition.CompetingItem;
 import com.ubtrobot.master.competition.CompetitionSession;
+import com.ubtrobot.master.context.MasterContext;
 import com.ubtrobot.speech.ipc.SpeechConstant;
 import com.ubtrobot.speech.ipc.SpeechConverters;
 import com.ubtrobot.speech.ipc.SpeechProto;
@@ -24,12 +32,18 @@ public class Recognizer implements Competing {
     private static final Logger LOGGER = FwLoggerFactory.getLogger("Recognizer");
 
     private final ProtoCallAdapter mSpeechService;
-
+    private final ListenerList<RecognizeListener> mListener;
     private Handler mHandler;
+    private final MasterContext mMasterContext;
+    private boolean mHasSubscribed = false;
+    private final byte[] mSubscribeLock = new byte[0];
 
-    public Recognizer(ProtoCallAdapter speechService, Handler handler) {
+    public Recognizer(ProtoCallAdapter speechService, Handler handler,
+            MasterContext masterContext) {
         mSpeechService = speechService;
         mHandler = handler;
+        mMasterContext = masterContext;
+        mListener = new ListenerList<>(new Handler(Looper.getMainLooper()));
     }
 
     @Override
@@ -73,10 +87,153 @@ public class Recognizer implements Competing {
                     }
 
                     @Override
-                    public RecognizingProgress convertProgress(SpeechProto.RecognizingProgress progress) {
+                    public RecognizingProgress convertProgress(
+                            SpeechProto.RecognizingProgress progress) {
                         return SpeechConverters.toRecognizingProgressPojo(progress);
                     }
                 });
+    }
+
+    public void registerRecognizeListener(RecognizeListener listener) {
+        mListener.register(listener);
+        synchronized (mSubscribeLock) {
+            if (!mListener.isEmpty() && !mHasSubscribed) {
+                mHasSubscribed = true;
+                subscribeEventReceiver();
+            }
+        }
+
+    }
+
+
+    public void unregisterRecognizeListener(RecognizeListener listener) {
+        mListener.unregister(listener);
+        synchronized (mSubscribeLock) {
+            if (mListener.isEmpty() && mHasSubscribed) {
+                mHasSubscribed = false;
+                unSubscribeEventReceiver();
+            }
+        }
+    }
+
+    private void subscribeEventReceiver() {
+        mMasterContext.subscribe(mProgressEventReceiver, SpeechConstant.ACTION_RECOGNIZING);
+        mMasterContext.subscribe(mResultEventReceiver, SpeechConstant.ACTION_RECOGNIZE_RESULT);
+        mMasterContext.subscribe(mExceptionEventReceiver, SpeechConstant.ACTION_RECOGNIZE_ERROR);
+    }
+
+    private void unSubscribeEventReceiver() {
+        mMasterContext.unsubscribe(mProgressEventReceiver);
+        mMasterContext.unsubscribe(mResultEventReceiver);
+        mMasterContext.unsubscribe(mExceptionEventReceiver);
+
+    }
+
+    private final ProtoEventReceiver<SpeechProto.RecognizeResult> mResultEventReceiver =
+            new ProtoEventReceiver<SpeechProto.RecognizeResult>() {
+
+                @Override
+                public void onReceive(MasterContext masterContext, String action,
+                        SpeechProto.RecognizeResult event) {
+                    notifyRecognzieComplete(SpeechConverters.toRecognizeResultPojo(event));
+                }
+
+                @Override
+                protected Class<SpeechProto.RecognizeResult> protoClass() {
+                    return SpeechProto.RecognizeResult.class;
+
+                }
+            };
+
+    private final ProtoEventReceiver<SpeechProto.RecognizingProgress> mProgressEventReceiver =
+            new ProtoEventReceiver<SpeechProto.RecognizingProgress>() {
+
+                @Override
+                public void onReceive(MasterContext masterContext, String action,
+                        SpeechProto.RecognizingProgress event) {
+                    RecognizingProgress progress = SpeechConverters.toRecognizingProgressPojo(
+                            event);
+                    switch (progress.getState()) {
+                        case RecognizingProgress.STATE_BEGAN:
+                            notifyRecognzieBegin();
+                            break;
+                        case RecognizingProgress.STATE_RECOGNIZING:
+                            notifyRecognzing(progress);
+                            break;
+                        case RecognizingProgress.STATE_ENDED:
+                            notifyRecognzieEnd();
+                            break;
+                        case RecognizingProgress.STATE_RESULT:
+                            //里面带有识别的中间数据
+                            notifyRecognzing(progress);
+                            break;
+                    }
+                }
+
+                @Override
+                protected Class<SpeechProto.RecognizingProgress> protoClass() {
+                    return SpeechProto.RecognizingProgress.class;
+                }
+            };
+    private final ProtoEventReceiver<SpeechProto.Error> mExceptionEventReceiver =
+            new ProtoEventReceiver<SpeechProto.Error>() {
+
+                @Override
+                public void onReceive(MasterContext masterContext, String action,
+                        SpeechProto.Error event) {
+
+                }
+
+                @Override
+                protected Class<SpeechProto.Error> protoClass() {
+                    return SpeechProto.Error.class;
+
+                }
+            };
+
+    private void notifyRecognzieBegin() {
+        mListener.forEach(new Consumer<RecognizeListener>() {
+            @Override
+            public void accept(RecognizeListener listener) {
+                listener.onRecognizeBegin();
+            }
+        });
+    }
+
+    private void notifyRecognzing(final RecognizingProgress progress) {
+        mListener.forEach(new Consumer<RecognizeListener>() {
+            @Override
+            public void accept(RecognizeListener listener) {
+                listener.onRecognizing(progress);
+            }
+        });
+    }
+
+    private void notifyRecognzieEnd() {
+        mListener.forEach(new Consumer<RecognizeListener>() {
+            @Override
+            public void accept(RecognizeListener listener) {
+                listener.onRecognizeEnd();
+            }
+        });
+    }
+
+    private void notifyRecognzieError(final RecognizeException e) {
+        mListener.forEach(new Consumer<RecognizeListener>() {
+            @Override
+            public void accept(RecognizeListener listener) {
+                listener.OnRecognizeError(e);
+            }
+        });
+    }
+
+    private void notifyRecognzieComplete(final RecognizeResult result) {
+        mListener.forEach(new Consumer<RecognizeListener>() {
+            @Override
+            public void accept(RecognizeListener listener) {
+                listener.onRecognizeComplete(result);
+            }
+        });
     }
 
     public boolean isRecognizing() {
@@ -163,7 +320,8 @@ public class Recognizer implements Competing {
 
             private void checkResult(RecognizeResult result) {
                 if (null == result) {
-                    throw new IllegalArgumentException("RecognizingProgress.Builder refuse null RecognizeResult.");
+                    throw new IllegalArgumentException(
+                            "RecognizingProgress.Builder refuse null RecognizeResult.");
                 }
             }
 
@@ -176,23 +334,56 @@ public class Recognizer implements Competing {
         }
     }
 
-    public static class RecognizeResult {
+    public static class RecognizeResult implements Parcelable {
+        public static final RecognizeResult NULL = new RecognizeResult.Builder("").build();
 
-        private String text;
+        private String text = "";
 
         private RecognizeResult(String text) {
             this.text = text;
+        }
+
+        private RecognizeResult(Parcel in) {
+            readFromParcel(in);
         }
 
         public String getText() {
             return text;
         }
 
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(text);
+        }
+
+        @SuppressWarnings("unchecked")
+        private void readFromParcel(Parcel in) {
+            text = in.readString();
+        }
+
+        public static final Parcelable.Creator<RecognizeResult> CREATOR = new Parcelable
+                .Creator<RecognizeResult>() {
+            @Override
+            public RecognizeResult createFromParcel(Parcel source) {
+                return new RecognizeResult(source);
+            }
+
+            @Override
+            public RecognizeResult[] newArray(int size) {
+                return new RecognizeResult[size];
+            }
+        };
+
         public static class Builder {
             private String text;
 
             public Builder(String text) {
-                checkText(text);
+                //checkText(text);
                 this.text = text;
             }
 

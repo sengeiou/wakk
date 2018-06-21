@@ -47,8 +47,8 @@ public class EmotionConverters {
                 new EmotionResource.Builder(
                         emotionProto.getResource().getPackageName(),
                         emotionProto.getResource().getNameResource(),
-                        emotionProto.getResource().getIconUri(),
-                        emotionProto.getResource().getName()
+                        emotionProto.getResource().getName(),
+                        emotionProto.getResource().getIconUri()
                 ).build()
         );
     }

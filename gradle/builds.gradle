@@ -64,6 +64,7 @@ ext {
     ]
 
     groupId = 'com.ubtrobot.framework'
+    mobileGroupId = 'com.ubtrobot.mobile'
 
     sdk = [
             compileSdkVersion: 26,

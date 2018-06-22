@@ -26,19 +26,20 @@ public class MusicSegmentPlayer extends AbstractSegmentPlayer<MusicSegmentPlayer
 
     @Override
     protected void onLoopStart(MusicOption option) {
-        LOGGER.w("Music Start:" + option.toString());
+        LOGGER.w("Music onLoopStart:" + option.toString());
         mPlay.play(option.getPath(), this, 10, false);
     }
 
     @Override
     protected void onLoopStop() {
-        LOGGER.w("Music stp.");
-        notifyLoopStopped();
+        LOGGER.w("Music onLoopStop.");
+//        notifyLoopStopped();
         mPlay.stop();
     }
 
     @Override
     protected void onEnd() {
+        LOGGER.w("Music onEnd.");
         mPlay.stop();
     }
 

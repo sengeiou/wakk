@@ -52,9 +52,11 @@ ext {
             speechVersion          : '0.5.0-SNAPSHOT',
             upgradeVersion         : '0.5.0-SNAPSHOT',
             upgradeSalImplVersion  : '0.5.0-SNAPSHOT',
-            wakeupVersion          : '0.5.0-SNAPSHOT',
+            sensorVersion          : '0.5.0-SNAPSHOT',
+            powerVersion           : '0.5.0-SNAPSHOT',
             initializationVersion  : '0.5.0-SNAPSHOT',
             playVersion            : '0.5.0-SNAPSHOT',
+            danceVersion           : '0.5.0-SNAPSHOT',
 
             sampleVersionCode      : 1,
             sampleVersionName      : '0.0.1',
@@ -64,6 +66,7 @@ ext {
     ]
 
     groupId = 'com.ubtrobot.framework'
+    mobileGroupId = 'com.ubtrobot.mobile'
 
     sdk = [
             compileSdkVersion: 26,
@@ -126,9 +129,11 @@ apply from: 'gradle/publish_motion.gradle'
 apply from: 'gradle/publish_navigation.gradle'
 apply from: 'gradle/publish_speech.gradle'
 apply from: 'gradle/publish_upgrade.gradle'
-apply from: 'gradle/publish_wakeup.gradle'
+apply from: 'gradle/publish_sensor.gradle'
+apply from: 'gradle/publish_power.gradle'
 apply from: 'gradle/publish_initialization.gradle'
 apply from: 'gradle/publish_play.gradle'
+apply from: 'gradle/publish_dance.gradle'
 
 apply from: 'gradle/publish_product_cruzr.gradle'
 apply from: 'gradle/publish_product_alpha_mini.gradle'

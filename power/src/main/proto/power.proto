@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package power;
+
+option java_package = "com.ubtrobot.power.ipc";
+option java_outer_classname = "PowerProto";
+
+message BatteryProperties {
+    int32 level = 1;
+    bool charger_ac_online = 2;
+    bool charging_station_online = 3;
+    int32 charging_voltage = 4;
+    bool full = 5;
+    int32 temperature = 6;
+}
+
+message  ConnectOption {
+    int32 timeout = 1;
+}

@@ -62,10 +62,20 @@ public class Location {
                 '}';
     }
 
+    public Builder toBuilder() {
+        return new Builder(this);
+    }
+
     public static class Builder extends GenericBuilder<Builder> {
 
         public Builder(Point position) {
             super(position);
+        }
+
+        public Builder(Location location) {
+            super(location.getPosition());
+            setZ(location.getZ());
+            setRotation(location.getRotation());
         }
     }
 

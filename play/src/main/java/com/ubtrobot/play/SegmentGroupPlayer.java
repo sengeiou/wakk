@@ -79,7 +79,12 @@ public class SegmentGroupPlayer<O> implements Player {
             addCirculationTask();
 
             mTaskSeries.start();
-            return mTaskSeries.promise();
+            return mTaskSeries.promise().fail(new FailCallback<PlayException>() {
+                @Override
+                public void onFail(PlayException e) {
+                    LOGGER.e("Segment group play fail." + e);
+                }
+            });
         }
     }
 

@@ -11,18 +11,6 @@ import java.util.Map;
 
 public class AnalyticsKit {
 
-    private static final int ID_MAX_LENGTH = 64;
-
-    private static final String CUSTOM_EVENT = "custom_event";
-
-    private static final String EVENT_TYPE_ACTIVITY = "activity";                // 页面的类型：activity
-    private static final String EVENT_TYPE_FRAGMENT = "fragment";                // 页面类型：fragment
-
-    private static final String EVENT_ID_DEF_ACTIVITY_START = "activityStart";   // activity启动时，默认的eventId
-    private static final String EVENT_ID_DEF_ACTIVITY_STOP = "activityStop";     // activity退出时，默认的eventId
-    private static final String EVENT_ID_DEF_FRAGMENT_START = "fragmentStart";   // fragment展示时，默认的eventId
-    private static final String EVENT_ID_DEF_FRAGMENT_STOP = "fragmentStop";     // fragment退出前台时，默认的eventId
-
     private static volatile Analytics sAnalytics;
 
     private AnalyticsKit() {
@@ -38,45 +26,16 @@ public class AnalyticsKit {
                 return;
             }
 
-            Class<Analytics> cls = getDelegateAnalyticsCls(AnalyticsConstants.DELEGATE_ANALYTICS_SERVICE_NAME);
-
-            if (cls != null) {
-                sAnalytics = new AnalyticsDelegate(cls);
-            } else {
-                ContentResolver resolver = context.getContentResolver();
-                sAnalytics = new ProviderAnalyticsProxy(resolver);
-            }
+            ContentResolver resolver = context.getContentResolver();
+            sAnalytics = new ProviderAnalyticsProxy(resolver);
         }
     }
 
     private static void checkAnalytics() {
         if (sAnalytics == null) {
-            throw new IllegalStateException("Please call com.ubtrobot.analytics.AnalyticsKit.initialize");
+            throw new IllegalStateException(
+                    "Please call com.ubtrobot.analytics.AnalyticsKit.initialize");
         }
-    }
-
-    private static Class<Analytics> getDelegateAnalyticsCls(String analyticsServiceName) {
-        if (analyticsServiceName == null || analyticsServiceName.length() == 0) {
-            return null;
-        }
-
-        Class<Analytics> cls;
-        try {
-            cls = (Class<Analytics>) Class.forName(analyticsServiceName);
-        } catch (ClassNotFoundException e) {
-            cls = null;
-        }
-
-        return cls;
-    }
-
-    public static void setStrategy(Strategy strategy) {
-        if (strategy == null) {
-            throw new IllegalArgumentException("Strategy is null.");
-        }
-
-        checkAnalytics();
-        sAnalytics.setStrategy(strategy);
     }
 
     public static Strategy getStrategy() {
@@ -84,35 +43,47 @@ public class AnalyticsKit {
         return sAnalytics.getStrategy();
     }
 
-    public static void enable(boolean enable) {
-        checkAnalytics();
-        sAnalytics.enable(enable);
-    }
-
     public static void recordEvent(String eventId) {
         recordEvent(eventId, null);
     }
 
-    public static void recordEvent(String eventId, Map<String, String> segmentation) {
-        checkAnalytics();
+    public static void recordEvent(String eventId, long duration) {
+        recordEvent(eventId, duration, null);
+    }
 
-        if (eventId == null || eventId.length() <= 0 || eventId.length() > ID_MAX_LENGTH) {
-            throw new IllegalArgumentException("Illegal id argument. 0 < id.length <= 64.");
+    public static void recordEvent(
+            String eventId, long duration, Map<String, String> segmentation) {
+        if (eventId == null || eventId.length() <= 0 ||
+                eventId.length() > AnalyticsConstants.ID_MAX_LENGTH) {
+            throw new IllegalArgumentException("Argument need 0 < eventId.length <= 64.");
+        }
+        if (duration < 0) {
+            throw new IllegalArgumentException("Argument duration < 0.");
         }
 
-        Event event = new Event.Builder(eventId, CUSTOM_EVENT).setCustomSegmentation(segmentation).build();
+        checkAnalytics();
 
-        sAnalytics.recordEvent(event);
+        sAnalytics.recordEvent(new Event.Builder(
+                eventId, AnalyticsConstants.CUSTOM_EVENT).
+                setCustomSegmentation(segmentation).
+                setDuration(duration).
+                build());
+    }
+
+    public static void recordEvent(String eventId, Map<String, String> segmentation) {
+        recordEvent(eventId, 0, segmentation);
     }
 
     public static void recordActivityStart(Activity activity) {
-        recordEvent(EVENT_ID_DEF_ACTIVITY_START, createSegmentation(activity, EVENT_TYPE_ACTIVITY));
+        recordEvent(AnalyticsConstants.EVENT_ID_DEF_ACTIVITY_START,
+                createSegmentation(activity, AnalyticsConstants.EVENT_TYPE_ACTIVITY));
     }
 
     public static void recordActivityStart(String activityName) {
         checkString("activityName", activityName);
 
-        recordEvent(EVENT_ID_DEF_ACTIVITY_START, createSegmentation(activityName, EVENT_TYPE_ACTIVITY));
+        recordEvent(AnalyticsConstants.EVENT_ID_DEF_ACTIVITY_START,
+                createSegmentation(activityName, AnalyticsConstants.EVENT_TYPE_ACTIVITY));
     }
 
     private static void checkString(String stringName, String stringValue) {
@@ -125,23 +96,27 @@ public class AnalyticsKit {
     public static void recordFragmentStart(String fragmentName) {
         checkString("fragmentName", fragmentName);
 
-        recordEvent(EVENT_ID_DEF_FRAGMENT_START, createSegmentation(fragmentName, EVENT_TYPE_FRAGMENT));
+        recordEvent(AnalyticsConstants.EVENT_ID_DEF_FRAGMENT_START,
+                createSegmentation(fragmentName, AnalyticsConstants.EVENT_TYPE_FRAGMENT));
     }
 
     public static void recordActivityStop(Activity activity) {
-        recordEvent(EVENT_ID_DEF_ACTIVITY_STOP, createSegmentation(activity, EVENT_TYPE_ACTIVITY));
+        recordEvent(AnalyticsConstants.EVENT_ID_DEF_ACTIVITY_STOP,
+                createSegmentation(activity, AnalyticsConstants.EVENT_TYPE_ACTIVITY));
     }
 
     public static void recordActivityStop(String activityName) {
         checkString("activityName", activityName);
 
-        recordEvent(EVENT_ID_DEF_ACTIVITY_STOP, createSegmentation(activityName, EVENT_TYPE_ACTIVITY));
+        recordEvent(AnalyticsConstants.EVENT_ID_DEF_ACTIVITY_STOP,
+                createSegmentation(activityName, AnalyticsConstants.EVENT_TYPE_ACTIVITY));
     }
 
     public static void recordFragmentStop(String fragmentName) {
         checkString("fragmentName", fragmentName);
 
-        recordEvent(EVENT_ID_DEF_FRAGMENT_STOP, createSegmentation(fragmentName, EVENT_TYPE_FRAGMENT));
+        recordEvent(AnalyticsConstants.EVENT_ID_DEF_FRAGMENT_STOP,
+                createSegmentation(fragmentName, AnalyticsConstants.EVENT_TYPE_FRAGMENT));
     }
 
     private static Map<String, String> createSegmentation(Object page, String pageType) {

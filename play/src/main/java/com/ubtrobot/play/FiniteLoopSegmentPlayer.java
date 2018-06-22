@@ -2,6 +2,7 @@ package com.ubtrobot.play;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import com.ubtrobot.async.AsyncTask;
 import com.ubtrobot.async.AsyncTaskSeries;
@@ -77,7 +78,9 @@ public class FiniteLoopSegmentPlayer<O> extends SegmentPlayer<O> {
 
     @Override
     protected void notifyLoopAborted(final PlayException e) {
-        mTaskSeries.rejectRunningTask(e);
+        if (mTaskSeries != null) {
+            mTaskSeries.rejectRunningTask(e);
+        }
     }
 
     private class PlayTask extends AsyncTask<Void, PlayException> implements Runnable {
@@ -105,7 +108,6 @@ public class FiniteLoopSegmentPlayer<O> extends SegmentPlayer<O> {
         @Override
         protected void onCancel() {
             if (!mSegment.isBlank()) {
-                onLoopStop();
                 onEnd();
             }
 

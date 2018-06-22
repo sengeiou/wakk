@@ -10,7 +10,7 @@ import "google/protobuf/any.proto";
 message GroundOverlay {
 
     string name = 1;
-    string tag = 2;
+    string type = 2;
     int32 width = 3;
     int32 height = 4;
     Point origin_In_Image = 5;
@@ -30,20 +30,22 @@ message Marker {
     Point position = 3;
     int32 z = 4;
     float rotation = 5;
-    string tag = 6;
+    repeated string tag = 6;
     string description = 7;
+    string extension = 8;
 }
 
 message NavMap {
 
     string id = 1;
     string name = 2;
-    string tag = 3;
-    float scale = 4;
+    float scale = 3;
+    string extension = 4;
 
     repeated GroundOverlay ground_overlay = 5;
     repeated Marker marker = 6;
-    google.protobuf.Any navFile = 7;
+    repeated Polyline polyline = 7;
+    google.protobuf.Any navFile = 8;
 }
 
 message NavMapList {
@@ -56,6 +58,14 @@ message Location {
     Point position = 1;
     int32 z = 2;
     float rotation = 3;
+}
+
+message Polyline {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    repeated Location location = 4;
+    string extension = 5;
 }
 
 message LocateOption {

@@ -19,5 +19,7 @@ public class NavigationConstants {
 
     public static final String CALL_PATH_GET_CURRENT_LOCATION = "/navigation/location/current";
     public static final String CALL_PATH_LOCATE_SELF = "/navigation/locate/self";
+    public static final String CALL_PATH_QUERY_LOCATING = "/navigation/locating";
     public static final String CALL_PATH_NAVIGATE = "/navigation/navigate";
+    public static final String CALL_PATH_QUERY_NAVIGATING = "/navigation/navigating";
 }

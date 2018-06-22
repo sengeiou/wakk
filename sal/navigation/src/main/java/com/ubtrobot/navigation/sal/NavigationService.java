@@ -2,6 +2,7 @@ package com.ubtrobot.navigation.sal;
 
 import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
+import com.ubtrobot.exception.AccessServiceException;
 import com.ubtrobot.navigation.GetLocationException;
 import com.ubtrobot.navigation.LocateException;
 import com.ubtrobot.navigation.LocateOption;
@@ -37,6 +38,10 @@ public interface NavigationService {
 
     Promise<Location, LocateException> locateSelf(LocateOption option);
 
+    Promise<Boolean, AccessServiceException> isLocating();
+
     ProgressivePromise<Void, NavigateException, Navigator.NavigatingProgress>
     navigate(Location destination, NavigateOption option);
+
+    Promise<Boolean, AccessServiceException> isNavigating();
 }

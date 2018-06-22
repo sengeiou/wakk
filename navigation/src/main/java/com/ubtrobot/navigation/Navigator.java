@@ -2,9 +2,11 @@ package com.ubtrobot.navigation;
 
 import android.os.Handler;
 
+import com.google.protobuf.BoolValue;
 import com.google.protobuf.Message;
 import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
+import com.ubtrobot.exception.AccessServiceException;
 import com.ubtrobot.master.adapter.ProtoCallAdapter;
 import com.ubtrobot.master.call.CallConfiguration;
 import com.ubtrobot.master.competition.Competing;
@@ -103,6 +105,28 @@ public class Navigator implements Competing {
         );
     }
 
+    public Promise<Boolean, AccessServiceException> isLocating() {
+        return mNavigationService.call(
+                NavigationConstants.CALL_PATH_QUERY_LOCATING,
+                new ProtoCallAdapter.DFProtoConverter<Boolean, BoolValue, AccessServiceException>() {
+                    @Override
+                    public Class<BoolValue> doneProtoClass() {
+                        return BoolValue.class;
+                    }
+
+                    @Override
+                    public Boolean convertDone(BoolValue locating) throws Exception {
+                        return locating.getValue();
+                    }
+
+                    @Override
+                    public AccessServiceException convertFail(CallException e) {
+                        return new AccessServiceException.Factory().from(e);
+                    }
+                }
+        );
+    }
+
     private void checkSession(CompetitionSession session) {
         if (session == null) {
             throw new IllegalArgumentException("Argument session is null.");
@@ -160,6 +184,28 @@ public class Navigator implements Competing {
                     public NavigatingProgress
                     convertProgress(NavigationProto.NavigatingProgress progress) {
                         return NavigationConverters.toNavigatingProgressPojo(progress);
+                    }
+                }
+        );
+    }
+
+    public Promise<Boolean, AccessServiceException> isNavigating() {
+        return mNavigationService.call(
+                NavigationConstants.CALL_PATH_QUERY_NAVIGATING,
+                new ProtoCallAdapter.DFProtoConverter<Boolean, BoolValue, AccessServiceException>() {
+                    @Override
+                    public Class<BoolValue> doneProtoClass() {
+                        return BoolValue.class;
+                    }
+
+                    @Override
+                    public Boolean convertDone(BoolValue navigating) throws Exception {
+                        return navigating.getValue();
+                    }
+
+                    @Override
+                    public AccessServiceException convertFail(CallException e) {
+                        return new AccessServiceException.Factory().from(e);
                     }
                 }
         );

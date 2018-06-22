@@ -5,6 +5,7 @@ import com.ubtrobot.async.InterruptibleAsyncTask;
 import com.ubtrobot.async.InterruptibleProgressiveAsyncTask;
 import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
+import com.ubtrobot.exception.AccessServiceException;
 import com.ubtrobot.master.competition.InterruptibleTaskHelper;
 import com.ubtrobot.navigation.GetLocationException;
 import com.ubtrobot.navigation.LocateException;
@@ -186,6 +187,20 @@ public abstract class AbstractNavigationService implements NavigationService {
         mInterruptibleTaskHelper.reject(TASK_RECEIVER_NAVIGATOR, TASK_NAME_LOCATE_SELF, e);
     }
 
+
+    @Override
+    public Promise<Boolean, AccessServiceException> isLocating() {
+        AsyncTask<Boolean, AccessServiceException> task = createGettingLocatingTask();
+        if (task == null) {
+            throw new IllegalStateException("createGettingLocatingTask returns null.");
+        }
+
+        task.start();
+        return task.promise();
+    }
+
+    protected abstract AsyncTask<Boolean, AccessServiceException> createGettingLocatingTask();
+
     @Override
     public ProgressivePromise<Void, NavigateException, Navigator.NavigatingProgress>
     navigate(final Location destination, final NavigateOption option) {
@@ -238,4 +253,17 @@ public abstract class AbstractNavigationService implements NavigationService {
 
         mInterruptibleTaskHelper.reject(TASK_RECEIVER_NAVIGATOR, TASK_NAME_NAVIGATE, e);
     }
+
+    @Override
+    public Promise<Boolean, AccessServiceException> isNavigating() {
+        AsyncTask<Boolean, AccessServiceException> task = createGettingNavigatingTask();
+        if (task == null) {
+            throw new IllegalStateException("createGettingNavigatingTask returns null.");
+        }
+
+        task.start();
+        return task.promise();
+    }
+
+    protected abstract AsyncTask<Boolean, AccessServiceException> createGettingNavigatingTask();
 }

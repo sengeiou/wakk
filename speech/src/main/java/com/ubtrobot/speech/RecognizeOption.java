@@ -18,6 +18,28 @@ public class RecognizeOption {
         return mode;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        RecognizeOption that = (RecognizeOption) o;
+
+        return mode == that.mode;
+    }
+
+    @Override
+    public String toString() {
+        return "RecognizeOption{" +
+                "mode=" + mode +
+                '}';
+    }
+
+    @Override
+    public int hashCode() {
+        return mode;
+    }
+
     public static class Builder {
 
         private int mode = MODE_UNKNOWN;

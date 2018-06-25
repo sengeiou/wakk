@@ -232,7 +232,6 @@ public class DiskEventStorage implements EventStorage {
                     Scheme.EVENT_COLUMN_DURATION, event.getDuration(),
                     Scheme.EVENT_COLUMN_RECORDED_AT, exitEvent.getEvent().getRecordedAt(),
                     Scheme.EVENT_COLUMN_DURATION, exitEvent.getEvent().getDuration());
-            Log.i("cj", "update sql: " + updateSql);
             db.execSQL(updateSql);
         }
     }

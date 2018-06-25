@@ -110,7 +110,7 @@ public class DiskEventStorage implements EventStorage {
             LinkedList<Event> events = new LinkedList<>();
             Cursor cursor = db.query(Scheme.TABLE_EVENT, null,
                     Scheme.EVENT_COLUMN_CATEGORY + " != ?",
-                    new String[]{AnalyticsConstants.SHUTDOWN_EVENT},
+                    new String[]{AnalyticsConstants.SHUTDOWN_EVENT_CATEGORY},
                     null, null,
                     Scheme.EVENT_COLUMN_ID + " asc", count + "");
             try {
@@ -192,7 +192,7 @@ public class DiskEventStorage implements EventStorage {
             LinkedList<EventTable> events = new LinkedList<>();
             Cursor cursor = db.query(Scheme.TABLE_EVENT, null,
                     Scheme.EVENT_COLUMN_CATEGORY + " == ?",
-                    new String[]{AnalyticsConstants.SHUTDOWN_EVENT},
+                    new String[]{AnalyticsConstants.SHUTDOWN_EVENT_CATEGORY},
                     null, null,
                     Scheme.EVENT_COLUMN_ID + " asc", count + "");
             try {
@@ -212,7 +212,7 @@ public class DiskEventStorage implements EventStorage {
             SQLiteDatabase db = mHelper.getWritableDatabase();
             String sql = String.format("SELECT * FROM %s where %s = '%s' ORDER BY %s DESC LIMIT 1",
                     Scheme.TABLE_EVENT, Scheme.EVENT_COLUMN_CATEGORY,
-                    AnalyticsConstants.SHUTDOWN_EVENT, Scheme.EVENT_COLUMN_RECORDED_AT);
+                    AnalyticsConstants.SHUTDOWN_EVENT_CATEGORY, Scheme.EVENT_COLUMN_RECORDED_AT);
             Cursor cursor = db.rawQuery(sql, null);
             EventTable exitEvent = null;
             if (cursor.moveToFirst()) {

@@ -14,11 +14,9 @@ import com.ubtrobot.analytics.ReportException;
 import com.ubtrobot.analytics.ipc.AnalyticsConstants;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 public class ShutdownAnalyticsService {
 
@@ -94,7 +92,7 @@ public class ShutdownAnalyticsService {
     private void removeShutdownEvents(List<EventTable> events) {
         long firstRecordedAt = events.get(0).getEvent().getRecordedAt();
         long lastRecordedAt = events.get(events.size() - 1).getEvent().getRecordedAt();
-        mDiskStorage.removeEvents(AnalyticsConstants.SHUTDOWN_EVENT,
+        mDiskStorage.removeEvents(AnalyticsConstants.SHUTDOWN_EVENT_CATEGORY,
                 Math.min(firstRecordedAt, lastRecordedAt),
                 Math.max(firstRecordedAt, lastRecordedAt));
     }
@@ -126,7 +124,7 @@ public class ShutdownAnalyticsService {
         public void run() {
             long duration = System.nanoTime() / 1000;
             updateEvent(new Event.Builder(AnalyticsConstants.SHUTDOWN_EVENT_ID,
-                    AnalyticsConstants.SHUTDOWN_EVENT).
+                    AnalyticsConstants.SHUTDOWN_EVENT_CATEGORY).
                     setDuration(duration).
                     build());
             mShutdownHandler.postDelayed(this, UPDATE_SHUTDOWN_DURATION);

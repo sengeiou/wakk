@@ -66,6 +66,11 @@ project(':product:cruzr') {
                     dependencyNode.appendNode('groupId', 'com.ubtrobot.framework')
                     dependencyNode.appendNode('artifactId', 'power')
                     dependencyNode.appendNode('version', rootProject.ext.versions.powerVersion)
+
+                    dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.ubtrobot.framework')
+                    dependencyNode.appendNode('artifactId', 'diagnosis')
+                    dependencyNode.appendNode('version', rootProject.ext.versions.diagnosisVersion)
                 }
             }
         }

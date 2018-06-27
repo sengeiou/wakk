@@ -17,16 +17,15 @@ public class AnalyticsConstants {
     public static final String CALL_METHOD_SHUTDOWN = "shutdown";
 
     public static final int ID_MAX_LENGTH = 64;
-    public static final String CUSTOM_EVENT = "custom_event";
-    public static final String SHUTDOWN_EVENT_ID = "shutdown_event_id";
-    public static final String SHUTDOWN_EVENT_CATEGORY = "active_user_event";
+    public static final String EVENT_CATEGORY_CUSTOM = "custom_event";
+    public static final String EVENT_CATEGORY_SHUTDOWN = "active_user";
+    public static final String EVENT_CATEGORY_PAGE = "page_view";
 
     public static final String EVENT_TYPE_ACTIVITY = "activity";                // 页面的类型：activity
     public static final String EVENT_TYPE_FRAGMENT = "fragment";                // 页面类型：fragment
 
-    public static final String EVENT_ID_DEF_ACTIVITY_START = "activityStart";   // activity启动时，默认的eventId
-    public static final String EVENT_ID_DEF_ACTIVITY_STOP = "activityStop";     // activity退出时，默认的eventId
-    public static final String EVENT_ID_DEF_FRAGMENT_START = "fragmentStart";   // fragment展示时，默认的eventId
-    public static final String EVENT_ID_DEF_FRAGMENT_STOP = "fragmentStop";     // fragment退出前台时，默认的eventId
+    public static final String EVENT_ID_SHUTDOWN = "active_user";
+    public static final String EVENT_ID_PAGE_START = "start";   // activity启动时，默认的eventId
+    public static final String EVENT_ID_PAGE_END = "end";     // activity退出时，默认的eventId
 
 }

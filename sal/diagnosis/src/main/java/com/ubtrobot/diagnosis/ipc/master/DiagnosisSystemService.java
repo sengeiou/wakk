@@ -5,15 +5,18 @@ import android.os.Handler;
 
 import com.google.protobuf.Message;
 import com.ubtrobot.async.Promise;
+import com.ubtrobot.diagnosis.Diagnosis;
 import com.ubtrobot.diagnosis.Part;
 import com.ubtrobot.diagnosis.ipc.DiagnosisConstants;
 import com.ubtrobot.diagnosis.ipc.DiagnosisConverters;
+import com.ubtrobot.diagnosis.ipc.DiagnosisProto;
 import com.ubtrobot.diagnosis.sal.AbstractDiagnosisService;
 import com.ubtrobot.diagnosis.sal.DiagnosisFactory;
 import com.ubtrobot.diagnosis.sal.DiagnosisService;
 import com.ubtrobot.exception.AccessServiceException;
 import com.ubtrobot.master.adapter.CallProcessAdapter;
 import com.ubtrobot.master.adapter.ProtoCallProcessAdapter;
+import com.ubtrobot.master.adapter.ProtoParamParser;
 import com.ubtrobot.master.annotation.Call;
 import com.ubtrobot.master.service.MasterSystemService;
 import com.ubtrobot.transport.message.CallException;
@@ -59,6 +62,36 @@ public class DiagnosisSystemService extends MasterSystemService {
                     @Override
                     public Message convertDone(List<Part> partList) {
                         return DiagnosisConverters.toPartListProto(partList);
+                    }
+
+                    @Override
+                    public CallException convertFail(AccessServiceException e) {
+                        return new CallException(e.getCode(), e.getMessage());
+                    }
+                }
+        );
+    }
+
+    @Call(path = DiagnosisConstants.CALL_PATH_GET_DIAGNOSIS_LIST)
+    public void onGetDiagnosisList(Request request, Responder responder) {
+        final DiagnosisProto.PartIdList partIdList = ProtoParamParser.parseParam(
+                request, DiagnosisProto.PartIdList.class, responder);
+        if (partIdList == null) {
+            return;
+        }
+
+        mCallProcessor.onCall(
+                responder,
+                new CallProcessAdapter.Callable<List<Diagnosis>, AccessServiceException>() {
+                    @Override
+                    public Promise<List<Diagnosis>, AccessServiceException> call() throws CallException {
+                        return mService.getDiagnosisList(partIdList.getIdList());
+                    }
+                },
+                new ProtoCallProcessAdapter.DFConverter<List<Diagnosis>, AccessServiceException>() {
+                    @Override
+                    public Message convertDone(List<Diagnosis> diagnosisList) {
+                        return DiagnosisConverters.toDiagnosisListProto(diagnosisList);
                     }
 
                     @Override

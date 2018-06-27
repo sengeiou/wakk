@@ -6,13 +6,26 @@ option java_package = "com.ubtrobot.diagnosis.ipc";
 option java_outer_classname = "DiagnosisProto";
 
 message Part {
-
     string id = 1;
     string name = 2;
     string description = 3;
 }
 
 message PartList {
-
     repeated Part part = 1;
+}
+
+message PartIdList {
+    repeated string id = 1;
+}
+
+message Diagnosis {
+    string part_id = 1;
+    bool faulty = 2;
+    string fault = 3;
+    string cause = 4;
+}
+
+message DiagnosisList {
+    repeated Diagnosis diagnosis = 1;
 }

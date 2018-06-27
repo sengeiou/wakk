@@ -46,8 +46,24 @@ task jarFramework(
     exclude('**/BuildConfig$*.class')
     exclude('android/')
 
-    exclude('com/ubtrobot/analytics/ipc/provider')
-    exclude('com/ubtrobot/analytics/sal/')
+    from 'build/intermediates/classes/release'
+}
+
+task jarMobileLib(
+        type: Jar,
+        dependsOn: ['assembleRelease']) {
+    archiveName = "analytics-mobile.jar"
+
+    exclude('**/R.class')
+    exclude('**/R$*.class')
+    exclude('**/BuildConfig.class')
+    exclude('**/BuildConfig$*.class')
+    exclude('android/')
+
+    exclude('**/AnalyticsKit.class')
+    exclude('**/AnalyticsKit$*.class')
+    exclude('**/ProviderAnalyticsProxy.class')
+    exclude('**/ProviderAnalyticsProxy$*.class')
 
     from 'build/intermediates/classes/release'
 }

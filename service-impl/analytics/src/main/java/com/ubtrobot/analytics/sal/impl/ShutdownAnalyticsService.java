@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class ShutdownAnalyticsService {
 
@@ -26,11 +28,14 @@ public class ShutdownAnalyticsService {
 
     private final byte[] mReportLock = new byte[0];
 
+    private Executor mExecutor;
+    private ReportRunnable mReportRunnable;
     private DiskEventStorage mDiskStorage;
     private EventReporter mReporter;
     private Handler mShutdownHandler;
 
-    public ShutdownAnalyticsService(Context context, String appId, String appKey, String deviceId) {
+    public ShutdownAnalyticsService(Context context, Executor executor,
+                                    String appId, String appKey, String deviceId) {
         if (context == null) {
             throw new IllegalArgumentException("Context is null.");
         }
@@ -39,10 +44,12 @@ public class ShutdownAnalyticsService {
         checkString("appKey", appKey);
         checkString("deviceId", deviceId);
 
+        this.mExecutor = executor != null ? executor : Executors.newSingleThreadExecutor();
+        this.mReportRunnable = new ReportRunnable();
         this.mDiskStorage = new DiskEventStorage(context.getApplicationContext());
-        mReporter = new HttpReport(context.getApplicationContext(), appId, appKey, deviceId);
+        this.mReporter = new HttpReport(context.getApplicationContext(), appId, appKey, deviceId);
 
-        mShutdownHandler = new Handler(Looper.getMainLooper());
+        this.mShutdownHandler = new Handler(Looper.getMainLooper());
         mShutdownHandler.post(new ShutdownRunnable());
     }
 
@@ -53,26 +60,7 @@ public class ShutdownAnalyticsService {
     }
 
     public void reportShutdownEvent() {
-        synchronized (mReportLock) {
-            LinkedList<EventTable> events = new LinkedList<>();
-            updateRanShutdown(events);
-            while (events.size() > 0) {
-                boolean isReportEventsSuccess = reportEvents(events);
-
-                removeShutdownEvents(events);
-
-                if (!isReportEventsSuccess) {
-                    try {
-                        mDiskStorage.writeEventTables(events);
-                    } catch (IOException e) {
-                        Log.e("ShutdownAnalytics", "Update shutdown event fail.");
-                    }
-                }
-
-                events.clear();
-                updateRanShutdown(events);
-            }
-        }
+        mExecutor.execute(mReportRunnable);
     }
 
     private void updateRanShutdown(LinkedList<EventTable> events) {
@@ -92,7 +80,7 @@ public class ShutdownAnalyticsService {
     private void removeShutdownEvents(List<EventTable> events) {
         long firstRecordedAt = events.get(0).getEvent().getRecordedAt();
         long lastRecordedAt = events.get(events.size() - 1).getEvent().getRecordedAt();
-        mDiskStorage.removeEvents(AnalyticsConstants.SHUTDOWN_EVENT_CATEGORY,
+        mDiskStorage.removeEvents(AnalyticsConstants.EVENT_CATEGORY_SHUTDOWN,
                 Math.min(firstRecordedAt, lastRecordedAt),
                 Math.max(firstRecordedAt, lastRecordedAt));
     }
@@ -118,13 +106,40 @@ public class ShutdownAnalyticsService {
         return isSuccess;
     }
 
+    private class ReportRunnable implements Runnable {
+
+        @Override
+        public void run() {
+            synchronized (mReportLock) {
+                LinkedList<EventTable> events = new LinkedList<>();
+                updateRanShutdown(events);
+                while (events.size() > 0) {
+                    boolean isReportEventsSuccess = reportEvents(events);
+
+                    removeShutdownEvents(events);
+
+                    if (!isReportEventsSuccess) {
+                        try {
+                            mDiskStorage.writeEventTables(events);
+                        } catch (IOException e) {
+                            Log.e("ShutdownAnalytics", "Update shutdown event fail.");
+                        }
+                    }
+
+                    events.clear();
+                    updateRanShutdown(events);
+                }
+            }
+        }
+    }
+
     private class ShutdownRunnable implements Runnable {
 
         @Override
         public void run() {
             long duration = System.nanoTime() / 1000;
-            updateEvent(new Event.Builder(AnalyticsConstants.SHUTDOWN_EVENT_ID,
-                    AnalyticsConstants.SHUTDOWN_EVENT_CATEGORY).
+            updateEvent(new Event.Builder(AnalyticsConstants.EVENT_ID_SHUTDOWN,
+                    AnalyticsConstants.EVENT_CATEGORY_SHUTDOWN).
                     setDuration(duration).
                     build());
             mShutdownHandler.postDelayed(this, UPDATE_SHUTDOWN_DURATION);

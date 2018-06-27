@@ -26,6 +26,11 @@ android {
 }
 
 dependencies {
+    implementation project(':service-impl:analytics')
+    implementation project(':dance')
+    implementation project(':play')
+    implementation project(':commons')
+
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     def deps = rootProject.ext.deps

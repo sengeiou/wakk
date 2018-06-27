@@ -125,6 +125,14 @@ public class SpeechConverters {
         //生成intent
         UnderstandResult.Intent.Builder intent = new UnderstandResult.Intent.Builder();
         intent.setName(result.getIntent().getName());
+        String parametersJson = result.getIntent().getParametersJson();
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject = new JSONObject(parametersJson);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        intent.setParameters(jsonObject);
         intent.setDisplayName(result.getIntent().getDisplayName());
         intent.setScore(result.getIntent().getScore());
         builder.setIntent(intent.build());
@@ -193,6 +201,8 @@ public class SpeechConverters {
         //生成intent
         SpeechProto.Intent.Builder intentBuilder = SpeechProto.Intent.newBuilder();
         intentBuilder.setName(result.getIntent().getName());
+        JSONObject parameters = result.getIntent().getParameters();
+        intentBuilder.setParametersJson(parameters.toString());
         intentBuilder.setDisplayName(result.getIntent().getDisplayName());
         intentBuilder.setScore(result.getIntent().getScore());
         builder.setIntent(intentBuilder.build());

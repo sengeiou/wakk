@@ -200,8 +200,8 @@ public class UnderstandResult implements Parcelable {
             try {
                 parameters = new JSONObject(slotString);
             } catch (JSONException e) {
-
                 e.printStackTrace();
+                throw new IllegalStateException("JSONException" + e.toString());
             }
             score = in.readFloat();
         }

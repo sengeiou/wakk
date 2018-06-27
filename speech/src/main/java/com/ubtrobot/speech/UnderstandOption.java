@@ -1,5 +1,7 @@
 package com.ubtrobot.speech;
 
+import android.util.Log;
+
 import com.ubtrobot.validate.Preconditions;
 
 import org.json.JSONException;
@@ -7,12 +9,14 @@ import org.json.JSONObject;
 
 public class UnderstandOption {
 
+    private static final String TAG = "UnderstandOption";
     public static final UnderstandOption DEFAULT = new UnderstandOption.Builder().build();
     public static final String LANGUAGE_CN = "cn";
     public static final String LANGUAGE_EN = "en";
+    public static final String LANGUAGE_TW = "tw";
     private float timeout;
     private String language;
-    private String seesionId;
+    private String sessionId;
     private JSONObject params;
 
     private UnderstandOption() {
@@ -26,8 +30,8 @@ public class UnderstandOption {
         return language;
     }
 
-    public String getSeesionId() {
-        return seesionId;
+    public String getSessionId() {
+        return sessionId;
     }
 
     public JSONObject getParams() {
@@ -74,6 +78,7 @@ public class UnderstandOption {
             try {
                 params.putOpt(key, value);
             } catch (JSONException e) {
+                Log.e(TAG, "appendString failed");
                 e.printStackTrace();
             }
             return this;
@@ -83,6 +88,7 @@ public class UnderstandOption {
             try {
                 params.putOpt(key, value);
             } catch (JSONException e) {
+                Log.e(TAG, "appendInt failed");
                 e.printStackTrace();
             }
             return this;
@@ -92,6 +98,7 @@ public class UnderstandOption {
             try {
                 params.putOpt(key, value);
             } catch (JSONException e) {
+                Log.e(TAG, "appendBoolean failed");
                 e.printStackTrace();
             }
             return this;
@@ -107,7 +114,7 @@ public class UnderstandOption {
             UnderstandOption understandOption = new UnderstandOption();
             understandOption.timeout = timeout;
             understandOption.language = language;
-            understandOption.seesionId = sessionId;
+            understandOption.sessionId = sessionId;
             understandOption.params = params;
             return understandOption;
         }

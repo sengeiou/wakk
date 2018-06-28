@@ -23,6 +23,7 @@ import com.ubtrobot.dance.player.EmotionSegmentPlayer;
 import com.ubtrobot.dance.player.MusicSegmentPlayer;
 import com.ubtrobot.emotion.EmotionManager;
 import com.ubtrobot.master.Master;
+import com.ubtrobot.motion.ExecuteException;
 import com.ubtrobot.motion.MotionManager;
 import com.ubtrobot.play.PlayException;
 import com.ubtrobot.play.Player;
@@ -144,17 +145,7 @@ public class DanceManager {
         mTaskSeries.append(new AsyncTask<Void, PlayException>() {
             @Override
             protected void onStart() {
-                startDance(dance).done(new DoneCallback<Void>() {
-                    @Override
-                    public void onDone(Void aVoid) {
-                        resolve(aVoid);
-                    }
-                }).fail(new FailCallback<PlayException>() {
-                    @Override
-                    public void onFail(PlayException e) {
-                        reject(new PlayException.Factory().forbidden(e.getMessage(), null));
-                    }
-                });
+                startDance(dance, this);
             }
 
             @Override
@@ -166,6 +157,45 @@ public class DanceManager {
                 mTaskParallel.cancel();
                 mTaskParallel = null;
                 resolve(null);
+            }
+        });
+
+        mTaskSeries.append(new AsyncTask<Void, PlayException>() {
+            @Override
+            protected void onStart() {
+                if (mMotionManager == null) {
+                    mMotionManager = new MotionManager(Master.get().getGlobalContext());
+                }
+
+                mMotionManager.executeScript("bow").done(new DoneCallback<Void>() {
+                    @Override
+                    public void onDone(Void aVoid) {
+                        LOGGER.w("Motion bow end");
+                        resolve(aVoid);
+                    }
+                }).fail(new FailCallback<ExecuteException>() {
+                    @Override
+                    public void onFail(ExecuteException e) {
+                        reject(new PlayException.Factory().from(e.getCode(), e.getMessage()));
+                    }
+                });
+            }
+        });
+
+        mTaskSeries.append(new AsyncTask<Void, PlayException>() {
+            @Override
+            protected void onStart() {
+                ttsDanceComplete().done(new DoneCallback<Void>() {
+                    @Override
+                    public void onDone(Void aVoid) {
+                        resolve(aVoid);
+                    }
+                }).fail(new FailCallback<SynthesizeException>() {
+                    @Override
+                    public void onFail(SynthesizeException e) {
+                        reject(new PlayException.Factory().from(e.getCode(), e.getMessage()));
+                    }
+                });
             }
         });
 
@@ -182,7 +212,7 @@ public class DanceManager {
 
     private ProgressivePromise<Void, PlayException,
             Map.Entry<String, AsyncTaskParallel.DoneOrFail<Object, PlayException>>>
-    startDance(final Dance dance) {
+    startDance(final Dance dance, final AsyncTask<Void, PlayException> asyncTask) {
         if (mTaskParallel != null) {
             mTaskParallel.cancel();
             mTaskParallel = null;
@@ -200,11 +230,13 @@ public class DanceManager {
             public void onDone(Void aVoid) {
                 LOGGER.w("Parallel dance: onDone");
                 mTaskParallel = null;
+                asyncTask.resolve(aVoid);
             }
         }).fail(new FailCallback<PlayException>() {
             @Override
             public void onFail(PlayException e) {
                 LOGGER.w("Parallel dance: onFail");
+                asyncTask.reject(e);
             }
         }).progress(new ProgressCallback<Map.Entry<String,
                 AsyncTaskParallel.DoneOrFail<Object, PlayException>>>() {
@@ -218,7 +250,7 @@ public class DanceManager {
                 Iterator<String> iterator = mTaskParallel.getDoneOrFailMap().keySet().iterator();
                 while (iterator.hasNext()) {
                     if (dance.getMainType().equals(iterator.next())) {
-                        danceComplete();
+                        asyncTask.resolve(null);
                         mTaskParallel.cancel();
                         mTaskParallel = null;
                     }
@@ -227,17 +259,8 @@ public class DanceManager {
         });
     }
 
-    private void danceComplete() {
-        if (mMotionManager == null) {
-            mMotionManager = new MotionManager(Master.get().getGlobalContext());
-        }
-
-        mMotionManager.executeScript("bow");
-
-        ttsDanceComplete();
-    }
-
-    private void ttsDanceComplete() {
+    private ProgressivePromise<Void, SynthesizeException, Synthesizer.SynthesizingProgress>
+    ttsDanceComplete() {
         String complete = "Please don't make fun of me if you think I'm a terrible dancer";
 
         if (Language.causedByZh()) {
@@ -246,10 +269,11 @@ public class DanceManager {
             complete = "Please don't make fun of me if you think I'm a terrible dancer";
         }
 
-        tts(complete);
+        return tts(complete);
     }
 
-    private void ttsArmForbidden() {
+    private ProgressivePromise<Void, SynthesizeException, Synthesizer.SynthesizingProgress>
+    ttsArmForbidden() {
         String armMotionOff = "The arm is forbidden now, I can't dance for you.";
 
         if (Language.causedByZh()) {
@@ -258,7 +282,7 @@ public class DanceManager {
             armMotionOff = "The arm is forbidden now, I can't dance for you.";
         }
 
-        tts(armMotionOff);
+        return tts(armMotionOff);
     }
 
     private ProgressivePromise<Void, SynthesizeException, Synthesizer.SynthesizingProgress>
@@ -281,10 +305,6 @@ public class DanceManager {
         }
 
         return mSpeechManager.synthesize(ttsInfo);
-    }
-
-    public String getCurrentDance() {
-        return mCurrentCategory;
     }
 
     public String getLastDance() {
@@ -328,6 +348,10 @@ public class DanceManager {
         return mPromise;
     }
 
+    public String getCurrentCategory() {
+        return mCurrentCategory;
+    }
+
     private class ParallelAsyncTask extends AsyncTask<Object, PlayException> {
 
         private Track mTrack;
@@ -358,9 +382,9 @@ public class DanceManager {
 
         @Override
         protected void onCancel() {
+            resolve(null);
             mPromise.cancel();
             mTaskParallel = null;
-            resolve(null);
         }
     }
 

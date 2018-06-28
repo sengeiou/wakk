@@ -110,8 +110,8 @@ public class AnalyticsServiceImpl implements Analytics {
     private boolean shouldReport() {
         long now = System.nanoTime();
 
-        return (now - mForbidReportAt < 0) || (now - mShouldReportAt >= 0)
-                || isEventCountDiskStorageLTReport();
+        return (now - mForbidReportAt > 0) && ((now - mShouldReportAt >= 0)
+                || isEventCountDiskStorageLTReport());
     }
 
     private void saveEvents() {
@@ -162,6 +162,7 @@ public class AnalyticsServiceImpl implements Analytics {
                     mForbidReportAt = System.nanoTime() + FORBID_INTERVAL;
                     break;
                 } else {
+                    mForbidReportAt = 0;
                     removeEventsDiskStorage(events);
                 }
 

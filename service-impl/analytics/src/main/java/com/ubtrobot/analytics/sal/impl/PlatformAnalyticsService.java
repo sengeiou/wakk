@@ -19,7 +19,7 @@ public class PlatformAnalyticsService implements AnalyticsService {
     public PlatformAnalyticsService(Context context, Executor executor,
                                     String appId, String appKey, String deviceId) {
         mAnalyticsService = new AnalyticsServiceImpl(context, executor, appId, appKey, deviceId);
-        mShutdownAnalyticsService = new ShutdownAnalyticsService(context, appId, appKey, deviceId);
+        mShutdownAnalyticsService = new ShutdownAnalyticsService(context, executor, appId, appKey, deviceId);
     }
 
     @Override

@@ -4,14 +4,18 @@ import android.os.Handler;
 
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Message;
+import com.ubtrobot.async.Consumer;
+import com.ubtrobot.async.ListenerList;
 import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.exception.AccessServiceException;
 import com.ubtrobot.master.adapter.ProtoCallAdapter;
+import com.ubtrobot.master.adapter.ProtoEventReceiver;
 import com.ubtrobot.master.call.CallConfiguration;
 import com.ubtrobot.master.competition.Competing;
 import com.ubtrobot.master.competition.CompetingItem;
 import com.ubtrobot.master.competition.CompetitionSession;
+import com.ubtrobot.master.context.MasterContext;
 import com.ubtrobot.master.service.ServiceProxy;
 import com.ubtrobot.navigation.ipc.NavigationConstants;
 import com.ubtrobot.navigation.ipc.NavigationConverters;
@@ -24,11 +28,19 @@ import java.util.List;
 public class Navigator implements Competing {
 
     private final ProtoCallAdapter mNavigationService;
+    private final MasterContext mMasterContext;
     private final Handler mHandler;
 
-    Navigator(ProtoCallAdapter navigationService, Handler handler) {
+    private final LocationEventReceiver mLocationEventReceiver;
+    private final ListenerList<LocationChangeListener> mLocationChangeListeners;
+
+    Navigator(MasterContext masterContext, ProtoCallAdapter navigationService, Handler handler) {
+        mMasterContext = masterContext;
         mNavigationService = navigationService;
         mHandler = handler;
+
+        mLocationChangeListeners = new ListenerList<>(handler);
+        mLocationEventReceiver = new LocationEventReceiver();
     }
 
     @Override
@@ -211,10 +223,55 @@ public class Navigator implements Competing {
         );
     }
 
+    public void registerLocationChangeListener(LocationChangeListener locationChangeListener){
+        synchronized (mLocationChangeListeners) {
+            boolean subscribed = !mLocationChangeListeners.isEmpty();
+            mLocationChangeListeners.register(locationChangeListener);
+
+            if (!subscribed) {
+                mMasterContext.subscribe(mLocationEventReceiver,
+                        NavigationConstants.ACTION_LOCATION_CHANGE);
+            }
+        }
+    }
+
+    public void unregisterLocationChangeListener(LocationChangeListener locationChangeListener){
+        synchronized (mLocationChangeListeners) {
+            mLocationChangeListeners.unregister(locationChangeListener);
+
+            if (mLocationChangeListeners.isEmpty()) {
+                mMasterContext.unsubscribe(mLocationEventReceiver);
+            }
+        }
+    }
+
+    private class LocationEventReceiver extends ProtoEventReceiver<NavigationProto.Location> {
+        @Override
+        protected Class<NavigationProto.Location> protoClass() {
+            return NavigationProto.Location.class;
+        }
+
+        @Override
+        public void onReceive(MasterContext masterContext, String action, NavigationProto.Location param) {
+            synchronized (mLocationChangeListeners) {
+                final Location location = NavigationConverters.toLocationPojo(param);
+
+                mLocationChangeListeners.forEach(new Consumer<LocationChangeListener>() {
+                    @Override
+                    public void accept(LocationChangeListener listener) {
+                        listener.onLocationChanged(location);
+                    }
+                });
+            }
+        }
+    }
+
     public static class NavigatingProgress {
 
         public static final int STATE_BEGAN = 0;
-        public static final int STATE_ENDED = 1;
+        public static final int STATE_LOCATION_CHANGED = 1;
+        public static final int STATE_BLOCKED = 2;
+        public static final int STATE_ENDED = 3;
 
         private int state;
         private Location location;
@@ -234,6 +291,12 @@ public class Navigator implements Competing {
         public boolean isBegan() {
             return state == STATE_BEGAN;
         }
+
+        public boolean isLocationChanged() {
+            return state == STATE_LOCATION_CHANGED;
+        }
+
+        public boolean isBlocked() { return state == STATE_BLOCKED; }
 
         public boolean isEnded() {
             return state == STATE_ENDED;

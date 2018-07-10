@@ -33,7 +33,7 @@ public class NavigationManager {
                 handler
         );
         mNavMapList = new NavMapList(navigationService);
-        mNavigator = new Navigator(navigationService, handler);
+        mNavigator = new Navigator(masterContext, navigationService, handler);
     }
 
     public Promise<List<NavMap>, NavMapException> getNavMapList() {
@@ -145,5 +145,13 @@ public class NavigationManager {
 
     public Navigator navigator() {
         return mNavigator;
+    }
+
+    public void registerLocationChangeListener(LocationChangeListener locationChangeListener) {
+        mNavigator.registerLocationChangeListener(locationChangeListener);
+    }
+
+    public void unregisterLocationChangeListener(LocationChangeListener locationChangeListener) {
+        mNavigator.unregisterLocationChangeListener(locationChangeListener);
     }
 }

@@ -5,8 +5,11 @@ import com.ubtrobot.async.InterruptibleAsyncTask;
 import com.ubtrobot.async.InterruptibleProgressiveAsyncTask;
 import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
+import com.ubtrobot.master.Master;
 import com.ubtrobot.exception.AccessServiceException;
 import com.ubtrobot.master.competition.InterruptibleTaskHelper;
+import com.ubtrobot.master.context.ContextRunnable;
+import com.ubtrobot.master.param.ProtoParam;
 import com.ubtrobot.navigation.GetLocationException;
 import com.ubtrobot.navigation.LocateException;
 import com.ubtrobot.navigation.LocateOption;
@@ -16,11 +19,19 @@ import com.ubtrobot.navigation.NavMapException;
 import com.ubtrobot.navigation.NavigateException;
 import com.ubtrobot.navigation.NavigateOption;
 import com.ubtrobot.navigation.Navigator;
+import com.ubtrobot.navigation.ipc.NavigationConstants;
+import com.ubtrobot.navigation.ipc.NavigationConverters;
+import com.ubtrobot.navigation.ipc.NavigationProto;
+import com.ubtrobot.navigation.ipc.master.NavigationSystemService;
+import com.ubtrobot.ulog.FwLoggerFactory;
+import com.ubtrobot.ulog.Logger;
 
 import java.util.List;
 import java.util.Set;
 
 public abstract class AbstractNavigationService implements NavigationService {
+
+    private static final Logger LOGGER = FwLoggerFactory.getLogger("AbstractNavigationService");
 
     private static final String TASK_RECEIVER_NAVIGATOR = "navigator";
     private static final String TASK_NAME_LOCATE_SELF = "locate-self";
@@ -252,6 +263,29 @@ public abstract class AbstractNavigationService implements NavigationService {
         }
 
         mInterruptibleTaskHelper.reject(TASK_RECEIVER_NAVIGATOR, TASK_NAME_NAVIGATE, e);
+    }
+
+    protected void publishLocation(final Location location) {
+        if (location == null) {
+            throw new IllegalArgumentException("Argument location is null.");
+        }
+
+        boolean navigationSystemServiceStarted = Master.get().execute(
+                NavigationSystemService.class,
+                new ContextRunnable<NavigationSystemService>() {
+                    @Override
+                    public void run(NavigationSystemService navigationSystemService) {
+                        ProtoParam<NavigationProto.Location> param = ProtoParam.create(
+                                NavigationConverters.toLocationProto(location));
+
+                        navigationSystemService.publish(NavigationConstants.ACTION_LOCATION_CHANGE, param);
+                    }
+                }
+        );
+
+        if (!navigationSystemServiceStarted) {
+            LOGGER.e("Publish Location failed. Pls start NavigationSystemService first.");
+        }
     }
 
     @Override

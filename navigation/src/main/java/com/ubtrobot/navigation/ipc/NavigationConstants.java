@@ -22,4 +22,6 @@ public class NavigationConstants {
     public static final String CALL_PATH_QUERY_LOCATING = "/navigation/locating";
     public static final String CALL_PATH_NAVIGATE = "/navigation/navigate";
     public static final String CALL_PATH_QUERY_NAVIGATING = "/navigation/navigating";
+
+    public static final String ACTION_LOCATION_CHANGE = "event.action.LOCATION_CHANGE";
 }

@@ -4,6 +4,7 @@ public class Diagnosis {
 
     private String partId;
     private boolean faulty;
+    private String info;
     private String fault;
     private String cause;
 
@@ -18,6 +19,8 @@ public class Diagnosis {
         return faulty;
     }
 
+    public String getInfo() { return info; }
+
     public String getFault() {
         return fault;
     }
@@ -30,7 +33,8 @@ public class Diagnosis {
     public String toString() {
         return "Diagnosis{" +
                 "partId='" + partId + '\'' +
-                ", faulty=" + faulty +
+                ", faulty=" + faulty +'\'' +
+                ", info='" + info + '\'' +
                 ", fault='" + fault + '\'' +
                 ", cause='" + cause + '\'' +
                 '}';
@@ -40,6 +44,7 @@ public class Diagnosis {
 
         private String partId;
         private boolean faulty;
+        private String info;
         private String fault;
         private String cause;
 
@@ -50,6 +55,11 @@ public class Diagnosis {
 
         public Builder setFaulty(boolean faulty) {
             this.faulty = faulty;
+            return this;
+        }
+
+        public Builder setInfo(String info) {
+            this.info = info;
             return this;
         }
 
@@ -67,6 +77,7 @@ public class Diagnosis {
             Diagnosis diagnosis = new Diagnosis();
             diagnosis.partId = partId == null ? "" : partId;
             diagnosis.faulty = faulty;
+            diagnosis.info = info == null ? "" : info;
             diagnosis.fault = fault == null ? "" : fault;
             diagnosis.cause = cause == null ? "" : cause;
 

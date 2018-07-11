@@ -41,13 +41,13 @@ public class DiagnosisConverters {
     public static Diagnosis toDiagnosisPojo(DiagnosisProto.Diagnosis diagnosisProto) {
         return new Diagnosis.Builder().setPartId(diagnosisProto.getPartId())
                 .setFaulty(diagnosisProto.getFaulty()).setFault(diagnosisProto.getFault())
-                .setCause(diagnosisProto.getCause()).build();
+                .setInfo(diagnosisProto.getInfo()).setCause(diagnosisProto.getCause()).build();
     }
 
     public static DiagnosisProto.Diagnosis toDiagnosisProto(Diagnosis diagnosisProto) {
         return DiagnosisProto.Diagnosis.newBuilder().setPartId(diagnosisProto.getPartId())
                 .setFaulty(diagnosisProto.isFaulty()).setFault(diagnosisProto.getFault())
-                .setCause(diagnosisProto.getCause()).build();
+                .setInfo(diagnosisProto.getInfo()).setCause(diagnosisProto.getCause()).build();
     }
 
     public static List<Diagnosis>

@@ -22,8 +22,9 @@ message PartIdList {
 message Diagnosis {
     string part_id = 1;
     bool faulty = 2;
-    string fault = 3;
-    string cause = 4;
+    string info = 3;
+    string fault = 4;
+    string cause = 5;
 }
 
 message DiagnosisList {

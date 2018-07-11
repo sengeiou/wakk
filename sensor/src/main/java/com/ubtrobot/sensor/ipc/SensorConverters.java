@@ -1,7 +1,5 @@
 package com.ubtrobot.sensor.ipc;
 
-import com.ubtrobot.device.ipc.DeviceConverters;
-import com.ubtrobot.device.ipc.DeviceProto;
 import com.ubtrobot.sensor.SensorDevice;
 import com.ubtrobot.sensor.SensorEvent;
 
@@ -12,18 +10,27 @@ public class SensorConverters {
     private SensorConverters() {
     }
 
-    public static DeviceProto.DeviceList toSensorDeviceListProto(List<SensorDevice> deviceList) {
-        DeviceProto.DeviceList.Builder builder = DeviceProto.DeviceList.newBuilder();
+    public static SensorProto.SensorDeviceList toSensorDeviceListProto(List<SensorDevice> deviceList) {
+        SensorProto.SensorDeviceList.Builder builder = SensorProto.SensorDeviceList.newBuilder();
         for (SensorDevice sensorDevice : deviceList) {
-            builder.addDevice(DeviceConverters.toDeviceProto(sensorDevice));
+            builder.addSensorDevice(toSensorDeviceProto(sensorDevice));
         }
 
         return builder.build();
     }
 
-    public static SensorDevice toSensorDevicePojo(DeviceProto.Device deviceProto) {
-        return new SensorDevice.Builder(deviceProto.getId(), deviceProto.getName())
-                .setDescription(deviceProto.getDescription()).build();
+    public static SensorDevice toSensorDevicePojo(SensorProto.SensorDevice sensorDevice) {
+        return new SensorDevice.Builder(sensorDevice.getId(), sensorDevice.getName())
+                .setType(sensorDevice.getType()).setDescription(sensorDevice.getDescription()).build();
+    }
+
+    public static SensorProto.SensorDevice toSensorDeviceProto(SensorDevice sensorDevice) {
+        return SensorProto.SensorDevice.newBuilder()
+                .setId(sensorDevice.getId())
+                .setName(sensorDevice.getName())
+                .setType(sensorDevice.getType())
+                .setDescription(sensorDevice.getDescription())
+                .build();
     }
 
     public static SensorEvent toSensorEventPojo(SensorProto.SensorEvent event) {

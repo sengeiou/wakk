@@ -32,6 +32,10 @@ public class SensorManager {
         return mSensorList.get(sensorId);
     }
 
+    public List<Sensor> getSensorList(String type) {
+        return mSensorList.getSensorList(type);
+    }
+
     public Promise<Boolean, SensorException> enableSensor(String sensorId) {
         return mSensorList.get(sensorId).enable();
     }

@@ -16,6 +16,8 @@ public class MotionConstants {
     public static final String CALL_PATH_GET_JOINT_ANGLE = "/joint/angle";
     public static final String CALL_PATH_JOINT_ROTATE = "/joint/rotate";
     public static final String CALL_PATH_EXECUTE_MOTION_SCRIPT = "/motion/script/execute";
+    public static final String CALL_PATH_JOINT_RELEASE = "/joint/release";
+    public static final String CALL_PATH_QUERY_JOINT_IS_RELEASED= "/joint/query-is-released";
 
     public static final String CALL_PATH_GET_LOCOMOTOR = "/locomotor/device";
     public static final String CALL_PATH_LOCOMOTE = "/locomotor/locomote";

@@ -35,4 +35,8 @@ public interface MotionService {
     locomote(List<LocomotionOption> optionSequence);
 
     Promise<Void, ExecuteException> executeScript(String scriptId);
+
+    Promise<Void, JointException> jointsRelease(List<String> jointIdList);
+
+    Promise<List<String>, JointException> isJointsReleased(List<String> jointIdList);
 }

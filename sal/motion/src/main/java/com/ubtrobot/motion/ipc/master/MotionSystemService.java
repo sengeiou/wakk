@@ -69,12 +69,13 @@ public class MotionSystemService extends MasterSystemService {
         try {
             List<JointDevice> jointDevices = mService.getJointList().get();
             for (JointDevice jointDevice : jointDevices) {
-                itemDetails.add(new CompetingItemDetail.Builder(
-                        getName(),
-                        MotionConstants.COMPETING_ITEM_PREFIX_JOINT + jointDevice.getId()
-                ).addCallPath(MotionConstants.CALL_PATH_JOINT_ROTATE)
-                        .setDescription("Competing item detail for joint " + jointDevice.getId())
-                        .build());
+                itemDetails.add(
+                        new CompetingItemDetail.Builder(getName(), MotionConstants.COMPETING_ITEM_PREFIX_JOINT + jointDevice.getId())
+                                .addCallPath(MotionConstants.CALL_PATH_JOINT_ROTATE)
+                                .addCallPath(MotionConstants.CALL_PATH_JOINT_RELEASE)
+                                .setDescription("Competing item detail for joint " + jointDevice.getId())
+                                .build()
+                );
             }
 
             itemDetails.add(new CompetingItemDetail.Builder(
@@ -344,6 +345,70 @@ public class MotionSystemService extends MasterSystemService {
                 new ProtoCompetingCallDelegate.FConverter<ExecuteException>() {
                     @Override
                     public CallException convertFail(ExecuteException e) {
+                        return new CallException(e.getCode(), e.getMessage());
+                    }
+                }
+        );
+    }
+
+    @Call(path = MotionConstants.CALL_PATH_JOINT_RELEASE)
+    public void onJointRelease(final Request request, final Responder responder) {
+        final MotionProto.JointIdList jointIdList;
+        if ((jointIdList = ProtoParamParser.parseParam(
+                request, MotionProto.JointIdList.class, responder)) == null) {
+            return;
+        }
+
+        LinkedList<String> competingItemIds = new LinkedList<>();
+        for (String string : jointIdList.getIdList()) {
+            competingItemIds.add(MotionConstants.COMPETING_ITEM_PREFIX_JOINT + string);
+        }
+
+        mCompetingCallDelegate.onCall(
+                request,
+                competingItemIds,
+                responder, new CompetingCallDelegate.SessionCallable<Void, JointException>() {
+                    @Override
+                    public Promise<Void, JointException> call() throws CallException {
+                        return mService.jointsRelease(jointIdList.getIdList());
+                    }
+                }, new ProtoCompetingCallDelegate.DFConverter<Void, JointException>() {
+                    @Override
+                    public Message convertDone(Void done) {
+                        return null;
+                    }
+
+                    @Override
+                    public CallException convertFail(JointException e) {
+                        return new CallException(e.getCode(), e.getMessage());
+                    }
+                });
+    }
+
+    @Call(path = MotionConstants.CALL_PATH_QUERY_JOINT_IS_RELEASED)
+    public void onQueryJointIsReleased(Request request, Responder responder) {
+        final MotionProto.JointIdList jointIdList;
+        if ((jointIdList = ProtoParamParser.parseParam(
+                request, MotionProto.JointIdList.class, responder)) == null) {
+            return;
+        }
+
+        mCallProcessor.onCall(
+                responder,
+                new CallProcessAdapter.Callable<List<String>, JointException>() {
+                    @Override
+                    public Promise<List<String>, JointException> call() throws CallException {
+                        return mService.isJointsReleased(jointIdList.getIdList());
+                    }
+                },
+                new ProtoCallProcessAdapter.DFConverter<List<String>, JointException>() {
+                    @Override
+                    public Message convertDone(List<String> idList) {
+                        return MotionProto.JointIdList.newBuilder().addAllId(idList).build();
+                    }
+
+                    @Override
+                    public CallException convertFail(JointException e) {
                         return new CallException(e.getCode(), e.getMessage());
                     }
                 }

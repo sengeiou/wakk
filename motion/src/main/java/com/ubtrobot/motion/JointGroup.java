@@ -189,6 +189,71 @@ public class JointGroup implements Competing {
         );
     }
 
+    public Promise<Void, JointException> release(CompetitionSession session, List<String> jointIds) {
+        if (session == null || !session.isAccessible(this)) {
+            throw new IllegalArgumentException("The session is null or does not contain " +
+                    "the competing of the joint group.");
+        }
+
+        MotionProto.JointIdList.Builder builder = MotionProto.JointIdList.newBuilder();
+        builder.addAllId(jointIds);
+
+        return new ProtoCallAdapter(
+                session.createSystemServiceProxy(MotionConstants.SERVICE_NAME),
+                mHandler
+        ).call(
+                MotionConstants.CALL_PATH_JOINT_RELEASE,
+                builder.build(),
+                new ProtoCallAdapter.DFProtoConverter<Void, Message, JointException>() {
+                    @Override
+                    public Class<Message> doneProtoClass() {
+                        return Message.class;
+                    }
+
+                    @Override
+                    public Void convertDone(Message protoParam) throws Exception {
+                        return null;
+                    }
+
+                    @Override
+                    public JointException convertFail(CallException e) {
+                        return new JointException.Factory().from(e);
+                    }
+                }
+        );
+    }
+
+    public Promise<Map<String, Boolean>, JointException> isReleased() {
+        return mMotionService.call(
+                MotionConstants.CALL_PATH_QUERY_JOINT_IS_RELEASED,
+                MotionConverters.toJointIdListProto(mJointDevices),
+                new ProtoCallAdapter.DFProtoConverter<Map<String, Boolean>,
+                        MotionProto.JointIdList, JointException>() {
+                    @Override
+                    public Class<MotionProto.JointIdList> doneProtoClass() {
+                        return MotionProto.JointIdList.class;
+                    }
+
+                    @Override
+                    public Map<String, Boolean> convertDone(MotionProto.JointIdList jointIdList) {
+                        HashSet<String> idSet = new HashSet<>(jointIdList.getIdList());
+                        HashMap<String, Boolean> ret = new HashMap<>();
+
+                        for (JointDevice jointDevice : mJointDevices) {
+                            ret.put(jointDevice.getId(), idSet.contains(jointDevice.getId()));
+                        }
+
+                        return ret;
+                    }
+
+                    @Override
+                    public JointException convertFail(CallException e) {
+                        return new JointException.Factory().from(e);
+                    }
+                }
+        );
+    }
+
     @Override
     public String toString() {
         return "JointGroup{" +

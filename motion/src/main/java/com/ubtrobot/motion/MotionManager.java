@@ -576,6 +576,57 @@ public class MotionManager {
         );
     }
 
+    public Promise<Void, JointException> release(final String jointId) {
+        SessionEnv sessionEnv = getSession(Collections.singletonList(jointId), false, false);
+        return sessionEnv.session.execute(
+                mJointList.get(jointId),
+                new CompetitionSessionExt.SessionCallable<Void, JointException, Competing>() {
+                    @Override
+                    public Promise<Void, JointException> call(CompetitionSession session, Competing competing) {
+                        return mJointList.get(jointId).release(session);
+                    }
+                }, new CompetitionSessionExt.Converter<JointException>() {
+                    @Override
+                    public JointException convert(ActivateException e) {
+                        return new JointException.Factory().occupied(e);
+                    }
+                });
+    }
+
+    public Promise<Void, JointException> release(String... jointIds) {
+        return release(Arrays.asList(jointIds));
+    }
+
+    public Promise<Void, JointException> release(final List<String> jointIdList) {
+        final SessionEnv sessionEnv = getSession(jointIdList, false, false);
+        return sessionEnv.session.execute(
+                sessionEnv.jointGroup,
+                new CompetitionSessionExt.SessionCallable<Void, JointException, Competing>() {
+                    @Override
+                    public Promise<Void, JointException>
+                    call(CompetitionSession session, Competing competing) {
+                        return sessionEnv.jointGroup.release(session, jointIdList);
+                    }
+                }, new CompetitionSessionExt.Converter<JointException>() {
+                    @Override
+                    public JointException convert(ActivateException e) {
+                        return new JointException.Factory().occupied(e);
+                    }
+                });
+    }
+
+    public Promise<Boolean, JointException> isReleased(String jointId) {
+        return mJointList.get(jointId).isReleased();
+    }
+
+    public Promise<Map<String, Boolean>, JointException> isReleased(String... jointIds) {
+        return createJointGroup(Arrays.asList(jointIds)).isReleased();
+    }
+
+    public Promise<Map<String, Boolean>, JointException> isReleased(List<String> jointIdList) {
+        return createJointGroup(jointIdList).isReleased();
+    }
+
     private static class SessionEnv {
 
         JointGroup jointGroup;

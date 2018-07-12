@@ -5,6 +5,7 @@ import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.ProgressivePromiseOperators;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.async.PromiseOperators;
+import com.ubtrobot.async.ReturnInputFunction;
 import com.ubtrobot.exception.AccessServiceException;
 import com.ubtrobot.master.adapter.ProtoCallAdapter;
 import com.ubtrobot.master.competition.Competing;
@@ -162,6 +163,38 @@ public class Joint implements Competing {
                         }
 
                         return angle;
+                    }
+                }
+        );
+    }
+
+    public Promise<Void, JointException> release(CompetitionSession session) {
+        return PromiseOperators.mapDone(
+                mJointGroup.release(session, Arrays.asList(mDevice.getId())),
+                new Function<Void, Void, JointException>() {
+
+                    @Override
+                    public Void apply(Void aVoid) throws JointException {
+                        return null;
+                    }
+                });
+    }
+
+    public Promise<Boolean, JointException> isReleased() {
+        return PromiseOperators.mapDone(
+                mJointGroup.isReleased(),
+                new Function<Map<String, Boolean>, Boolean, JointException>() {
+                    @Override
+                    public Boolean
+                    apply(Map<String, Boolean> releasedMap) throws JointException {
+                        Boolean isReleased = releasedMap.get(mDevice.getId());
+                        if (isReleased == null) {
+                            isReleased = false;
+                            LOGGER.e("Query joint is released failed. " +
+                                    "Released state in map NOT found.");
+                        }
+
+                        return isReleased;
                     }
                 }
         );

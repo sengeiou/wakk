@@ -10,4 +10,6 @@
     <call path="/locomotor/locomote" />
     <call path="/locomotor/query-is-locomoting" />
     <call path="/motion/script/execute" />
+    <call path="/joint/release" />
+    <call path="/joint/query-is-released" />
 </service>

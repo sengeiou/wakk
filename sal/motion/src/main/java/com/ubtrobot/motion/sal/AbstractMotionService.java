@@ -28,6 +28,7 @@ public abstract class AbstractMotionService implements MotionService {
     private static final String TASK_RECEIVER_JOINT_PREFIX = "joint-";
     private static final String TASK_RECEIVER_LOCOMOTION = "locomotion";
     private static final String TASK_NAME_JOINT_ROTATE = "joint-rotate";
+    private static final String TASK_NAME_JOINT_RELEASE = "joint-release";
     private static final String TASK_NAME_SCRIPT_EXECUTE = "script-execute";
     private static final String TASK_NAME_LOCOMOTION = "locomotion";
 
@@ -264,4 +265,50 @@ public abstract class AbstractMotionService implements MotionService {
     protected void rejectExecutingScript(String sessionId, ExecuteException e) {
         mInterruptibleTaskHelper.reject(sessionId, e);
     }
+
+    @Override
+    public Promise<Void, JointException> jointsRelease(final List<String> jointIdList) {
+        LinkedList<String> jointReceivers = new LinkedList<>();
+        for (String jointId : jointIdList) {
+            jointReceivers.add(TASK_RECEIVER_JOINT_PREFIX + jointId);
+        }
+
+        final InterruptibleTaskHelper.Session session = new InterruptibleTaskHelper.Session();
+        return mInterruptibleTaskHelper.start(
+                jointReceivers,
+                TASK_NAME_JOINT_RELEASE,
+                session,
+                new InterruptibleAsyncTask<Void, JointException>() {
+                    @Override
+                    protected void onStart() {
+                        jointStartReleasing(session.getId(), jointIdList);
+                    }
+                },
+                new InterruptibleTaskHelper.InterruptedExceptionCreator<JointException>() {
+                    @Override
+                    public JointException createInterruptedException(Set<String> interrupters) {
+                        return new JointException.Factory().interrupted("Interrupted by joints("
+                                + interrupters + ").");
+                    }
+                }
+        );
+    }
+
+    protected abstract void
+    jointStartReleasing(String sessionId, List<String> jointIdList);
+
+    @Override
+    public Promise<List<String>, JointException>
+    isJointsReleased(List<String> jointIdList) {
+        AsyncTask<List<String>, JointException> task = createGettingJointsReleasedTask(jointIdList);
+        if (task == null) {
+            throw new IllegalStateException("createGetJointsReleasedTask returns null.");
+        }
+
+        task.start();
+        return task.promise();
+    }
+
+    protected abstract AsyncTask<List<String>, JointException>
+    createGettingJointsReleasedTask(List<String> jointIdList);
 }

@@ -1,11 +1,12 @@
 package com.ubtrobot.sensor;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.ubtrobot.cache.CachedField;
+import com.ubtrobot.device.ipc.DeviceProto;
 import com.ubtrobot.master.adapter.ProtoCallAdapter;
 import com.ubtrobot.master.context.MasterContext;
 import com.ubtrobot.sensor.ipc.SensorConstants;
 import com.ubtrobot.sensor.ipc.SensorConverters;
-import com.ubtrobot.sensor.ipc.SensorProto;
 import com.ubtrobot.transport.message.CallException;
 import com.ubtrobot.ulog.FwLoggerFactory;
 import com.ubtrobot.ulog.Logger;
@@ -29,10 +30,10 @@ public class SensorList {
             @Override
             public List<Sensor> get() {
                 try {
-                    SensorProto.SensorDeviceList deviceList = sensorService.syncCall(
-                            SensorConstants.CALL_PATH_GET_SENSOR_LIST, SensorProto.SensorDeviceList.class);
+                    DeviceProto.DeviceList deviceList = sensorService.syncCall(
+                            SensorConstants.CALL_PATH_GET_SENSOR_LIST, DeviceProto.DeviceList.class);
                     LinkedList<Sensor> sensors = new LinkedList<>();
-                    for (SensorProto.SensorDevice device : deviceList.getSensorDeviceList()) {
+                    for (DeviceProto.Device device : deviceList.getDeviceList()) {
                         sensors.add(new Sensor(masterContext, sensorService,
                                 SensorConverters.toSensorDevicePojo(device)));
                     }
@@ -40,8 +41,11 @@ public class SensorList {
                     return Collections.unmodifiableList(sensors);
                 } catch (CallException e) {
                     LOGGER.e(e, "Framework error when getting the sensor list.");
-                    return null;
+                } catch (InvalidProtocolBufferException e) {
+                    LOGGER.e(e, "Framework error when getting the Sensor list.");
                 }
+
+                return null;
             }
         });
         mSensorMap = new CachedField<>(new CachedField.FieldGetter<Map<String, Sensor>>() {

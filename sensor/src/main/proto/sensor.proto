@@ -17,13 +17,6 @@ message ControlOptions {
     map<string, string> option = 3;
 }
 
-message SensorDevice {
-    string id = 1;
-    string name = 2;
+message SensorDeviceExt {
     string type = 3;
-    string description = 4;
-}
-
-message SensorDeviceList {
-    repeated SensorDevice sensorDevice = 1;
 }

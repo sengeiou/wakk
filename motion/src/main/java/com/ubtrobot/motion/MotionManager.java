@@ -29,7 +29,7 @@ public class MotionManager {
 
     private final JointList mJointList;
     private final LocomotorGetter mLocomotorGetter;
-    private final MotionScriptExecutor mScriptExecutor;
+    private final ActionPerformer mActionPerformer;
 
     private final Map<String, SessionEnv> mSessions = new HashMap<>();
 
@@ -47,7 +47,7 @@ public class MotionManager {
 
         mJointList = new JointList(mMotionService);
         mLocomotorGetter = new LocomotorGetter(mMotionService);
-        mScriptExecutor = new MotionScriptExecutor(mJointList, mLocomotorGetter);
+        mActionPerformer = new ActionPerformer(mJointList, mLocomotorGetter);
     }
 
     public List<Joint> getJointList() {
@@ -121,7 +121,7 @@ public class MotionManager {
     private SessionEnv getSession(
             List<String> jointIds,
             boolean containLocomotor,
-            boolean containScriptExecutor) {
+            boolean containActionPerformer) {
         LinkedList<String> sortedJointIds;
         if (jointIds == null || jointIds.isEmpty()) {
             sortedJointIds = new LinkedList<>();
@@ -137,8 +137,8 @@ public class MotionManager {
         if (containLocomotor) {
             builder.append("Locomotor");
         }
-        if (containScriptExecutor) {
-            builder.append("Executor");
+        if (containActionPerformer) {
+            builder.append("Performer");
         }
         if (builder.length() == 0) {
             throw new AssertionError("Should NOT be here.");
@@ -159,9 +159,9 @@ public class MotionManager {
                     sessionEnv.locomotor = mLocomotorGetter.get();
                     session.addCompeting(sessionEnv.locomotor);
                 }
-                if (containScriptExecutor) {
-                    sessionEnv.scriptExecutor = mScriptExecutor;
-                    session.addCompeting(sessionEnv.scriptExecutor);
+                if (containActionPerformer) {
+                    sessionEnv.actionPerformer = mActionPerformer;
+                    session.addCompeting(sessionEnv.actionPerformer);
                 }
 
                 mSessions.put(key, sessionEnv);
@@ -550,7 +550,15 @@ public class MotionManager {
         return mLocomotorGetter.get().isLocomoting();
     }
 
-    public Promise<Void, ExecuteException> executeScript(final String scriptId) {
+    public Promise<Void, PerformException> performAction(String actionId) {
+        return performAction(Arrays.asList(actionId));
+    }
+
+    public Promise<Void, PerformException> performAction(String... actionIds) {
+        return performAction(Arrays.asList(actionIds));
+    }
+
+    public Promise<Void, PerformException> performAction(final List<String> actionIdList) {
         LinkedList<String> jointIds = new LinkedList<>();
         for (Joint joint : mJointList.all()) {
             jointIds.add(joint.getId());
@@ -558,19 +566,19 @@ public class MotionManager {
 
         final SessionEnv sessionEnv = getSession(jointIds, mLocomotorGetter.exists(), true);
         return sessionEnv.session.execute(
-                mScriptExecutor,
+                mActionPerformer,
                 new CompetitionSessionExt.SessionCallable<
-                        Void, ExecuteException, Competing>() {
+                        Void, PerformException, Competing>() {
                     @Override
-                    public Promise<Void, ExecuteException>
+                    public Promise<Void, PerformException>
                     call(CompetitionSession session, Competing competing) {
-                        return sessionEnv.scriptExecutor.execute(session, scriptId);
+                        return sessionEnv.actionPerformer.performAction(session, actionIdList);
                     }
                 },
-                new CompetitionSessionExt.Converter<ExecuteException>() {
+                new CompetitionSessionExt.Converter<PerformException>() {
                     @Override
-                    public ExecuteException convert(ActivateException e) {
-                        return new ExecuteException.Factory().occupied(e);
+                    public PerformException convert(ActivateException e) {
+                        return new PerformException.Factory().occupied(e);
                     }
                 }
         );
@@ -631,7 +639,7 @@ public class MotionManager {
 
         JointGroup jointGroup;
         Locomotor locomotor;
-        MotionScriptExecutor scriptExecutor;
+        ActionPerformer actionPerformer;
         CompetitionSessionExt<Competing> session;
 
         public SessionEnv(CompetitionSessionExt<Competing> session) {

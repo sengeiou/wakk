@@ -8,7 +8,6 @@ import com.ubtrobot.async.Promise;
 import com.ubtrobot.cache.CachedField;
 import com.ubtrobot.exception.AccessServiceException;
 import com.ubtrobot.master.competition.InterruptibleTaskHelper;
-import com.ubtrobot.motion.ExecuteException;
 import com.ubtrobot.motion.JointDevice;
 import com.ubtrobot.motion.JointException;
 import com.ubtrobot.motion.JointGroupRotatingProgress;
@@ -17,6 +16,7 @@ import com.ubtrobot.motion.LocomotionException;
 import com.ubtrobot.motion.LocomotionOption;
 import com.ubtrobot.motion.LocomotionProgress;
 import com.ubtrobot.motion.LocomotorDevice;
+import com.ubtrobot.motion.PerformException;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -29,7 +29,7 @@ public abstract class AbstractMotionService implements MotionService {
     private static final String TASK_RECEIVER_LOCOMOTION = "locomotion";
     private static final String TASK_NAME_JOINT_ROTATE = "joint-rotate";
     private static final String TASK_NAME_JOINT_RELEASE = "joint-release";
-    private static final String TASK_NAME_SCRIPT_EXECUTE = "script-execute";
+    private static final String TASK_NAME_ACTION_EXECUTE = "action-perform";
     private static final String TASK_NAME_LOCOMOTION = "locomotion";
 
     private final CachedField<Promise<List<JointDevice>, AccessServiceException>> mJoingListPromise;
@@ -216,7 +216,7 @@ public abstract class AbstractMotionService implements MotionService {
     }
 
     @Override
-    public Promise<Void, ExecuteException> executeScript(final String scriptId) {
+    public Promise<Void, PerformException> performAction(final List<String> actionIdList) {
         LinkedList<String> receivers = new LinkedList<>();
         try {
             List<JointDevice> jointDevices = mJoingListPromise.get().get();
@@ -231,38 +231,38 @@ public abstract class AbstractMotionService implements MotionService {
         final InterruptibleTaskHelper.Session session = new InterruptibleTaskHelper.Session();
         return mInterruptibleTaskHelper.start(
                 receivers,
-                TASK_NAME_SCRIPT_EXECUTE,
+                TASK_NAME_ACTION_EXECUTE,
                 session,
-                new InterruptibleAsyncTask<Void, ExecuteException>() {
+                new InterruptibleAsyncTask<Void, PerformException>() {
                     @Override
                     protected void onStart() {
-                        startExecutingScript(session.getId(), scriptId);
+                        startPerformingAction(session.getId(), actionIdList);
                     }
 
                     @Override
                     protected void onCancel() {
-                        stopExecutingScript(session.getId());
+                        stopPerformingAction(session.getId());
                     }
                 },
-                new InterruptibleTaskHelper.InterruptedExceptionCreator<ExecuteException>() {
+                new InterruptibleTaskHelper.InterruptedExceptionCreator<PerformException>() {
                     @Override
-                    public ExecuteException createInterruptedException(Set<String> interrupters) {
-                        return new ExecuteException.Factory().interrupted("Interrupted by joints("
+                    public PerformException createInterruptedException(Set<String> interrupters) {
+                        return new PerformException.Factory().interrupted("Interrupted by joints("
                                 + interrupters + ").");
                     }
                 }
         );
     }
 
-    protected abstract void startExecutingScript(String sessionId, String scriptId);
+    protected abstract void startPerformingAction(String sessionId, List<String> actionIdList);
 
-    protected abstract void stopExecutingScript(String sessionId);
+    protected abstract void stopPerformingAction(String sessionId);
 
-    protected void resolveExecutingScript(String sessionId) {
+    protected void resolvePerformAction(String sessionId) {
         mInterruptibleTaskHelper.resolve(sessionId, null);
     }
 
-    protected void rejectExecutingScript(String sessionId, ExecuteException e) {
+    protected void rejectPerformAction(String sessionId, PerformException e) {
         mInterruptibleTaskHelper.reject(sessionId, e);
     }
 

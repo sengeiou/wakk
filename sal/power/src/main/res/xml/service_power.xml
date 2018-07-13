@@ -6,6 +6,8 @@
     <call path="/power/query-is-sleeping" />
     <call path="/power/wake-up" />
     <call path="/power/shutdown" />
+    <call path="/power/startup/schedule" />
+    <call path="/power/startup/schedule/cancel" />
     <call path="/power/battery-properties" />
     <call path="/power/charging-station/connect" />
     <call path="/power/charging-station/disconnect" />

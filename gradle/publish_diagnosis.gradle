@@ -1,0 +1,57 @@
+project(':diagnosis') {
+    artifactoryPublish.dependsOn('jarFramework')
+    publishing {
+        publications {
+            jarFramework(MavenPublication) {
+                groupId = rootProject.ext.groupId
+                artifactId = "diagnosis"
+                version = rootProject.ext.versions.diagnosisVersion
+
+                rootProject.ext.isSnapshot = version.toUpperCase().endsWith("-SNAPSHOT")
+
+                artifact("$buildDir/libs/diagnosis.jar")
+                pom.withXml {
+                    def dependenciesNode = asNode().appendNode('dependencies')
+
+                    def dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.ubtrobot.framework')
+                    dependencyNode.appendNode('artifactId', 'commons')
+                    dependencyNode.appendNode('version', rootProject.ext.versions.commonsVersion)
+                }
+            }
+        }
+    }
+
+    artifactoryPublish {
+        publications(publishing.publications.jarFramework)
+    }
+}
+
+project(':sal:diagnosis') {
+    artifactoryPublish.dependsOn('assembleRelease')
+    publishing {
+        publications {
+            aarSal(MavenPublication) {
+                groupId = rootProject.ext.groupId
+                artifactId = "diagnosis-sal"
+                version = rootProject.ext.versions.diagnosisVersion
+
+                rootProject.ext.isSnapshot = version.toUpperCase().endsWith("-SNAPSHOT")
+
+                artifact("$buildDir/outputs/aar/diagnosis-release.aar")
+                pom.withXml {
+                    def dependenciesNode = asNode().appendNode('dependencies')
+
+                    def dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.ubtrobot.framework')
+                    dependencyNode.appendNode('artifactId', 'diagnosis')
+                    dependencyNode.appendNode('version', rootProject.ext.versions.diagnosisVersion)
+                }
+            }
+        }
+    }
+
+    artifactoryPublish {
+        publications(publishing.publications.aarSal)
+    }
+}

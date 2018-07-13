@@ -4,6 +4,7 @@ import android.app.Application;
 import android.os.Handler;
 
 import com.google.protobuf.BoolValue;
+import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.exception.AccessServiceException;
@@ -138,9 +139,27 @@ public class PowerSystemService extends MasterSystemService {
 
     @Call(path = PowerConstants.CALL_PATH_SHUTDOWN)
     public void onShutdown(Request request, Responder responder) {
-        final PowerProto.ShutdownOption shutdownOption;
-        if ((shutdownOption = ProtoParamParser.parseParam(
-                request, PowerProto.ShutdownOption.class, responder)) == null) {
+        mCallProcessor.onCall(
+                responder,
+                new CallProcessAdapter.Callable<Void, AccessServiceException>() {
+                    @Override
+                    public Promise<Void, AccessServiceException> call() throws CallException {
+                        return mService.shutdown();
+                    }
+                },
+                new ProtoCallProcessAdapter.FConverter<AccessServiceException>() {
+                    @Override
+                    public CallException convertFail(AccessServiceException e) {
+                        return new CallException(e.getCode(), e.getMessage());
+                    }
+                }
+        );
+    }
+
+    @Call(path = PowerConstants.CALL_PATH_SCHEDULE_STARTUP)
+    public void onScheduleStartup(Request request, Responder responder) {
+        final Int32Value waitSeconds = ProtoParamParser.parseParam(request, Int32Value.class, responder);
+        if (waitSeconds == null) {
             return;
         }
 
@@ -149,10 +168,34 @@ public class PowerSystemService extends MasterSystemService {
                 new CallProcessAdapter.Callable<Void, AccessServiceException>() {
                     @Override
                     public Promise<Void, AccessServiceException> call() throws CallException {
-                        return mService.shutdown(PowerConverters.toShutdownOptionPojo(shutdownOption));
+                        return mService.scheduleStartup(waitSeconds.getValue());
                     }
                 },
                 new ProtoCallProcessAdapter.FConverter<AccessServiceException>() {
+                    @Override
+                    public CallException convertFail(AccessServiceException e) {
+                        return new CallException(e.getCode(), e.getMessage());
+                    }
+                }
+        );
+    }
+
+    @Call(path = PowerConstants.CALL_PATH_CANCEL_STARTUP)
+    public void onCancelStartupSchedule(Request request, Responder responder) {
+        mCallProcessor.onCall(
+                responder,
+                new CallProcessAdapter.Callable<Boolean, AccessServiceException>() {
+                    @Override
+                    public Promise<Boolean, AccessServiceException> call() throws CallException {
+                        return mService.cancelStartupSchedule();
+                    }
+                },
+                new ProtoCallProcessAdapter.DFConverter<Boolean, AccessServiceException>() {
+                    @Override
+                    public Message convertDone(Boolean taskScheduled) {
+                        return BoolValue.newBuilder().setValue(taskScheduled).build();
+                    }
+
                     @Override
                     public CallException convertFail(AccessServiceException e) {
                         return new CallException(e.getCode(), e.getMessage());

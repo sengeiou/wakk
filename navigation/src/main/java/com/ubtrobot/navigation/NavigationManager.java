@@ -5,6 +5,7 @@ import android.os.Looper;
 
 import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
+import com.ubtrobot.exception.AccessServiceException;
 import com.ubtrobot.master.adapter.ProtoCallAdapter;
 import com.ubtrobot.master.competition.ActivateException;
 import com.ubtrobot.master.competition.CompetitionSession;
@@ -32,7 +33,7 @@ public class NavigationManager {
                 handler
         );
         mNavMapList = new NavMapList(navigationService);
-        mNavigator = new Navigator(navigationService, handler);
+        mNavigator = new Navigator(masterContext, navigationService, handler);
     }
 
     public Promise<List<NavMap>, NavMapException> getNavMapList() {
@@ -108,6 +109,10 @@ public class NavigationManager {
         );
     }
 
+    public Promise<Boolean, AccessServiceException> isLocating() {
+        return mNavigator.isLocating();
+    }
+
     public ProgressivePromise<Void, NavigateException, Navigator.NavigatingProgress>
     navigate(Location destination) {
         return navigate(destination, NavigateOption.DEFAULT);
@@ -134,7 +139,19 @@ public class NavigationManager {
         );
     }
 
+    public Promise<Boolean, AccessServiceException> isNavigating() {
+        return mNavigator.isNavigating();
+    }
+
     public Navigator navigator() {
         return mNavigator;
+    }
+
+    public void registerLocationChangeListener(LocationChangeListener locationChangeListener) {
+        mNavigator.registerLocationChangeListener(locationChangeListener);
+    }
+
+    public void unregisterLocationChangeListener(LocationChangeListener locationChangeListener) {
+        mNavigator.unregisterLocationChangeListener(locationChangeListener);
     }
 }

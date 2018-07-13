@@ -4,10 +4,12 @@ import android.app.Application;
 import android.os.Handler;
 import android.text.TextUtils;
 
+import com.google.protobuf.BoolValue;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
+import com.ubtrobot.exception.AccessServiceException;
 import com.ubtrobot.master.adapter.CallProcessAdapter;
 import com.ubtrobot.master.adapter.ProtoCallProcessAdapter;
 import com.ubtrobot.master.adapter.ProtoParamParser;
@@ -276,6 +278,30 @@ public class NavigationSystemService extends MasterSystemService {
         );
     }
 
+    @Call(path = NavigationConstants.CALL_PATH_QUERY_LOCATING)
+    public void onQueryLocating(Request request, Responder responder) {
+        mCallProcessor.onCall(
+                responder,
+                new CallProcessAdapter.Callable<Boolean, AccessServiceException>() {
+                    @Override
+                    public Promise<Boolean, AccessServiceException> call() throws CallException {
+                        return mService.isLocating();
+                    }
+                },
+                new ProtoCallProcessAdapter.DFConverter<Boolean, AccessServiceException>() {
+                    @Override
+                    public Message convertDone(Boolean locating) {
+                        return BoolValue.newBuilder().setValue(locating).build();
+                    }
+
+                    @Override
+                    public CallException convertFail(AccessServiceException e) {
+                        return new CallException(e.getCode(), e.getMessage());
+                    }
+                }
+        );
+    }
+
     @Call(path = NavigationConstants.CALL_PATH_NAVIGATE)
     public void onNavigate(Request request, Responder responder) {
         final NavigationProto.NavigateOption navigateOption = ProtoParamParser.parseParam(request,
@@ -314,6 +340,30 @@ public class NavigationSystemService extends MasterSystemService {
                     @Override
                     public Message convertProgress(Navigator.NavigatingProgress progress) {
                         return NavigationConverters.toNavigatingProgressProto(progress);
+                    }
+                }
+        );
+    }
+
+    @Call(path = NavigationConstants.CALL_PATH_QUERY_NAVIGATING)
+    public void onQueryNavigating(Request request, Responder responder) {
+        mCallProcessor.onCall(
+                responder,
+                new CallProcessAdapter.Callable<Boolean, AccessServiceException>() {
+                    @Override
+                    public Promise<Boolean, AccessServiceException> call() throws CallException {
+                        return mService.isNavigating();
+                    }
+                },
+                new ProtoCallProcessAdapter.DFConverter<Boolean, AccessServiceException>() {
+                    @Override
+                    public Message convertDone(Boolean navigating) {
+                        return BoolValue.newBuilder().setValue(navigating).build();
+                    }
+
+                    @Override
+                    public CallException convertFail(AccessServiceException e) {
+                        return new CallException(e.getCode(), e.getMessage());
                     }
                 }
         );

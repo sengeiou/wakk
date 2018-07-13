@@ -37,7 +37,7 @@ public class EmotionManager {
                 handler
         );
         mEmotionList = new EmotionList(emotionService);
-        mExpresser = new Expresser(mEmotionList, handler);
+        mExpresser = new Expresser(masterContext, mEmotionList, handler);
     }
 
     /**
@@ -123,5 +123,13 @@ public class EmotionManager {
                     }
                 }
         );
+    }
+
+    public void registerEmotionListener(EmotionListener emotionListener) {
+        mExpresser.registerEmotionListener(emotionListener);
+    }
+
+    public void unregisterEmotionListener(EmotionListener emotionListener) {
+        mExpresser.unregisterLocationChangeListener(emotionListener);
     }
 }

@@ -51,7 +51,8 @@ public class Configuration {
         }
 
         public Builder(Configuration configuration) {
-            Preconditions.checkNotNull(configuration, "Configuration.Builder refuse null Configuration");
+            Preconditions.checkNotNull(configuration,
+                    "Configuration.Builder refuse null Configuration");
             speakerId = configuration.getSpeakerId();
             speakingSpeed = configuration.getSpeakingSpeed();
             speakingVolume = configuration.getSpeakingVolume();
@@ -67,27 +68,31 @@ public class Configuration {
         }
 
         public Builder setSpeakingSpeed(int speakingSpeed) {
-            Preconditions.checkArgument((speakingSpeed >= SynthesizeOption.SPEAKING_SPEED_MIN)
+            Preconditions.checkArgument((speakingSpeed >= SynthesizeOption.DEFAULT_SPEAKING_SPEED)
                             && (speakingSpeed <= SynthesizeOption.SPEAKING_SPEED_MAX),
                     "Configuration.Builder setSpeakingSpeed value must in" +
-                            "[SynthesizeOption.SPEAKING_SPEED_MIN,SynthesizeOption.SPEAKING_SPEED_MAX]");
+                            "[SynthesizeOption.SPEAKING_SPEED_MIN,SynthesizeOption"
+                            + ".SPEAKING_SPEED_MAX]");
             this.speakingSpeed = speakingSpeed;
             return this;
         }
 
         public Builder setSpeakingVolume(int speakingVolume) {
-            Preconditions.checkArgument((speakingVolume >= SynthesizeOption.SPEAKING_VOLUME_MIN)
+            Preconditions.checkArgument((speakingVolume >= SynthesizeOption.DEFAULT_SPEAKING_VOLUME)
                             && (speakingVolume <= SynthesizeOption.SPEAKING_VOLUME_MAX),
                     "Configuration.Builder speakingVolume value must in" +
-                            "[SynthesizeOption.SPEAKING_VOLUME_MIN,SynthesizeOption.SPEAKING_VOLUME_MAX]");
+                            "[SynthesizeOption.SPEAKING_VOLUME_MIN,SynthesizeOption"
+                            + ".SPEAKING_VOLUME_MAX]");
             this.speakingVolume = speakingVolume;
             return this;
         }
 
         public Builder setRecognizingMode(int recognizingMode) {
-            Preconditions.checkArgument(recognizingMode == RecognizeOption.MODE_SINGLE
-                    || recognizingMode == RecognizeOption.MODE_CONTINUOUS, "Invalid mode value, verify for " +
-                    "RecognizeOption.MODE__MODE_SINGLE or RecognizeOption.MODE_CONTINUOUS");
+            Preconditions.checkArgument(recognizingMode == RecognizeOption.MODE_UNKNOWN
+                            || recognizingMode == RecognizeOption.MODE_SINGLE
+                            || recognizingMode == RecognizeOption.MODE_CONTINUOUS,
+                    "Invalid mode value, verify for " +
+                            "RecognizeOption.MODE__MODE_SINGLE or RecognizeOption.MODE_CONTINUOUS");
             this.recognizingMode = recognizingMode;
             return this;
         }

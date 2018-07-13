@@ -23,8 +23,8 @@ import retrofit2.http.POST;
 
 public class HttpReport implements EventReporter {
 
-//    private static final String BASE_URL = "https://apis.ubtrobot.com/v1/collect-rest/";
-    private static final String BASE_URL = "http://10.10.20.71:8086/v1/collect-rest/";
+    //    private static final String BASE_URL = "https://apis.ubtrobot.com/v1/collect-rest/collected/";
+    private static final String BASE_URL = "http://10.10.20.71:8033/v1/collect-rest/collected/";
 
     private final Context mContext;
     private final String mAppId;
@@ -116,7 +116,7 @@ public class HttpReport implements EventReporter {
 
     public interface ReportService {
 
-        @POST("collected/events")
+        @POST("events")
         URestCall<Void> reportEvent(@Body List<Event> events);
     }
 

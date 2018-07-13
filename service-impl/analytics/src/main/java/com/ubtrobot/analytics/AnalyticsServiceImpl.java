@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 public class AnalyticsServiceImpl implements Analytics {
 
-    private static final String TAG = "AnalyticsServiceImpl";
+    private static final String TAG = "Analytics";
 
     private static final int COUNT_PER_SAVE = 5;
     private static final int COUNT_PER_REPORT = 8;
@@ -31,7 +31,7 @@ public class AnalyticsServiceImpl implements Analytics {
     private Executor mExecutor;
     private Strategy mStrategy;
     private MemEventStorage mMemStorage;
-    private EventStorage mDiskStorage;
+    private DiskEventStorage mDiskStorage;
     private EventReporter mReporter;
     private boolean mEnable = true;
 
@@ -110,8 +110,8 @@ public class AnalyticsServiceImpl implements Analytics {
     private boolean shouldReport() {
         long now = System.nanoTime();
 
-        return (now - mForbidReportAt < 0) || (now - mShouldReportAt >= 0)
-                || isEventCountDiskStorageLTReport();
+        return (now - mForbidReportAt > 0) && ((now - mShouldReportAt >= 0)
+                || isEventCountDiskStorageLTReport());
     }
 
     private void saveEvents() {
@@ -148,6 +148,11 @@ public class AnalyticsServiceImpl implements Analytics {
         synchronized (mReportLock) {
             do {
                 List<Event> events = getEventListDiskStorage();
+                Log.i(TAG, "/--------上报-------");
+                for (Event event : events) {
+                    Log.i(TAG, event.toString());
+                }
+                Log.i(TAG, "---------------/");
                 if (events.size() < COUNT_PER_REPORT) {
                     return;
                 }
@@ -157,6 +162,7 @@ public class AnalyticsServiceImpl implements Analytics {
                     mForbidReportAt = System.nanoTime() + FORBID_INTERVAL;
                     break;
                 } else {
+                    mForbidReportAt = 0;
                     removeEventsDiskStorage(events);
                 }
 
@@ -267,5 +273,4 @@ public class AnalyticsServiceImpl implements Analytics {
             }
         }
     }
-
 }

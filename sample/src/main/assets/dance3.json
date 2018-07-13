@@ -1,0 +1,336 @@
+[
+  {
+    "mainType": "music",
+    "danceName": "小提琴",
+    "tracks": [
+      {
+        "type": "music",
+        "trackDescription": "音乐",
+        "segmentGroup":{
+          "name": "music_seg_001",
+          "description": "music_des",
+          "loops": 1,
+          "duration": 30000,
+          "isBlank": false,
+          "option": {
+            "id": "music_001",
+            "name": "indie_rock",
+            "path": "music/yankee_doodle_dandy.mp3"
+          }
+        }
+      },
+      {
+        "type": "emotion",
+        "trackDescription": "表情",
+        "segmentGroup":{
+          "name": "emotion_seg_001",
+          "description": "emotion_des",
+          "loops": 1,
+          "duration": 30000,
+          "isBlank": false,
+          "children":[
+            {
+              "trackDescription": "表情",
+              "name": "emotion_ch_seg_001",
+              "description": "emotion_des",
+              "loops": 1,
+              "duration": 30000,
+              "isBlank": false,
+              "option": {
+                "emotionId": "1001",
+                "loops":1,
+                "dismissAfterEnd":true,
+                "loopDefaultAfterEnd":false
+              }
+            }
+          ]
+        }
+      },
+      {
+        "type": "armMotion",
+        "trackDescription": "上肢运动",
+        "segmentGroup":{
+          "name": "motion_seg_001",
+          "description": "motion_des",
+          "loops": 1,
+          "duration": 30000,
+          "isBlank": false,
+          "option": {
+            "id": "bow"
+          },
+          "children":[
+            {
+              "trackDescription": "动作",
+              "name": "motion_ch_seg_002",
+              "description": "motion_des",
+              "loops": 1,
+              "duration": 30000,
+              "isBlank": false,
+              "option": {
+                "id": "yankee"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "mainType": "music",
+    "danceName": "机械舞",
+    "tracks": [
+      {
+        "type": "music",
+        "trackDescription": "音乐",
+        "segmentGroup":{
+          "name": "music_seg_001",
+          "description": "music_des",
+          "loops": 1,
+          "duration": 40000,
+          "isBlank": false,
+          "option": {
+            "id": "music_001",
+            "name": "indie_rock",
+            "path": "music/Rotan-Give_Them.mp3"
+          }
+        }
+      },
+      {
+        "type": "emotion",
+        "trackDescription": "表情",
+        "segmentGroup":{
+          "name": "emotion_seg_001",
+          "description": "emotion_des",
+          "loops": 1,
+          "duration": 40000,
+          "isBlank": false,
+          "children":[
+            {
+              "trackDescription": "表情",
+              "name": "emotion_ch_seg_001",
+              "description": "emotion_des",
+              "loops": 1,
+              "duration": 40000,
+              "isBlank": false,
+              "option": {
+                "emotionId": "1002",
+                "loops":1,
+                "dismissAfterEnd":true,
+                "loopDefaultAfterEnd":false
+              }
+            }
+          ]
+        }
+      },
+      {
+        "type": "armMotion",
+        "trackDescription": "上肢运动",
+        "segmentGroup":{
+          "name": "motion_seg_002",
+          "description": "motion_des",
+          "loops": 1,
+          "duration": 40000,
+          "isBlank": false,
+          "option": {
+            "id": "bow"
+          },
+          "children":[
+            {
+              "trackDescription": "动作",
+              "name": "motion_ch_seg_002",
+              "description": "motion_des",
+              "loops": 1,
+              "duration": 40000,
+              "isBlank": false,
+              "option": {
+                "id": "poppin"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "mainType": "music",
+    "danceName": "阿拉伯舞",
+    "tracks": [
+      {
+        "type": "music",
+        "trackDescription": "音乐",
+        "segmentGroup":{
+          "name": "music_seg_001",
+          "description": "music_des",
+          "loops": 1,
+          "duration": 40000,
+          "isBlank": false,
+          "option": {
+            "id": "music_001",
+            "name": "indie_arabia",
+            "path": "music/sultan_of_arabia.mp3"
+          }
+        }
+      },
+      {
+        "type": "emotion",
+        "trackDescription": "表情",
+        "segmentGroup":{
+          "name": "emotion_seg_001",
+          "description": "emotion_des",
+          "loops": 1,
+          "duration": 40000,
+          "isBlank": false,
+          "children":[
+            {
+              "trackDescription": "表情",
+              "name": "emotion_ch_seg_001",
+              "description": "emotion_des",
+              "loops": 1,
+              "duration": 40000,
+              "isBlank": false,
+              "option": {
+                "emotionId": "1003",
+                "loops":1,
+                "dismissAfterEnd":true,
+                "loopDefaultAfterEnd":false
+              }
+            }
+          ]
+        }
+      },
+      {
+        "type": "armMotion",
+        "trackDescription": "上肢运动",
+        "segmentGroup":{
+          "name": "motion_seg_002",
+          "description": "motion_des",
+          "loops": 1,
+          "duration": 40000,
+          "isBlank": false,
+          "option": {
+            "id": "bow"
+          },
+          "children":[
+            {
+              "trackDescription": "动作",
+              "name": "motion_ch_seg_002",
+              "description": "motion_des",
+              "loops": 1,
+              "duration": 40000,
+              "isBlank": false,
+              "option": {
+                "id": "arabia"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "mainType": "music",
+    "danceName": "西班牙舞",
+    "tracks": [
+      {
+        "type": "music",
+        "trackDescription": "音乐",
+        "segmentGroup":{
+          "name": "music_seg_001",
+          "description": "music_des",
+          "loops": 1,
+          "duration": 40000,
+          "isBlank": false,
+          "option": {
+            "id": "music_001",
+            "name": "indie_arabia",
+            "path": "music/spanish_rumble.mp3"
+          }
+        }
+      },
+      {
+        "type": "emotion",
+        "trackDescription": "表情",
+        "segmentGroup":{
+          "name": "emotion_seg_001",
+          "description": "emotion_des",
+          "loops": 1,
+          "duration": 40000,
+          "isBlank": false,
+          "option": {
+            "emotionId": "1004",
+            "loops":1,
+            "dismissAfterEnd":true,
+            "loopDefaultAfterEnd":false
+          }
+        }
+      },
+      {
+        "type": "armMotion",
+        "trackDescription": "上肢运动",
+        "segmentGroup":{
+          "name": "motion_seg_002",
+          "description": "motion_des",
+          "loops": 1,
+          "duration": 40000,
+          "isBlank": false,
+          "option": {
+            "id": "spanish"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "mainType": "music",
+    "danceName": "流行舞",
+    "tracks": [
+      {
+        "type": "music",
+        "trackDescription": "音乐",
+        "segmentGroup":{
+          "name": "music_seg_001",
+          "description": "music_des",
+          "loops": 1,
+          "duration": 40000,
+          "isBlank": false,
+          "option": {
+            "id": "music_001",
+            "name": "indie_arabia",
+            "path": "music/modern_dance.mp3"
+          }
+        }
+      },
+      {
+        "type": "emotion",
+        "trackDescription": "表情",
+        "segmentGroup":{
+          "name": "emotion_seg_001",
+          "description": "emotion_des",
+          "loops": 1,
+          "duration": 40000,
+          "isBlank": false,
+          "option": {
+            "emotionId": "1005",
+            "loops":1,
+            "dismissAfterEnd":true,
+            "loopDefaultAfterEnd":false
+          }
+        }
+      },
+      {
+        "type": "armMotion",
+        "trackDescription": "上肢运动",
+        "segmentGroup":{
+          "name": "motion_seg_002",
+          "description": "motion_des",
+          "loops": 1,
+          "duration": 40000,
+          "isBlank": false,
+          "option": {
+            "id": "easyhomecruzr"
+          }
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,108 @@
+[
+  {
+    "mainType": "music",
+    "danceName": "舞蹈001",
+    "tracks": [
+      {
+        "type": "music",
+        "trackDescription": "舞蹈的音乐",
+        "segmentGroup":{
+          "name": "music_seg_001",
+          "description": "music_des",
+          "loops": 1,
+          "duration": 3000,
+          "isBlank": false,
+          "option": {
+              "id": "music_001"
+          }
+        }
+      },
+      {
+        "type": "light",
+        "trackDescription": "灯光",
+        "segmentGroup":{
+          "name": "light_001",
+          "description": "light_001_des",
+          "loops": 1,
+          "duration": 3000,
+          "isBlank": false,
+          "option": {
+            "id": "option_001",
+            "name": "light1"
+          },
+          "children":[
+            {
+              "name": "light_ch_001",
+              "description": "light_ch_001_des",
+              "loops": 1,
+              "duration": 3000,
+              "isBlank": false,
+              "option": {
+                "id": "option_001",
+                "name": "light12"
+              }
+            },
+            {
+              "name": "light_ch_002",
+              "description": "light_ch_002_des",
+              "loops": 1,
+              "duration": 3000,
+              "isBlank": false,
+              "option": {
+                "id": "option_002"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "type": "emotion",
+        "trackDescription": "表情",
+        "segmentGroup":{
+          "name": "emotion_001",
+          "description": "emotion_001_des",
+          "loops": 1,
+          "duration": 3000,
+          "isBlank": false,
+          "option": {
+            "id": "option_001"
+          },
+          "children":[
+            {
+              "name": "emotion_ch_001",
+              "description": "emotion_ch_001_des",
+              "loops": 1,
+              "duration": 3000,
+              "isBlank": false,
+              "option": {
+                "id": "option_001"
+              }
+            },
+            {
+              "name": "light_ch_002",
+              "description": "light_ch_002_des",
+              "loops": 1,
+              "duration": 3000,
+              "isBlank": false,
+              "option": {
+                "id": "option_002"
+              },
+              "children":[
+                {
+                  "name": "emotion_ch_ch_001",
+                  "description": "emotion_ch_ch_001_des",
+                  "loops": 1,
+                  "duration": 3000,
+                  "isBlank": false,
+                  "option": {
+                    "id": "option_001"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

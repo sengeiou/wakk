@@ -1,0 +1,65 @@
+[
+  {
+    "mainType": "music",
+    "danceName": "跳舞",
+    "tracks": [
+      {
+        "type": "music",
+        "trackDescription": "音乐",
+        "segmentGroup":{
+          "name": "music_seg_001",
+          "description": "music_des",
+          "loops": 1,
+          "duration": 60000,
+          "isBlank": false,
+          "option": {
+            "id": "music_001",
+            "name": "indie_rock",
+            "path": "music/indie_rock.mp3"
+          }
+        }
+      },
+      {
+        "type": "emotion",
+        "trackDescription": "表情",
+        "segmentGroup":{
+          "name": "emotion_seg_001",
+          "description": "emotion_des",
+          "loops": 1,
+          "duration": 50000,
+          "isBlank": false,
+          "children":[
+            {
+              "trackDescription": "表情",
+              "name": "emotion_ch_seg_001",
+              "description": "emotion_des",
+              "loops": 1,
+              "duration": 60000,
+              "isBlank": false,
+              "option": {
+                "emotionId": "1001",
+                "loops":2,
+                "dismissAfterEnd":true,
+                "loopDefaultAfterEnd":false
+              }
+            },
+            {
+              "trackDescription": "表情",
+              "name": "emotion_ch_seg_002",
+              "description": "emotion_des",
+              "loops": 1,
+              "duration": 50000,
+              "isBlank": false,
+              "option": {
+                "emotionId": "1003",
+                "loops":2,
+                "dismissAfterEnd":true,
+                "loopDefaultAfterEnd":false
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

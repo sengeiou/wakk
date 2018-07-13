@@ -21,6 +21,7 @@ import com.ubtrobot.dance.player.ArmMotionSegmentPlayer;
 import com.ubtrobot.dance.player.ChassisMotionSegmentPlayer;
 import com.ubtrobot.dance.player.EmotionSegmentPlayer;
 import com.ubtrobot.dance.player.MusicSegmentPlayer;
+import com.ubtrobot.emotion.EmotionListener;
 import com.ubtrobot.emotion.EmotionManager;
 import com.ubtrobot.master.Master;
 import com.ubtrobot.motion.MotionManager;
@@ -61,6 +62,8 @@ public class DanceManager {
     private MotionManager mMotionManager;
 
     private String mCurrentCategory;
+
+    private EmotionListener mEmotionListener;
 
     private static AsyncTaskSeries<PlayException> mTaskSeries;
     private static Promise<Void, PlayException> mPromise;
@@ -381,8 +384,11 @@ public class DanceManager {
                 case TYPE_MUSIC:
                     return new MusicSegmentPlayer(new MusicPlay(mContext), segment);
                 case TYPE_EMOTION:
-                    return new EmotionSegmentPlayer(
-                            new EmotionManager(Master.get().getGlobalContext()), segment);
+                    mEmotionListener = mEmotionListener == null
+                            ? new EmotionDismissListener() : mEmotionListener;
+                    EmotionManager emotionManager = new EmotionManager(Master.get().getGlobalContext());
+                    emotionManager.registerEmotionListener(mEmotionListener);
+                    return new EmotionSegmentPlayer(emotionManager, segment);
                 case TYPE_ARM_MOTION:
                     return new ArmMotionSegmentPlayer(
                             new MotionManager(Master.get().getGlobalContext()), segment);
@@ -422,5 +428,19 @@ public class DanceManager {
             return EN.toLowerCase().equals(getCurrentLanguage().toLowerCase());
         }
     }
+
+    private class EmotionDismissListener implements EmotionListener {
+
+        @Override
+        public void onEmotionChanged(boolean isDismiss) {
+            LOGGER.w("Callback emotion dismiss.");
+            if (!isDismiss || mPromise == null) {
+                return;
+            }
+            mPromise.cancel();
+            mPromise = null;
+        }
+    }
+
 
 }

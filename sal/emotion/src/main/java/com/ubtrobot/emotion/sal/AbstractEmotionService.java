@@ -135,17 +135,17 @@ public abstract class AbstractEmotionService implements EmotionService {
     }
 
     protected void publishEmotionDismiss() {
-        publishEmotionState(false);
+        publishEmotionState(true);
     }
 
-    private void publishEmotionState(final boolean isExpresser) {
+    private void publishEmotionState(final boolean isDismiss) {
         boolean emotionSystemServiceStarted = Master.get().execute(
                 EmotionSystemService.class,
                 new ContextRunnable<EmotionSystemService>() {
                     @Override
                     public void run(EmotionSystemService emotionSystemService) {
                         ProtoParam<EmotionProto.EmotionState> param = ProtoParam.create(
-                                EmotionConverters.toEmotionStateProto(isExpresser));
+                                EmotionConverters.toEmotionStateProto(isDismiss));
 
                         emotionSystemService.publish(
                                 EmotionConstants.ACTION_EMOTION_EXPRESS_CHANGE, param);

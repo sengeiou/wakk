@@ -1,7 +1,5 @@
 package com.ubtrobot.dance.player;
 
-import android.util.Log;
-
 import com.ubtrobot.async.DoneCallback;
 import com.ubtrobot.async.FailCallback;
 import com.ubtrobot.async.Promise;
@@ -33,10 +31,10 @@ public class EmotionSegmentPlayer extends AbstractSegmentPlayer<EmotionSegmentPl
     protected void onLoopStart(EmotionOption option) {
         mExpressPromise = mEmotionManager.express(option.getEmotionId(),
                 new ExpressOption.Builder().
-                setLoops(0).
-                setDismissAfterEnd(option.isDismissAfterEnd()).
-                setLoopDefaultAfterEnd(option.isLoopDefaultAfterEnd()).
-                build()).done(new DoneCallback<Void>() {
+                        setLoops(0).
+                        setDismissAfterEnd(option.isDismissAfterEnd()).
+                        setLoopDefaultAfterEnd(option.isLoopDefaultAfterEnd()).
+                        build()).done(new DoneCallback<Void>() {
             @Override
             public void onDone(Void aVoid) {
                 mExpressPromise = null;
@@ -45,7 +43,7 @@ public class EmotionSegmentPlayer extends AbstractSegmentPlayer<EmotionSegmentPl
             @Override
             public void onFail(ExpressException e) {
                 LOGGER.e(e);
-                notifyLoopAborted(new PlayException.Factory().from(e.getCode(),e.getMessage()));
+                notifyLoopAborted(new PlayException.Factory().from(e.getCode(), e.getMessage()));
                 mExpressPromise = null;
             }
         });

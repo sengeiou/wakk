@@ -21,7 +21,7 @@ message Emotion {
 
 message EmotionState{
 
-    bool express = 1;
+    bool dismiss = 1;
 }
 
 message EmotionList {

@@ -24,6 +24,7 @@ import com.ubtrobot.dance.player.MusicSegmentPlayer;
 import com.ubtrobot.emotion.EmotionListener;
 import com.ubtrobot.emotion.EmotionManager;
 import com.ubtrobot.master.Master;
+import com.ubtrobot.master.context.MasterContext;
 import com.ubtrobot.motion.ExecuteException;
 import com.ubtrobot.motion.MotionManager;
 import com.ubtrobot.play.PlayException;
@@ -32,6 +33,10 @@ import com.ubtrobot.play.PlayerFactory;
 import com.ubtrobot.play.Segment;
 import com.ubtrobot.play.Track;
 import com.ubtrobot.play.TrackPlayer;
+import com.ubtrobot.sensor.Sensor;
+import com.ubtrobot.sensor.SensorEvent;
+import com.ubtrobot.sensor.SensorListener;
+import com.ubtrobot.sensor.SensorManager;
 import com.ubtrobot.speech.SpeechManager;
 import com.ubtrobot.speech.SynthesizeException;
 import com.ubtrobot.speech.Synthesizer;
@@ -51,7 +56,7 @@ import static com.ubtrobot.dance.ipc.DanceConstants.TYPE_MUSIC;
 
 public class DanceManager {
 
-    private static final Logger LOGGER = FwLoggerFactory.getLogger("DanceManager");
+    private static final Logger LOGGER = FwLoggerFactory.getLogger("Dance");
 
     private static final String ARM_STATE_URI = "content://com.ubtechinc.settings.provider/CruiserSettings";
 
@@ -59,12 +64,13 @@ public class DanceManager {
     private static volatile DanceManager mDanceManager;
     private static volatile DanceList mDanceList;
 
-    private SpeechManager mSpeechManager;
     private MotionManager mMotionManager;
 
     private String mCurrentCategory;
 
     private EmotionListener mEmotionListener;
+    private SystemWarn mSystemWarn;
+    private DanceTTS mDanceTTS;
 
     private static AsyncTaskSeries<PlayException> mTaskSeries;
     private static Promise<Void, PlayException> mPromise;
@@ -83,6 +89,8 @@ public class DanceManager {
             mDanceManager = this;
             mContext = context.getApplicationContext();
             mDanceList = new DanceList(context);
+            mSystemWarn = new SystemWarn(Master.get().getGlobalContext());
+            mDanceTTS = new DanceTTS(Master.get().getGlobalContext());
         }
     }
 
@@ -111,7 +119,7 @@ public class DanceManager {
     public Promise<Void, PlayException> play(String danceCategory) {
         if (!checkTrack()) {
             LOGGER.w("Arm motion off.");
-            ttsArmForbidden();
+            mDanceTTS.ttsArmForbidden();
             return null;
         }
 
@@ -131,7 +139,7 @@ public class DanceManager {
         mTaskSeries.append(new AsyncTask<Void, PlayException>() {
             @Override
             protected void onStart() {
-                ttsDance().done(new DoneCallback<Void>() {
+                mDanceTTS.ttsDance().done(new DoneCallback<Void>() {
                     @Override
                     public void onDone(Void aVoid) {
                         resolve(aVoid);
@@ -188,7 +196,7 @@ public class DanceManager {
         mTaskSeries.append(new AsyncTask<Void, PlayException>() {
             @Override
             protected void onStart() {
-                ttsDanceComplete().done(new DoneCallback<Void>() {
+                mDanceTTS.ttsDanceComplete().done(new DoneCallback<Void>() {
                     @Override
                     public void onDone(Void aVoid) {
                         resolve(aVoid);
@@ -260,54 +268,6 @@ public class DanceManager {
                 }
             }
         });
-    }
-
-    private ProgressivePromise<Void, SynthesizeException, Synthesizer.SynthesizingProgress>
-    ttsDanceComplete() {
-        String complete = "Please don't make fun of me if you think I'm a terrible dancer";
-
-        if (Language.causedByZh()) {
-            complete = "跳得不好请您多多包涵";
-        } else if (Language.causedByEn()) {
-            complete = "Please don't make fun of me if you think I'm a terrible dancer";
-        }
-
-        return tts(complete);
-    }
-
-    private ProgressivePromise<Void, SynthesizeException, Synthesizer.SynthesizingProgress>
-    ttsArmForbidden() {
-        String armMotionOff = "The arm is forbidden now, I can't dance for you.";
-
-        if (Language.causedByZh()) {
-            armMotionOff = "手臂动作已关闭，我暂时不能为您跳舞";
-        } else if (Language.causedByEn()) {
-            armMotionOff = "The arm is forbidden now, I can't dance for you.";
-        }
-
-        return tts(armMotionOff);
-    }
-
-    private ProgressivePromise<Void, SynthesizeException, Synthesizer.SynthesizingProgress>
-    ttsDance() {
-        String dance = "I'm going to start dancing. Keep a distance of one meter with me";
-
-        if (Language.causedByZh()) {
-            dance = "我要开始跳舞了，请跟我保持一些距离";
-        } else if (Language.causedByEn()) {
-            dance = "I'm going to start dancing. Keep a distance of one meter with me";
-        }
-
-        return tts(dance);
-    }
-
-    private ProgressivePromise<Void, SynthesizeException, Synthesizer.SynthesizingProgress>
-    tts(String ttsInfo) {
-        if (mSpeechManager == null) {
-            mSpeechManager = new SpeechManager(Master.get().getGlobalContext());
-        }
-
-        return mSpeechManager.synthesize(ttsInfo);
     }
 
     public String getLastDance() {
@@ -425,6 +385,63 @@ public class DanceManager {
         }
     }
 
+    private class DanceTTS {
+
+        private SpeechManager mSpeechManager;
+
+        public DanceTTS(MasterContext masterContext) {
+            this.mSpeechManager = new SpeechManager(masterContext);
+        }
+
+        private ProgressivePromise<Void, SynthesizeException, Synthesizer.SynthesizingProgress>
+        ttsDanceComplete() {
+            String complete = "Please don't make fun of me if you think I'm a terrible dancer";
+
+            if (Language.causedByZh()) {
+                complete = "跳得不好请您多多包涵";
+            } else if (Language.causedByEn()) {
+                complete = "Please don't make fun of me if you think I'm a terrible dancer";
+            }
+
+            return tts(complete);
+        }
+
+        private ProgressivePromise<Void, SynthesizeException, Synthesizer.SynthesizingProgress>
+        ttsArmForbidden() {
+            String armMotionOff = "The arm is forbidden now, I can't dance for you.";
+
+            if (Language.causedByZh()) {
+                armMotionOff = "手臂动作已关闭，我暂时不能为您跳舞";
+            } else if (Language.causedByEn()) {
+                armMotionOff = "The arm is forbidden now, I can't dance for you.";
+            }
+
+            return tts(armMotionOff);
+        }
+
+        private ProgressivePromise<Void, SynthesizeException, Synthesizer.SynthesizingProgress>
+        ttsDance() {
+            String dance = "I'm going to start dancing. Keep a distance of one meter with me";
+
+            if (Language.causedByZh()) {
+                dance = "我要开始跳舞了，请跟我保持一些距离";
+            } else if (Language.causedByEn()) {
+                dance = "I'm going to start dancing. Keep a distance of one meter with me";
+            }
+
+            return tts(dance);
+        }
+
+        private ProgressivePromise<Void, SynthesizeException, Synthesizer.SynthesizingProgress>
+        tts(String ttsInfo) {
+            if (mSpeechManager == null) {
+                mSpeechManager = new SpeechManager(Master.get().getGlobalContext());
+            }
+
+            return mSpeechManager.synthesize(ttsInfo);
+        }
+    }
+
     private static class Language {
 
         private static final String ZH = "zh";
@@ -458,13 +475,77 @@ public class DanceManager {
         @Override
         public void onEmotionChanged(boolean isDismiss) {
             LOGGER.w("Callback emotion dismiss.");
-            if (!isDismiss || mPromise == null) {
+            if (!isDismiss) {
                 return;
             }
-            mPromise.cancel();
-            mPromise = null;
+            stopDance();
         }
     }
 
+    private void stopDance() {
+        if (mPromise == null) {
+            return;
+        }
+        mPromise.cancel();
+        mPromise = null;
+    }
+
+    public class SystemWarn {
+
+        private static final String ESKIN_L_PALM = "LPalm_skin";
+        private static final String ESKIN_L_SWITCH = "LPalm_switch";
+        private static final String ESKIN_LF_ARM = "LFArm_skin";
+        private static final String ESKIN_LB_ARM = "LBArm_skin";
+
+        private static final String ESKIN_R_PALM = "RPalm_skin";
+        private static final String ESKIN_R_SWITCH = "RPalm_switch";
+        private static final String ESKIN_RF_ARM = "RFArm_skin";
+        private static final String ESKIN_RB_ARM = "RBArm_skin";
+
+        private final String[] ESKINS = {ESKIN_L_PALM, ESKIN_L_SWITCH, ESKIN_LF_ARM, ESKIN_LB_ARM,
+                ESKIN_R_PALM, ESKIN_R_SWITCH, ESKIN_RF_ARM, ESKIN_RB_ARM};
+
+        private static final String EMERGENCY_STOP = "emergency_stop";
+
+        private SensorManager sensorManager;
+
+        private SystemWarn(MasterContext masterContext) {
+            sensorManager = new SensorManager(masterContext);
+            registerESkinListener();
+            registerWarnListener();
+        }
+
+        private void registerESkinListener() {
+            for (String eSkinId : ESKINS) {
+                sensorManager.registerSensorListener(eSkinId, new SensorListener() {
+                    @Override
+                    public void onSensorChanged(Sensor sensor, SensorEvent sensorEvent) {
+                        float[] values = sensorEvent.getValues();
+                        if (values[0] <= 0) {
+                            return;
+                        }
+                        LOGGER.w("ESkin happen, Dance Stop.");
+                        stopDance();
+                    }
+                });
+            }
+        }
+
+        private void registerWarnListener() {
+            sensorManager.registerSensorListener(EMERGENCY_STOP, new SensorListener() {
+                @Override
+                public void onSensorChanged(Sensor sensor, SensorEvent sensorEvent) {
+                    float warn = 1.0f;
+                    float[] values = sensorEvent.getValues();
+                    if (warn != values[0]) {
+                        return;
+                    }
+                    LOGGER.w("Warn happen, Dance Stop.");
+                    stopDance();
+                }
+            });
+        }
+
+    }
 
 }

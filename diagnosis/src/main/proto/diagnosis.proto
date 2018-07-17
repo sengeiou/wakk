@@ -30,3 +30,7 @@ message Diagnosis {
 message DiagnosisList {
     repeated Diagnosis diagnosis = 1;
 }
+
+message RepairProgress{
+    int32 state = 1;
+}

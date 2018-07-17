@@ -2,6 +2,7 @@ package com.ubtrobot.diagnosis.ipc;
 
 import com.ubtrobot.diagnosis.Diagnosis;
 import com.ubtrobot.diagnosis.Part;
+import com.ubtrobot.diagnosis.RepairProgress;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -65,5 +66,13 @@ public class DiagnosisConverters {
             builder.addDiagnosis(toDiagnosisProto(diagnosis));
         }
         return builder.build();
+    }
+
+    public static DiagnosisProto.RepairProgress toRepairProgressProto(RepairProgress progress) {
+        return DiagnosisProto.RepairProgress.newBuilder().setState(progress.getState()).build();
+    }
+
+    public static RepairProgress toRepairProgressPojo(DiagnosisProto.RepairProgress progress) {
+        return new RepairProgress.Builder(progress.getState()).build();
     }
 }

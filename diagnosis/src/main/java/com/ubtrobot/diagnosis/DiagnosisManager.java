@@ -3,7 +3,10 @@ package com.ubtrobot.diagnosis;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
 import com.ubtrobot.async.Function;
+import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.async.PromiseOperators;
 import com.ubtrobot.diagnosis.ipc.DiagnosisConstants;
@@ -107,6 +110,41 @@ public class DiagnosisManager {
                         }
 
                         return diagnoses.get(0);
+                    }
+                }
+        );
+    }
+
+    public ProgressivePromise<Void, RepairException, RepairProgress> repair(String partId) {
+        mPartList.get(partId); // 检查部件是否存在
+
+        return mService.callStickily(
+                DiagnosisConstants.CALL_PATH_DIAGNOSIS_REPAIR,
+                StringValue.newBuilder().setValue(partId).build(),
+                new ProtoCallAdapter.DFPProtoConverter<Void, Message, RepairException, RepairProgress, DiagnosisProto.RepairProgress>() {
+                    @Override
+                    public Class<Message> doneProtoClass() {
+                        return Message.class;
+                    }
+
+                    @Override
+                    public Void convertDone(Message protoParam) {
+                        return null;
+                    }
+
+                    @Override
+                    public RepairException convertFail(CallException e) {
+                        return new RepairException.Factory().from(e);
+                    }
+
+                    @Override
+                    public Class<DiagnosisProto.RepairProgress> progressProtoClass() {
+                        return DiagnosisProto.RepairProgress.class;
+                    }
+
+                    @Override
+                    public RepairProgress convertProgress(DiagnosisProto.RepairProgress protoParam) {
+                        return DiagnosisConverters.toRepairProgressPojo(protoParam);
                     }
                 }
         );

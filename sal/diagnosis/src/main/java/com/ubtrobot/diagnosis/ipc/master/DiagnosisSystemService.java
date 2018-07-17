@@ -4,9 +4,12 @@ import android.app.Application;
 import android.os.Handler;
 
 import com.google.protobuf.Message;
+import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.diagnosis.Diagnosis;
 import com.ubtrobot.diagnosis.Part;
+import com.ubtrobot.diagnosis.RepairException;
+import com.ubtrobot.diagnosis.RepairProgress;
 import com.ubtrobot.diagnosis.ipc.DiagnosisConstants;
 import com.ubtrobot.diagnosis.ipc.DiagnosisConverters;
 import com.ubtrobot.diagnosis.ipc.DiagnosisProto;
@@ -96,6 +99,37 @@ public class DiagnosisSystemService extends MasterSystemService {
 
                     @Override
                     public CallException convertFail(AccessServiceException e) {
+                        return new CallException(e.getCode(), e.getMessage());
+                    }
+                }
+        );
+    }
+
+    @Call(path = DiagnosisConstants.CALL_PATH_DIAGNOSIS_REPAIR)
+    public void onDiagnosisRepair(Request request, Responder responder) {
+        final String partId = ProtoParamParser.parseStringParam(request, responder);
+
+        mCallProcessor.onCall(
+                responder,
+                new CallProcessAdapter.ProgressiveCallable<Void, RepairException, RepairProgress>() {
+                    @Override
+                    public ProgressivePromise<Void, RepairException, RepairProgress> call() throws CallException {
+                        return mService.repair(partId);
+                    }
+                },
+                new ProtoCallProcessAdapter.DFPConverter<Void, RepairException, RepairProgress>() {
+                    @Override
+                    public Message convertProgress(RepairProgress progress) {
+                        return DiagnosisConverters.toRepairProgressProto(progress);
+                    }
+
+                    @Override
+                    public Message convertDone(Void done) {
+                        return null;
+                    }
+
+                    @Override
+                    public CallException convertFail(RepairException e) {
                         return new CallException(e.getCode(), e.getMessage());
                     }
                 }

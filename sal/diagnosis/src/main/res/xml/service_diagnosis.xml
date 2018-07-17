@@ -4,4 +4,5 @@
     level="system">
     <call path="/diagnosis/part/list" />
     <call path="/diagnosis/list" />
+    <call path="/diagnosis/repair" />
 </service>

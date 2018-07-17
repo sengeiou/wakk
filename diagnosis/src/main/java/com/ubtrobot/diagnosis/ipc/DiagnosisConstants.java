@@ -9,6 +9,7 @@ public class DiagnosisConstants {
 
     public static final String CALL_PATH_GET_PART_LIST = "/diagnosis/part/list";
     public static final String CALL_PATH_GET_DIAGNOSIS_LIST = "/diagnosis/list";
+    public static final String CALL_PATH_DIAGNOSIS_REPAIR = "/diagnosis/repair";
 
     public static final String ACTION_DIAGNOSE_PREFIX = "event.action.DIAGNOSE";
 }

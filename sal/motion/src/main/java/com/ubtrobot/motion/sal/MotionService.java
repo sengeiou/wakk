@@ -25,7 +25,7 @@ public interface MotionService {
     Promise<Map<String, Float>, AccessServiceException> getJointsAngle(List<String> jointIdList);
 
     ProgressivePromise<Void, JointException, JointGroupRotatingProgress>
-    jointRotate(Map<String, List<JointRotatingOption>> optionSequenceMap);
+    jointsRotate(Map<String, List<JointRotatingOption>> optionSequenceMap);
 
     Promise<LocomotorDevice, AccessServiceException> getLocomotor();
 

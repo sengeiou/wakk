@@ -202,7 +202,7 @@ public class MotionSystemService extends MasterSystemService {
                     @Override
                     public ProgressivePromise<Void, JointException, JointGroupRotatingProgress>
                     call() throws CallException {
-                        return mService.jointRotate(MotionConverters.
+                        return mService.jointsRotate(MotionConverters.
                                 toJointRotatingOptionSequenceMapPojo(optionSequenceMap));
                     }
                 },

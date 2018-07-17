@@ -93,7 +93,7 @@ public abstract class AbstractMotionService implements MotionService {
 
     @Override
     public ProgressivePromise<Void, JointException, JointGroupRotatingProgress>
-    jointRotate(final Map<String, List<JointRotatingOption>> optionSequenceMap) {
+    jointsRotate(final Map<String, List<JointRotatingOption>> optionSequenceMap) {
         LinkedList<String> jointReceivers = new LinkedList<>();
         for (String jointId : optionSequenceMap.keySet()) {
             jointReceivers.add(TASK_RECEIVER_JOINT_PREFIX + jointId);

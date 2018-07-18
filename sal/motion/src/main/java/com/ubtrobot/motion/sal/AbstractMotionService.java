@@ -283,6 +283,11 @@ public abstract class AbstractMotionService implements MotionService {
                     protected void onStart() {
                         jointStartReleasing(session.getId(), jointIdList);
                     }
+
+                    @Override
+                    protected void onCancel() {
+                        jointStopReleasing(session.getId(), jointIdList);
+                    }
                 },
                 new InterruptibleTaskHelper.InterruptedExceptionCreator<JointException>() {
                     @Override
@@ -294,8 +299,17 @@ public abstract class AbstractMotionService implements MotionService {
         );
     }
 
-    protected abstract void
-    jointStartReleasing(String sessionId, List<String> jointIdList);
+    protected abstract void jointStartReleasing(String sessionId, List<String> jointIdList);
+
+    protected abstract void jointStopReleasing(String sessionId, List<String> jointIdList);
+
+    protected void resolveStartReleasing(String sessionId) {
+        mInterruptibleTaskHelper.resolve(sessionId, null);
+    }
+
+    protected void rejectStartReleasing(String sessionId, JointException e) {
+        mInterruptibleTaskHelper.reject(sessionId, e);
+    }
 
     @Override
     public Promise<List<String>, JointException>

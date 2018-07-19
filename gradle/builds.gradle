@@ -41,6 +41,7 @@ ext {
             productCruzrVersion    : '0.5.0-SNAPSHOT',
             productAlphaMiniVersion: '0.5.0-SNAPSHOT',
             productBetaVersion     : '0.5.0-SNAPSHOT',
+            productGoldPigVersion  : '0.5.0-SNAPSHOT',
 
             commonsVersion         : '0.5.0-SNAPSHOT',
             analyticsVersion       : '0.5.0-SNAPSHOT',
@@ -135,6 +136,7 @@ apply from: 'gradle/publish_initialization.gradle'
 apply from: 'gradle/publish_product_cruzr.gradle'
 apply from: 'gradle/publish_product_alpha_mini.gradle'
 apply from: 'gradle/publish_product_beta.gradle'
+apply from: 'gradle/publish_product_gold_pig.gradle'
 
 artifactory {
     contextUrl = artifactory_url

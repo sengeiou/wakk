@@ -15,4 +15,4 @@ include ':initialization'
 
 include ':sample', ':service-mocks'
 
-include ':product:cruzr', ':product:alpha-mini', ':product:beta'
+include ':product:cruzr', ':product:alpha-mini', ':product:beta', ':product:gold-pig'

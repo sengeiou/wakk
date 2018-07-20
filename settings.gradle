@@ -10,7 +10,6 @@ include 'analytics', ':sal:analytics', ':service-impl:analytics'
 include ':dance'
 include ':sensor', ':sal:sensor'
 include ':power', ':sal:power'
-include ':dance'
 include ':diagnosis', ':sal:diagnosis'
 
 include ':initialization'

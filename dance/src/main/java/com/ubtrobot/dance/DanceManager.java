@@ -25,8 +25,8 @@ import com.ubtrobot.emotion.EmotionListener;
 import com.ubtrobot.emotion.EmotionManager;
 import com.ubtrobot.master.Master;
 import com.ubtrobot.master.context.MasterContext;
-import com.ubtrobot.motion.ExecuteException;
 import com.ubtrobot.motion.MotionManager;
+import com.ubtrobot.motion.PerformException;
 import com.ubtrobot.play.PlayException;
 import com.ubtrobot.play.Player;
 import com.ubtrobot.play.PlayerFactory;
@@ -178,15 +178,15 @@ public class DanceManager {
                     mMotionManager = new MotionManager(Master.get().getGlobalContext());
                 }
 
-                mMotionManager.executeScript("bow").done(new DoneCallback<Void>() {
+                mMotionManager.performAction("bow").done(new DoneCallback<Void>() {
                     @Override
                     public void onDone(Void aVoid) {
                         LOGGER.w("Motion bow end");
                         resolve(aVoid);
                     }
-                }).fail(new FailCallback<ExecuteException>() {
+                }).fail(new FailCallback<PerformException>() {
                     @Override
-                    public void onFail(ExecuteException e) {
+                    public void onFail(PerformException e) {
                         reject(new PlayException.Factory().from(e.getCode(), e.getMessage()));
                     }
                 });

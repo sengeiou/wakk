@@ -149,8 +149,8 @@ public class SpeechManager {
         return recognize(RecognizeOption.DEFAULT);
     }
 
-    public Promise<UnderstandResult, UnderstandException> understand(String question, UnderstandOption option) {
-        return mUnderstander.understand(question, option);
+    public Promise<UnderstandResult, UnderstandException> understand(String sentence, UnderstandOption option) {
+        return mUnderstander.understand(sentence, option);
     }
 
     public Promise<UnderstandResult, UnderstandException> understand(String question) {

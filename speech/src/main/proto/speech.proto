@@ -50,8 +50,9 @@ message RecognizeOption {
 
 message UnderstandOption {
     string question = 1;
-    float time_out = 2;
-    string params = 3;
+    string language = 2;
+    float time_out = 3;
+    string params = 4;
 }
 
 message UnderstandResult {

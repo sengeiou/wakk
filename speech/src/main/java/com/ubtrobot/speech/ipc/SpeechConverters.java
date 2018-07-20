@@ -254,6 +254,7 @@ public class SpeechConverters {
             String question) {
         return SpeechProto.UnderstandOption.newBuilder()
                 .setQuestion(question)
+                .setLanguage(option.getLanguage())
                 .setTimeOut(option.getTimeout())
                 .setParams(option.getParams().toString())
                 .build();
@@ -269,6 +270,7 @@ public class SpeechConverters {
         }
         return new UnderstandOption.Builder()
                 .setTimeout(option.getTimeOut())
+                .setLanguage(option.getLanguage())
                 .setParams(params)
                 .build();
     }

@@ -154,6 +154,7 @@ public class SpeechSystemService extends MasterSystemService {
 
     @Call(path = SpeechConstant.CALL_PATH_RECOGNIZE)
     public void recognize(Request request, Responder responder) {
+        LOGGER.i("SpeechSystemService recognize");
         final SpeechProto.RecognizeOption protoOption = ProtoParamParser.parseParam(
                 request,
                 SpeechProto.RecognizeOption.class,

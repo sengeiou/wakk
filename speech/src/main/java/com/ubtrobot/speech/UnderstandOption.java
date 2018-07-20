@@ -10,10 +10,13 @@ import org.json.JSONObject;
 public class UnderstandOption {
 
     private static final String TAG = "UnderstandOption";
-    public static final UnderstandOption DEFAULT = new UnderstandOption.Builder().build();
+
     public static final String LANGUAGE_CN = "zh-CN";
     public static final String LANGUAGE_EN = "en";
     public static final String LANGUAGE_TW = "zh-TW";
+
+    public static final UnderstandOption DEFAULT = new UnderstandOption.Builder().build();
+
     private float timeout;
     private String language;
     private String sessionId;

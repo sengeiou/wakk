@@ -9,6 +9,7 @@ import com.ubtrobot.validate.Preconditions;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.security.Key;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -155,7 +156,13 @@ public class UnderstandResult implements Parcelable {
         List<Message> messages = fulfillment.getMessages();
         for (Message message : messages) {
             String type = message.getType();
-            messageMap.put(type, messages);
+            if (messageMap.containsKey(type)) {
+                messageMap.get(type).add(message);
+            } else {
+                List<Message> list = new ArrayList<>();
+                list.add(message);
+                messageMap.put(type, list);
+            }
         }
     }
 

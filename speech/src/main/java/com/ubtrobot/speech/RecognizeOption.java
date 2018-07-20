@@ -18,6 +18,28 @@ public class RecognizeOption {
         return mode;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        RecognizeOption that = (RecognizeOption) o;
+
+        return mode == that.mode;
+    }
+
+    @Override
+    public String toString() {
+        return "RecognizeOption{" +
+                "mode=" + mode +
+                '}';
+    }
+
+    @Override
+    public int hashCode() {
+        return mode;
+    }
+
     public static class Builder {
 
         private int mode = MODE_UNKNOWN;
@@ -33,7 +55,7 @@ public class RecognizeOption {
         private void checkMode(int mode) {
             if (mode != MODE_UNKNOWN && mode != MODE_SINGLE && mode != MODE_CONTINUOUS) {
                 throw new IllegalArgumentException("Invalid mode value, verify for " +
-                        "RecognizeOption.MODE__MODE_SINGLE or RecognizeOption.MODE_CONTINUOUS");
+                        "MODE_UNKNOWNRecognizeOption.MODE_UNKNOWN,RecognizeOption.MODE__MODE_SINGLE or RecognizeOption.MODE_CONTINUOUS");
             }
         }
 

@@ -2,13 +2,17 @@ package com.ubtrobot.speech.ipc;
 
 import android.text.TextUtils;
 
+import com.ubtrobot.speech.Configuration;
 import com.ubtrobot.speech.RecognizeOption;
 import com.ubtrobot.speech.Recognizer;
 import com.ubtrobot.speech.Speaker;
 import com.ubtrobot.speech.SynthesizeOption;
 import com.ubtrobot.speech.Synthesizer;
 import com.ubtrobot.speech.UnderstandOption;
-import com.ubtrobot.speech.Understander;
+import com.ubtrobot.speech.UnderstandResult;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -35,7 +39,8 @@ public class SpeechConverters {
     public static SpeechProto.SynthesizeOption toSynthesizeOptionProto(
             SynthesizeOption option, String sentence) {
         if (TextUtils.isEmpty(sentence)) {
-            throw new IllegalArgumentException("SpeechProto.SynthesizeOption refuse null sentence.");
+            throw new IllegalArgumentException(
+                    "SpeechProto.SynthesizeOption refuse null sentence.");
         }
 
         return SpeechProto.SynthesizeOption.newBuilder()
@@ -84,11 +89,13 @@ public class SpeechConverters {
         return builder.build();
     }
 
-    public static Recognizer.RecognizeResult toRecognizeResultPojo(SpeechProto.RecognizeResult result) {
+    public static Recognizer.RecognizeResult toRecognizeResultPojo(
+            SpeechProto.RecognizeResult result) {
         return new Recognizer.RecognizeResult.Builder(result.getText()).build();
     }
 
-    public static SpeechProto.RecognizeResult toRecognizeResultProto(Recognizer.RecognizeResult result) {
+    public static SpeechProto.RecognizeResult toRecognizeResultProto(
+            Recognizer.RecognizeResult result) {
         return SpeechProto.RecognizeResult.newBuilder()
                 .setText(result.getText())
                 .build();
@@ -105,28 +112,164 @@ public class SpeechConverters {
                 .build();
     }
 
-    public static Understander.UnderstandResult toUnderstandResultPojo(SpeechProto.UnderstandResult result) {
-        return new Understander.UnderstandResult.Builder(result.getQuestion(), result.getAnswer())
-                .build();
+    public static UnderstandResult toUnderstandResultPojo(
+            SpeechProto.UnderstandResult result) {
+        UnderstandResult.Builder builder = new UnderstandResult.Builder();
+
+        builder.setSessionId(result.getSessionId());
+        builder.setLanguage(result.getLanguage());
+        builder.setActionIncomplete(result.getActionIncomplete());
+        builder.setSource(result.getSource());
+        builder.setInputText(result.getInputText());
+
+        //生成intent
+        UnderstandResult.Intent.Builder intent = new UnderstandResult.Intent.Builder();
+        intent.setName(result.getIntent().getName());
+        String parametersJson = result.getIntent().getParametersJson();
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject = new JSONObject(parametersJson);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        intent.setParameters(jsonObject);
+        intent.setDisplayName(result.getIntent().getDisplayName());
+        intent.setScore(result.getIntent().getScore());
+        builder.setIntent(intent.build());
+
+        //生成context
+        List<SpeechProto.Context> contextProtos = result.getContextsList();
+        List<UnderstandResult.Context> contextBeans = new ArrayList<>();
+        for (SpeechProto.Context context : contextProtos) {
+            UnderstandResult.Context.Builder contextBuilder =
+                    new UnderstandResult.Context.Builder();
+            contextBuilder.setName(context.getName());
+            try {
+                contextBuilder.setParameters(new JSONObject(context.getParametersJson()));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            contextBuilder.setLifespan(context.getLifespan());
+            contextBeans.add(contextBuilder.build());
+        }
+
+        builder.setContexts(contextBeans);
+
+        //生成fulfillment
+        SpeechProto.Fulfillment fulfillment = result.getFulfillment();
+        UnderstandResult.Fulfillment.Builder fulfillmentBuilder =
+                new UnderstandResult.Fulfillment.Builder();
+        fulfillmentBuilder.setSpeech(fulfillment.getSpeech());
+
+        List<SpeechProto.Message> messageProtos = result.getFulfillment().getMessagesList();
+
+        List<UnderstandResult.Message> messageBeans = new ArrayList<>();
+        for (SpeechProto.Message message : messageProtos) {
+            UnderstandResult.Message.Builder messageBuilder =
+                    new UnderstandResult.Message.Builder();
+            messageBuilder.setType(message.getType());
+            try {
+                messageBuilder.setParameters(new JSONObject(message.getParametersJson()));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            messageBuilder.setPlatform(message.getPlatform());
+            messageBeans.add(messageBuilder.build());
+        }
+        fulfillmentBuilder.setMessages(messageBeans);
+
+        UnderstandResult.Status.Builder statusBuilder = new UnderstandResult.Status.Builder();
+        statusBuilder.setCode(fulfillment.getStatus().getCode());
+        statusBuilder.setErrorDetails(fulfillment.getStatus().getErrorDetails());
+        statusBuilder.setErrorMessage(fulfillment.getStatus().getErrorMessage());
+        fulfillmentBuilder.setStatus(statusBuilder.build());
+        builder.setFulfillment(fulfillmentBuilder.build());
+
+        return builder.build();
     }
 
-    public static SpeechProto.UnderstandResult toUnderstandResultProto(Understander.UnderstandResult result) {
-        return SpeechProto.UnderstandResult.newBuilder()
-                .setQuestion(result.getQuestion())
-                .setAnswer(result.getAnswer())
-                .build();
+    public static SpeechProto.UnderstandResult toUnderstandResultProto(
+            UnderstandResult result) {
+        SpeechProto.UnderstandResult.Builder builder = SpeechProto.UnderstandResult.newBuilder();
+
+        builder.setActionIncomplete(result.isActionIncomplete());
+        builder.setSessionId(result.getSessionId());
+        builder.setLanguage(result.getLanguage());
+        builder.setSource(result.getSource());
+        builder.setInputText(result.getInputText());
+
+        //生成intent
+        SpeechProto.Intent.Builder intentBuilder = SpeechProto.Intent.newBuilder();
+        intentBuilder.setName(result.getIntent().getName());
+        JSONObject parameters = result.getIntent().getParameters();
+        intentBuilder.setParametersJson(parameters.toString());
+        intentBuilder.setDisplayName(result.getIntent().getDisplayName());
+        intentBuilder.setScore(result.getIntent().getScore());
+        builder.setIntent(intentBuilder.build());
+
+        //生成context
+        List<UnderstandResult.Context> contextBeans = result.getContexts();
+        List<SpeechProto.Context> contextProtos = new ArrayList<>();
+        for (UnderstandResult.Context context : contextBeans) {
+            SpeechProto.Context.Builder contextBuilder = SpeechProto.Context.newBuilder();
+            contextBuilder.setName(context.getName());
+            contextBuilder.setParametersJson(context.getSlots().toString());
+            contextBuilder.setLifespan(context.getLifespan());
+            contextProtos.add(contextBuilder.build());
+        }
+
+        builder.addAllContexts(contextProtos);
+
+        //生成fulfillment
+        UnderstandResult.Fulfillment fulfillment =
+                result.getFulfillment();
+        SpeechProto.Fulfillment.Builder fulfillmentBuilder =
+                SpeechProto.Fulfillment.newBuilder();
+
+        fulfillmentBuilder.setSpeech(fulfillment.getSpeech());
+
+        List<UnderstandResult.Message> messageBeans = result.getFulfillment().getMessages();
+
+        List<SpeechProto.Message> messageProtos = new ArrayList<>();
+        for (UnderstandResult.Message message : messageBeans) {
+            SpeechProto.Message.Builder messageBuilder = SpeechProto.Message.newBuilder();
+            messageBuilder.setType(message.getType());
+            messageBuilder.setParametersJson(message.getParameters().toString());
+            messageBuilder.setPlatform(message.getPlatform());
+            messageProtos.add(messageBuilder.build());
+        }
+        fulfillmentBuilder.addAllMessages(messageProtos);
+
+        SpeechProto.Status.Builder statusBuilder = SpeechProto.Status.newBuilder();
+        statusBuilder.setCode(fulfillment.getStatus().getCode());
+        statusBuilder.setErrorDetails(fulfillment.getStatus().getErrorDetails());
+        statusBuilder.setErrorMessage(fulfillment.getStatus().getErrorMessage());
+        fulfillmentBuilder.setStatus(statusBuilder.build());
+        builder.setFulfillment(fulfillmentBuilder.build());
+
+        return builder.build();
     }
 
-    public static SpeechProto.UnderstandOption toUnderstandOptionProto(UnderstandOption option, String question) {
+    public static SpeechProto.UnderstandOption toUnderstandOptionProto(UnderstandOption option,
+            String question) {
         return SpeechProto.UnderstandOption.newBuilder()
                 .setQuestion(question)
                 .setTimeOut(option.getTimeout())
+                .setParams(option.getParams().toString())
                 .build();
     }
 
     public static UnderstandOption toUnderstandOptionPojo(SpeechProto.UnderstandOption option) {
+        JSONObject params = null;
+        try {
+            params = new JSONObject(option.getParams());
+        } catch (JSONException e) {
+            params = new JSONObject();
+            e.printStackTrace();
+        }
         return new UnderstandOption.Builder()
                 .setTimeout(option.getTimeOut())
+                .setParams(params)
                 .build();
     }
 
@@ -166,5 +309,23 @@ public class SpeechConverters {
         return builder.build();
     }
 
+    public static SpeechProto.Configuration toConfigurationProto(Configuration configuration) {
+        return SpeechProto.Configuration.newBuilder()
+                .setSpeakerId(configuration.getSpeakerId())
+                .setSpeakingSpeed(configuration.getSpeakingSpeed())
+                .setSpeakingVolume(configuration.getSpeakingVolume())
+                .setRecognizeMode(configuration.getRecognizingMode())
+                .setUnderstandTimeout(configuration.getUnderstandTimeout())
+                .build();
+    }
 
+    public static Configuration toConfigurationPojo(SpeechProto.Configuration configuration) {
+        return new Configuration.Builder()
+                .setSpeakerId(configuration.getSpeakerId())
+                .setSpeakingSpeed(configuration.getSpeakingSpeed())
+                .setSpeakingVolume(configuration.getSpeakingVolume())
+                .setRecognizingMode(configuration.getRecognizeMode())
+                .setUnderstandTimeout(configuration.getUnderstandTimeout())
+                .build();
+    }
 }

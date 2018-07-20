@@ -11,17 +11,17 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.ubtrobot.analytics.Analytics;
 import com.ubtrobot.analytics.Event;
 import com.ubtrobot.analytics.Strategy;
 import com.ubtrobot.analytics.ipc.AnalyticsConstants;
 import com.ubtrobot.analytics.sal.AnalyticsFactory;
+import com.ubtrobot.analytics.sal.AnalyticsService;
 
 public class AnalyticsProvider extends ContentProvider {
 
     private static final String TAG = "AnalyticsProvider";
 
-    private Analytics mAnalytics;
+    private AnalyticsService mAnalytics;
 
     @Override
     public boolean onCreate() {
@@ -30,7 +30,7 @@ public class AnalyticsProvider extends ContentProvider {
         return true;
     }
 
-    private Analytics getAnalytics(Context context) {
+    private AnalyticsService getAnalytics(Context context) {
         Application application = (Application) context.getApplicationContext();
 
         if (!(application instanceof AnalyticsFactory)) {
@@ -38,7 +38,7 @@ public class AnalyticsProvider extends ContentProvider {
         }
 
         AnalyticsFactory factory = (AnalyticsFactory) application;
-        Analytics analytics = factory.createAnalyticsService();
+        AnalyticsService analytics = factory.createAnalyticsService();
 
         if (analytics == null) {
             throw new IllegalStateException("Your application createAnalyticsService return is null.");
@@ -69,9 +69,16 @@ public class AnalyticsProvider extends ContentProvider {
             case AnalyticsConstants.CALL_METHOD_RECORD_EVENT:
                 recordEvent(extras);
                 break;
+            case AnalyticsConstants.CALL_METHOD_SHUTDOWN:
+                reportedShutdownEvent();
+                break;
         }
 
         return bundle;
+    }
+
+    private void reportedShutdownEvent() {
+        mAnalytics.reportShutdownEvent();
     }
 
     private void recordEvent(Bundle extras) {

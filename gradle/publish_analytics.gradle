@@ -1,5 +1,5 @@
 project(':analytics') {
-    artifactoryPublish.dependsOn('jarFramework')
+    artifactoryPublish.dependsOn('jarFramework', 'jarMobileLib')
     publishing {
         publications {
             jarFramework(MavenPublication) {
@@ -11,11 +11,21 @@ project(':analytics') {
 
                 artifact("$buildDir/libs/analytics.jar")
             }
+
+            jarMobileLib(MavenPublication) {
+                groupId = rootProject.ext.mobileGroupId
+                artifactId = "analytics-base"
+                version = rootProject.ext.versions.analyticsVersion
+
+                rootProject.ext.isSnapshot = version.toUpperCase().endsWith("-SNAPSHOT")
+
+                artifact("$buildDir/libs/analytics-mobile.jar")
+            }
         }
     }
 
     artifactoryPublish {
-        publications(publishing.publications.jarFramework)
+        publications(publishing.publications.jarFramework, publishing.publications.jarMobileLib)
     }
 }
 
@@ -49,7 +59,7 @@ project(':sal:analytics') {
 }
 
 project(':service-impl:analytics') {
-    artifactoryPublish.dependsOn('assembleRelease')
+    artifactoryPublish.dependsOn('assembleRelease', 'jarMobileLib')
     publishing {
         publications {
             aarSalImpl(MavenPublication) {
@@ -94,10 +104,54 @@ project(':service-impl:analytics') {
                     dependencyNode.appendNode('version', "${rootProject.ext.depVersions.authInterceptor}")
                 }
             }
+
+            jarMobileLib(MavenPublication) {
+                groupId = rootProject.ext.mobileGroupId
+                artifactId = "analytics"
+                version = rootProject.ext.versions.analyticsVersion
+
+                rootProject.ext.isSnapshot = version.toUpperCase().endsWith("-SNAPSHOT")
+
+                artifact("$buildDir/libs/analytics-mobile.jar")
+
+                pom.withXml {
+                    def dependenciesNode = asNode().appendNode('dependencies')
+
+                    def dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', rootProject.ext.mobileGroupId)
+                    dependencyNode.appendNode('artifactId', 'analytics-base')
+                    dependencyNode.appendNode('version', rootProject.ext.versions.analyticsVersion)
+
+                    dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.squareup.retrofit2')
+                    dependencyNode.appendNode('artifactId', 'retrofit')
+                    dependencyNode.appendNode('version', "${rootProject.ext.depVersions.retrofit}")
+
+                    dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.squareup.retrofit2')
+                    dependencyNode.appendNode('artifactId', 'converter-gson')
+                    dependencyNode.appendNode('version', "${rootProject.ext.depVersions.gsonConverter}")
+
+                    dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.ubtrobot.http.rest')
+                    dependencyNode.appendNode('artifactId', 'retrofit-urest-adapter')
+                    dependencyNode.appendNode('version', "${rootProject.ext.depVersions.uRestAdapter}")
+
+                    dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.ubtrobot.http.rest')
+                    dependencyNode.appendNode('artifactId', 'okhttp-sign-interceptor')
+                    dependencyNode.appendNode('version', "${rootProject.ext.depVersions.signInterceptor}")
+
+                    dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', 'com.ubtrobot.http.rest')
+                    dependencyNode.appendNode('artifactId', 'okhttp-auth-interceptor')
+                    dependencyNode.appendNode('version', "${rootProject.ext.depVersions.authInterceptor}")
+                }
+            }
         }
     }
 
     artifactoryPublish {
-        publications(publishing.publications.aarSalImpl)
+        publications(publishing.publications.aarSalImpl, publishing.publications.jarMobileLib)
     }
 }

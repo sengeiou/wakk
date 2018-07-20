@@ -47,10 +47,18 @@ public class EmotionConverters {
                 new EmotionResource.Builder(
                         emotionProto.getResource().getPackageName(),
                         emotionProto.getResource().getNameResource(),
-                        emotionProto.getResource().getIconUri(),
-                        emotionProto.getResource().getName()
+                        emotionProto.getResource().getName(),
+                        emotionProto.getResource().getIconUri()
                 ).build()
         );
+    }
+
+    public static EmotionProto.EmotionState toEmotionStateProto(boolean dismiss) {
+        return EmotionProto.EmotionState.newBuilder().setDismiss(dismiss).build();
+    }
+
+    public static boolean toEmotionStatePojo(EmotionProto.EmotionState emotionStateProto) {
+        return emotionStateProto.getDismiss();
     }
 
     public static EmotionProto.ExpressOption

@@ -10,6 +10,7 @@ public class Event implements Parcelable {
 
     private String eventId;
     private String category;
+    private long duration;
     private long recordedAt;
     private Map<String, String> segmentation;   // 系统定义
     private Map<String, String> customSegmentation; // 客户定义
@@ -34,6 +35,7 @@ public class Event implements Parcelable {
     private Event(Parcel in) {
         eventId = in.readString();
         category = in.readString();
+        duration = in.readLong();
         recordedAt = in.readLong();
 
         boolean hasSegmentation = in.readByte() != 0;
@@ -57,6 +59,10 @@ public class Event implements Parcelable {
         return category;
     }
 
+    public long getDuration() {
+        return duration;
+    }
+
     public long getRecordedAt() {
         return recordedAt;
     }
@@ -78,6 +84,7 @@ public class Event implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(eventId);
         dest.writeString(category);
+        dest.writeLong(duration);
         dest.writeLong(recordedAt);
 
         dest.writeByte((byte) (segmentation == null ? 0 : 1));
@@ -96,6 +103,7 @@ public class Event implements Parcelable {
         return "Event{" +
                 "eventId='" + eventId + '\'' +
                 ", category='" + category + '\'' +
+                ", duration=" + duration +
                 ", recordedAt=" + recordedAt +
                 ", segmentation=" + segmentation +
                 ", customSegmentation=" + customSegmentation +
@@ -107,7 +115,9 @@ public class Event implements Parcelable {
         private String eventId;
         private String category;
         // 单位：s
+        private long duration;
         private long recordedAt = System.currentTimeMillis() / 1000;
+
         private Map<String, String> segmentation;
         private Map<String, String> customSegmentation;
 
@@ -116,8 +126,13 @@ public class Event implements Parcelable {
             this.category = category;
         }
 
+        public Builder setDuration(long duration) {
+            this.duration = duration / 1000;
+            return this;
+        }
+
         public Builder setRecordedAt(long recordedAt) {
-            this.recordedAt = recordedAt;
+            this.recordedAt = recordedAt / 1000;
             return this;
         }
 
@@ -131,8 +146,19 @@ public class Event implements Parcelable {
             return this;
         }
 
+        public Builder toBuild(Event event) {
+            this.eventId = event.getEventId();
+            this.category = event.getCategory();
+            this.duration = event.getDuration();
+            this.recordedAt = event.getRecordedAt();
+            this.segmentation = event.getSegmentation();
+            this.customSegmentation = event.getCustomSegmentation();
+            return this;
+        }
+
         public Event build() {
             Event event = new Event(eventId, category);
+            event.duration = duration;
             event.recordedAt = recordedAt;
             event.segmentation = segmentation;
             event.customSegmentation = customSegmentation;
@@ -145,6 +171,7 @@ public class Event implements Parcelable {
             return "Event.Builder{" +
                     "eventId='" + eventId + '\'' +
                     ", category='" + category + '\'' +
+                    ", duration=" + duration +
                     ", recordedAt=" + recordedAt +
                     ", segmentation=" + segmentation +
                     ", customSegmentation=" + customSegmentation +

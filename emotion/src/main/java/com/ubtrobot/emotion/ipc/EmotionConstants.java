@@ -12,4 +12,6 @@ public class EmotionConstants {
     public static final String CALL_PATH_EMOTION_LIST = "/emotion/list";
     public static final String CALL_PATH_EXPRESS_EMOTION = "/emotion/express";
     public static final String CALL_PATH_DISMISS_EMOTION = "/emotion/dismiss";
+
+    public static final String ACTION_EMOTION_EXPRESS_CHANGE = "event.action.EMOTION_EXPRESS_CHANGE";
 }

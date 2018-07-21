@@ -5,8 +5,8 @@ import android.util.Log;
 import com.ubtrobot.async.DoneCallback;
 import com.ubtrobot.async.FailCallback;
 import com.ubtrobot.async.Promise;
-import com.ubtrobot.motion.ExecuteException;
 import com.ubtrobot.motion.MotionManager;
+import com.ubtrobot.motion.PerformException;
 import com.ubtrobot.play.AbstractSegmentPlayer;
 import com.ubtrobot.play.PlayException;
 import com.ubtrobot.play.Segment;
@@ -22,7 +22,7 @@ public class ArmMotionSegmentPlayer extends AbstractSegmentPlayer<
     private static final Logger LOGGER = FwLoggerFactory.getLogger("ArmMotionSegmentPlayer");
 
     private MotionManager mMotionManager;
-    private Promise<Void, ExecuteException> mExecutePromise;
+    private Promise<Void, PerformException> mExecutePromise;
 
     public ArmMotionSegmentPlayer(MotionManager motionManager, Segment segment) {
         super(segment);
@@ -39,16 +39,15 @@ public class ArmMotionSegmentPlayer extends AbstractSegmentPlayer<
 
     @Override
     protected void onLoopStart(ArmMotionOption option) {
-        mExecutePromise = mMotionManager.executeScript(
-                option.getId()).done(new DoneCallback<Void>() {
+        mMotionManager.performAction(option.getId()).done(new DoneCallback<Void>() {
             @Override
             public void onDone(Void aVoid) {
                 LOGGER.w("Arm motion onDone...");
                 mExecutePromise = null;
             }
-        }).fail(new FailCallback<ExecuteException>() {
+        }).fail(new FailCallback<PerformException>() {
             @Override
-            public void onFail(ExecuteException e) {
+            public void onFail(PerformException e) {
                 LOGGER.w("Arm motion onFail:" + e.toString());
                 notifyLoopAborted(new PlayException.Factory().from(e.getCode(), e.getMessage()));
                 mExecutePromise = null;
@@ -70,14 +69,14 @@ public class ArmMotionSegmentPlayer extends AbstractSegmentPlayer<
         }
 
         LOGGER.w("Arm motion executeScript reset...");
-        mMotionManager.executeScript("reset").done(new DoneCallback<Void>() {
+        mMotionManager.performAction("reset").done(new DoneCallback<Void>() {
             @Override
             public void onDone(Void aVoid) {
                 LOGGER.w("Arm motion executeScript reset onDone...");
             }
-        }).fail(new FailCallback<ExecuteException>() {
+        }).fail(new FailCallback<PerformException>() {
             @Override
-            public void onFail(ExecuteException e) {
+            public void onFail(PerformException e) {
                 LOGGER.e("Arm motion executeScript reset onFail:" + e);
                 notifyLoopAborted(new PlayException.Factory().
                         forbidden(e.getMessage(), e.getDetail()));

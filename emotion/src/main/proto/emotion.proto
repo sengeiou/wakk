@@ -19,6 +19,11 @@ message Emotion {
     EmotionResource resource = 2;
 }
 
+message EmotionState{
+
+    bool dismiss = 1;
+}
+
 message EmotionList {
 
     repeated Emotion emotion = 1;

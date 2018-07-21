@@ -1,5 +1,6 @@
 package com.ubtrobot.sensor;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.ubtrobot.cache.CachedField;
 import com.ubtrobot.device.ipc.DeviceProto;
 import com.ubtrobot.master.adapter.ProtoCallAdapter;
@@ -22,6 +23,7 @@ public class SensorList {
 
     private final CachedField<List<Sensor>> mSensors;
     private final CachedField<Map<String, Sensor>> mSensorMap;
+    private final CachedField<Map<String, List<Sensor>>> mTypeSensorMap;
 
     SensorList(final MasterContext masterContext, final ProtoCallAdapter sensorService) {
         mSensors = new CachedField<>(new CachedField.FieldGetter<List<Sensor>>() {
@@ -39,8 +41,11 @@ public class SensorList {
                     return Collections.unmodifiableList(sensors);
                 } catch (CallException e) {
                     LOGGER.e(e, "Framework error when getting the sensor list.");
-                    return null;
+                } catch (InvalidProtocolBufferException e) {
+                    LOGGER.e(e, "Framework error when getting the Sensor list.");
                 }
+
+                return null;
             }
         });
         mSensorMap = new CachedField<>(new CachedField.FieldGetter<Map<String, Sensor>>() {
@@ -54,6 +59,30 @@ public class SensorList {
                 HashMap<String, Sensor> sensorMap = new HashMap<>();
                 for (Sensor sensor : sensors) {
                     sensorMap.put(sensor.getId(), sensor);
+                }
+
+                return sensorMap;
+            }
+        });
+        mTypeSensorMap = new CachedField<>(new CachedField.FieldGetter<Map<String, List<Sensor>>>() {
+            @Override
+            public Map<String, List<Sensor>> get() {
+                List<Sensor> sensors = mSensors.get();
+                if (sensors == null) {
+                    return null;
+                }
+
+                HashMap<String, List<Sensor>> sensorMap = new HashMap<>();
+                for (Sensor sensor : sensors) {
+                    String type = sensor.getDevice().getType();
+
+                    List<Sensor> sensorList = sensorMap.get(type);
+                    if (sensorList == null) {
+                        sensorList = new LinkedList<>();
+                        sensorMap.put(type, sensorList);
+                    }
+
+                    sensorList.add(sensor);
                 }
 
                 return sensorMap;
@@ -74,6 +103,10 @@ public class SensorList {
             throw new SensorNotFoundException();
         }
         return sensor;
+    }
+
+    public List<Sensor> getSensorList(String type) {
+        return mTypeSensorMap.get().get(type);
     }
 
     public static class SensorNotFoundException extends RuntimeException {

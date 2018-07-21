@@ -23,7 +23,7 @@ public class Marker extends Location {
 
     private Marker(Builder builder) {
         super(builder);
-        id = builder.id;
+        id = builder.id == null ? "" : builder.id;
         title = builder.title == null ? "" : builder.title;
         description = builder.description == null ? "" : builder.description;
 
@@ -104,11 +104,11 @@ public class Marker extends Location {
 
         public Builder(String id, Point position) {
             super(position);
-            if (id == null) {
-                throw new IllegalArgumentException("Argument id is null.");
-            }
-
             this.id = id;
+        }
+
+        public Builder(Point position) {
+            super(position);
         }
 
         public Builder(Marker marker) {

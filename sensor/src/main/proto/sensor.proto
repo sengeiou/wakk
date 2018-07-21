@@ -16,3 +16,7 @@ message ControlOptions {
     string command = 2;
     map<string, string> option = 3;
 }
+
+message SensorDeviceExt {
+    string type = 3;
+}

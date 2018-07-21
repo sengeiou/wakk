@@ -17,7 +17,7 @@ import com.ubtrobot.master.competition.CompetingItemDetail;
 import com.ubtrobot.master.competition.CompetitionSessionInfo;
 import com.ubtrobot.master.competition.ProtoCompetingCallDelegate;
 import com.ubtrobot.master.service.MasterSystemService;
-import com.ubtrobot.motion.ExecuteException;
+import com.ubtrobot.motion.PerformException;
 import com.ubtrobot.motion.JointDevice;
 import com.ubtrobot.motion.JointException;
 import com.ubtrobot.motion.JointGroupRotatingProgress;
@@ -69,19 +69,20 @@ public class MotionSystemService extends MasterSystemService {
         try {
             List<JointDevice> jointDevices = mService.getJointList().get();
             for (JointDevice jointDevice : jointDevices) {
-                itemDetails.add(new CompetingItemDetail.Builder(
-                        getName(),
-                        MotionConstants.COMPETING_ITEM_PREFIX_JOINT + jointDevice.getId()
-                ).addCallPath(MotionConstants.CALL_PATH_JOINT_ROTATE)
-                        .setDescription("Competing item detail for joint " + jointDevice.getId())
-                        .build());
+                itemDetails.add(
+                        new CompetingItemDetail.Builder(getName(), MotionConstants.COMPETING_ITEM_PREFIX_JOINT + jointDevice.getId())
+                                .addCallPath(MotionConstants.CALL_PATH_JOINT_ROTATE)
+                                .addCallPath(MotionConstants.CALL_PATH_JOINT_RELEASE)
+                                .setDescription("Competing item detail for joint " + jointDevice.getId())
+                                .build()
+                );
             }
 
             itemDetails.add(new CompetingItemDetail.Builder(
                     getName(),
-                    MotionConstants.COMPETING_ITEM_SCRIPT_EXECUTOR
-            ).addCallPath(MotionConstants.CALL_PATH_EXECUTE_MOTION_SCRIPT)
-                    .setDescription("Competing item detail for executing script")
+                    MotionConstants.COMPETING_ITEM_ACTION_PERFORMER
+            ).addCallPath(MotionConstants.CALL_PATH_PERFORM_MOTION_ACTION)
+                    .setDescription("Competing item detail for performing action")
                     .build());
 
             itemDetails.add(new CompetingItemDetail.Builder(
@@ -201,7 +202,7 @@ public class MotionSystemService extends MasterSystemService {
                     @Override
                     public ProgressivePromise<Void, JointException, JointGroupRotatingProgress>
                     call() throws CallException {
-                        return mService.jointRotate(MotionConverters.
+                        return mService.jointsRotate(MotionConverters.
                                 toJointRotatingOptionSequenceMapPojo(optionSequenceMap));
                     }
                 },
@@ -314,10 +315,11 @@ public class MotionSystemService extends MasterSystemService {
         );
     }
 
-    @Call(path = MotionConstants.CALL_PATH_EXECUTE_MOTION_SCRIPT)
-    public void onScriptExecute(final Request request, final Responder responder) {
-        final String scriptId = ProtoParamParser.parseStringParam(request, responder);
-        if (scriptId == null) {
+    @Call(path = MotionConstants.CALL_PATH_PERFORM_MOTION_ACTION)
+    public void onActionPerform(final Request request, final Responder responder) {
+        final MotionProto.ActionIdList actionIdList;
+        if ((actionIdList = ProtoParamParser.parseParam(
+                request, MotionProto.ActionIdList.class, responder)) == null) {
             return;
         }
 
@@ -335,15 +337,79 @@ public class MotionSystemService extends MasterSystemService {
                 request,
                 competingItems,
                 responder,
-                new CompetingCallDelegate.SessionCallable<Void, ExecuteException>() {
+                new CompetingCallDelegate.SessionCallable<Void, PerformException>() {
                     @Override
-                    public Promise<Void, ExecuteException> call() throws CallException {
-                        return mService.executeScript(scriptId);
+                    public Promise<Void, PerformException> call() throws CallException {
+                        return mService.performAction(actionIdList.getIdList());
                     }
                 },
-                new ProtoCompetingCallDelegate.FConverter<ExecuteException>() {
+                new ProtoCompetingCallDelegate.FConverter<PerformException>() {
                     @Override
-                    public CallException convertFail(ExecuteException e) {
+                    public CallException convertFail(PerformException e) {
+                        return new CallException(e.getCode(), e.getMessage());
+                    }
+                }
+        );
+    }
+
+    @Call(path = MotionConstants.CALL_PATH_JOINT_RELEASE)
+    public void onJointRelease(final Request request, final Responder responder) {
+        final MotionProto.JointIdList jointIdList;
+        if ((jointIdList = ProtoParamParser.parseParam(
+                request, MotionProto.JointIdList.class, responder)) == null) {
+            return;
+        }
+
+        LinkedList<String> competingItemIds = new LinkedList<>();
+        for (String string : jointIdList.getIdList()) {
+            competingItemIds.add(MotionConstants.COMPETING_ITEM_PREFIX_JOINT + string);
+        }
+
+        mCompetingCallDelegate.onCall(
+                request,
+                competingItemIds,
+                responder, new CompetingCallDelegate.SessionCallable<Void, JointException>() {
+                    @Override
+                    public Promise<Void, JointException> call() throws CallException {
+                        return mService.jointsRelease(jointIdList.getIdList());
+                    }
+                }, new ProtoCompetingCallDelegate.DFConverter<Void, JointException>() {
+                    @Override
+                    public Message convertDone(Void done) {
+                        return null;
+                    }
+
+                    @Override
+                    public CallException convertFail(JointException e) {
+                        return new CallException(e.getCode(), e.getMessage());
+                    }
+                });
+    }
+
+    @Call(path = MotionConstants.CALL_PATH_QUERY_JOINT_IS_RELEASED)
+    public void onQueryJointIsReleased(Request request, Responder responder) {
+        final MotionProto.JointIdList jointIdList;
+        if ((jointIdList = ProtoParamParser.parseParam(
+                request, MotionProto.JointIdList.class, responder)) == null) {
+            return;
+        }
+
+        mCallProcessor.onCall(
+                responder,
+                new CallProcessAdapter.Callable<List<String>, JointException>() {
+                    @Override
+                    public Promise<List<String>, JointException> call() throws CallException {
+                        return mService.isJointsReleased(jointIdList.getIdList());
+                    }
+                },
+                new ProtoCallProcessAdapter.DFConverter<List<String>, JointException>() {
+                    @Override
+                    public Message convertDone(List<String> idList) {
+                        return MotionProto.JointIdList.newBuilder().addAllId(idList).build();
+                    }
+
+                    @Override
+                    public CallException convertFail(JointException e) {
                         return new CallException(e.getCode(), e.getMessage());
                     }
                 }

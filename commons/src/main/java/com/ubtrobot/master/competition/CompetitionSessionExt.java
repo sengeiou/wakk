@@ -96,7 +96,7 @@ public class CompetitionSessionExt<C extends Competing> {
                 return callable.call(mSession, competing);
             }
 
-            final Promise[] callablePromise = new ProgressivePromise[1];
+            final Promise[] callablePromise = new Promise[1];
             Cancelable cancelable = new AbstractCancelable() {
                 @Override
                 protected void doCancel() {

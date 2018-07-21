@@ -1,6 +1,7 @@
 package com.ubtrobot.sensor.ipc;
 
-import com.ubtrobot.device.ipc.DeviceConverters;
+import com.google.protobuf.Any;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.ubtrobot.device.ipc.DeviceProto;
 import com.ubtrobot.sensor.SensorDevice;
 import com.ubtrobot.sensor.SensorEvent;
@@ -15,15 +16,35 @@ public class SensorConverters {
     public static DeviceProto.DeviceList toSensorDeviceListProto(List<SensorDevice> deviceList) {
         DeviceProto.DeviceList.Builder builder = DeviceProto.DeviceList.newBuilder();
         for (SensorDevice sensorDevice : deviceList) {
-            builder.addDevice(DeviceConverters.toDeviceProto(sensorDevice));
+            builder.addDevice(toSensorDeviceProto(sensorDevice));
         }
 
         return builder.build();
     }
 
-    public static SensorDevice toSensorDevicePojo(DeviceProto.Device deviceProto) {
-        return new SensorDevice.Builder(deviceProto.getId(), deviceProto.getName())
-                .setDescription(deviceProto.getDescription()).build();
+    public static SensorDevice toSensorDevicePojo(DeviceProto.Device deviceProto) throws InvalidProtocolBufferException {
+        SensorDevice.Builder builder = new SensorDevice.Builder(deviceProto.getId(), deviceProto.getName())
+                .setDescription(deviceProto.getDescription());
+
+        SensorProto.SensorDeviceExt ext = deviceProto.getExtension().
+                unpack(SensorProto.SensorDeviceExt.class);
+
+        return builder
+                .setType(ext.getType())
+                .build();
+    }
+
+    public static DeviceProto.Device toSensorDeviceProto(SensorDevice sensorDevice) {
+        return DeviceProto.Device.newBuilder().
+                setId(sensorDevice.getId()).
+                setName(sensorDevice.getName()).
+                setDescription(sensorDevice.getDescription()).
+                setExtension(Any.pack(
+                        SensorProto.SensorDeviceExt.newBuilder()
+                                .setType(sensorDevice.getType())
+                                .build()
+                        )
+                ).build();
     }
 
     public static SensorEvent toSensorEventPojo(SensorProto.SensorEvent event) {

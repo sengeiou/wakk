@@ -53,6 +53,14 @@ public class EmotionConverters {
         );
     }
 
+    public static EmotionProto.EmotionState toEmotionStateProto(boolean dismiss) {
+        return EmotionProto.EmotionState.newBuilder().setDismiss(dismiss).build();
+    }
+
+    public static boolean toEmotionStatePojo(EmotionProto.EmotionState emotionStateProto) {
+        return emotionStateProto.getDismiss();
+    }
+
     public static EmotionProto.ExpressOption
     toExpressOptionProto(String emotionId, ExpressOption option) {
         return EmotionProto.ExpressOption.newBuilder().

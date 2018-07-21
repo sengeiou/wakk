@@ -3,7 +3,7 @@ package com.ubtrobot.motion.sal;
 import com.ubtrobot.async.ProgressivePromise;
 import com.ubtrobot.async.Promise;
 import com.ubtrobot.exception.AccessServiceException;
-import com.ubtrobot.motion.ExecuteException;
+import com.ubtrobot.motion.PerformException;
 import com.ubtrobot.motion.JointDevice;
 import com.ubtrobot.motion.JointException;
 import com.ubtrobot.motion.JointGroupRotatingProgress;
@@ -25,7 +25,7 @@ public interface MotionService {
     Promise<Map<String, Float>, AccessServiceException> getJointsAngle(List<String> jointIdList);
 
     ProgressivePromise<Void, JointException, JointGroupRotatingProgress>
-    jointRotate(Map<String, List<JointRotatingOption>> optionSequenceMap);
+    jointsRotate(Map<String, List<JointRotatingOption>> optionSequenceMap);
 
     Promise<LocomotorDevice, AccessServiceException> getLocomotor();
 
@@ -34,5 +34,9 @@ public interface MotionService {
     ProgressivePromise<Void, LocomotionException, LocomotionProgress>
     locomote(List<LocomotionOption> optionSequence);
 
-    Promise<Void, ExecuteException> executeScript(String scriptId);
+    Promise<Void, PerformException> performAction(List<String> actionIdList);
+
+    Promise<Void, JointException> jointsRelease(List<String> jointIdList);
+
+    Promise<List<String>, JointException> isJointsReleased(List<String> jointIdList);
 }

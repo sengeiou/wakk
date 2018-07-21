@@ -10,10 +10,10 @@ include 'analytics', ':sal:analytics', ':service-impl:analytics'
 include ':dance'
 include ':sensor', ':sal:sensor'
 include ':power', ':sal:power'
-include ':dance'
+include ':diagnosis', ':sal:diagnosis'
 
 include ':initialization'
 
 include ':sample', ':service-mocks'
 
-include ':product:cruzr', ':product:alpha-mini', ':product:beta'
+include ':product:cruzr', ':product:alpha-mini', ':product:beta', ':product:gold-pig'

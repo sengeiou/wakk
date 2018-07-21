@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<service
+    name="diagnosis"
+    level="system">
+    <call path="/diagnosis/part/list" />
+    <call path="/diagnosis/list" />
+    <call path="/diagnosis/repair" />
+</service>

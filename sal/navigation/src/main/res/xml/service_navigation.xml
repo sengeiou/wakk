@@ -11,5 +11,7 @@
     <call path="/navigation/map/remove" />
     <call path="/navigation/location/current" />
     <call path="/navigation/locate/self" />
+    <call path="/navigation/locating" />
     <call path="/navigation/navigate" />
+    <call path="/navigation/navigating" />
 </service>

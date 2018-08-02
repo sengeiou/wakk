@@ -514,6 +514,9 @@ public class UnderstandResult implements Parcelable {
             }
 
             public Builder setSpeech(String speech) {
+                if (speech == null) {
+                    throw new IllegalArgumentException("Fulfillment.Builder refuse null speech");
+                }
                 this.speech = speech;
                 return this;
             }
